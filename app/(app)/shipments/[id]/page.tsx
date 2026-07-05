@@ -3,22 +3,127 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Shipment } from "@/lib/types";
-import { invoiceRef, shipmentRef } from "@/lib/format";
-import { Button, PageHeader } from "@/components/ui";
+import type { Shipment, ShipmentStatus } from "@/lib/types";
+import {
+  fmtDate,
+  fmtKg,
+  invoiceRef,
+  shipmentRef,
+  STATUS_CLASS,
+  STATUS_LABEL,
+} from "@/lib/format";
+import {
+  Badge,
+  Button,
+  Card,
+  ErrorNote,
+  Field,
+  PageHeader,
+  Select,
+} from "@/components/ui";
 import { ShipmentForm } from "@/components/shipment-form";
+import { ShipmentExpenses } from "@/components/shipment-expenses";
+import { useRole } from "@/components/role-context";
 import Link from "next/link";
+
+// Agents see the shipment read-only and may only change its status.
+function AgentShipmentView({ shipment }: { shipment: Shipment }) {
+  const router = useRouter();
+  const [status, setStatus] = useState<ShipmentStatus>(shipment.status);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function saveStatus(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    setSaved(false);
+    const { error } = await supabase
+      .from("shipments")
+      .update({ status })
+      .eq("id", shipment.id);
+    setBusy(false);
+    if (error) setError(error.message);
+    else setSaved(true);
+  }
+
+  const rows: [string, React.ReactNode][] = [
+    ["Description", shipment.description],
+    ["Destination", shipment.destinations?.name ?? "—"],
+    ["Weight", fmtKg(Number(shipment.weight_kg))],
+    ["Ship date", fmtDate(shipment.ship_date)],
+    ["Notes", shipment.notes ?? "—"],
+  ];
+
+  return (
+    <div>
+      <PageHeader
+        title={shipmentRef(shipment.id)}
+        action={
+          <Badge className={STATUS_CLASS[status]}>{STATUS_LABEL[status]}</Badge>
+        }
+      />
+      <Card className="max-w-xl p-6">
+        <dl className="space-y-3">
+          {rows.map(([label, value]) => (
+            <div key={label} className="flex gap-3 text-sm">
+              <dt className="w-28 shrink-0 font-medium text-slate-500 dark:text-slate-400">
+                {label}
+              </dt>
+              <dd className="min-w-0">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <form onSubmit={saveStatus} className="mt-6 space-y-3">
+          <Field label="Update status">
+            <Select
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value as ShipmentStatus);
+                setSaved(false);
+              }}
+            >
+              <option value="pending">Pending</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+            </Select>
+          </Field>
+          <ErrorNote message={error} />
+          {saved && (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+              Status updated.
+            </p>
+          )}
+          <div className="flex gap-3">
+            <Button type="submit" disabled={busy}>
+              {busy ? "Saving…" : "Save status"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => router.push("/shipments")}
+            >
+              Back
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+}
 
 export default function EditShipmentPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const role = useRole();
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     supabase
       .from("shipments")
-      .select("*")
+      .select("*, destinations(id, name, country)")
       .eq("id", Number(id))
       .single()
       .then(({ data }) => {
@@ -40,6 +145,10 @@ export default function EditShipmentPage() {
   }
   if (!shipment) {
     return <p className="text-sm text-slate-400">Loading…</p>;
+  }
+
+  if (role === "agent") {
+    return <AgentShipmentView shipment={shipment} />;
   }
 
   return (
@@ -72,7 +181,10 @@ export default function EditShipmentPage() {
           . Changing its total will change that invoice&apos;s balance.
         </p>
       )}
-      <ShipmentForm shipment={shipment} />
+      <div className="grid items-start gap-5 xl:grid-cols-2">
+        <ShipmentForm shipment={shipment} />
+        <ShipmentExpenses shipment={shipment} />
+      </div>
     </div>
   );
 }

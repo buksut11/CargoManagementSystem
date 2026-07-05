@@ -1,20 +1,22 @@
-# CargoBook — personal cargo tracker
+# CargoBook — cargo tracker
 
-A simple, single-user app to track your cargo shipments and get paid:
+A simple app to track your cargo shipments and get paid:
 
 - **Shipments** — description, weight (kg), destination, status (pending → shipped → delivered), price (either weight × rate-per-kg, or a manual total)
 - **Destinations** — your own list of the places you ship to
 - **Invoices** — group uninvoiced shipments into an invoice, with a clean **printable view** (Print / Save as PDF from the browser); each shipment also has its own **printable receipt** with signature lines
 - **CSV export** — download your shipments and payments for Excel / Google Sheets
 - **Payments** — record payments against invoices, see paid / partial / unpaid status and remaining balances
-- **Dashboard** — total shipments, total kg, invoiced amount, outstanding balance
+- **Expenses & profit** — record what each delivery cost you (airplane, car, motorcycle, …); the app subtracts those costs from the customer's price to show the **net profit per shipment** and overall
+- **Dashboard** — total shipments, total kg, invoiced amount, outstanding balance, expenses, net profit
+- **Admin & Agent roles** — admins have full access; agents only see shipments (no financials) and can only update the shipment status
 
 Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.com) (free tier is plenty).
 
 ## One-time setup (~10 minutes)
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free account → New project).
-2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…`, then `0002_…`).
+2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…`, `0002_…`, then `0003_…`).
 3. **Create your login user:** dashboard → **Authentication → Users → Add user** — enter your email and a password (tick "Auto confirm user").
 4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the two values from dashboard → **Project Settings → API**:
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL
@@ -29,12 +31,26 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and sign in with the user you created in step 3.
 
+## Roles: Admin vs. Agent
+
+Migration `0003` adds a `profiles` table with a `role` per user:
+
+- **Admin** — full access to everything (shipments, invoices, payments, expenses, destinations).
+- **Agent** — sees only the shipments list and shipment details (no prices or invoices), and can only change a shipment's **status** (Pending / Shipped / Delivered). This is enforced in the database (row-level security + a trigger), not just hidden in the UI.
+
+Users that existed before the migration become **admins** automatically; users added afterwards default to **agent**. To change a user's role, run this in the SQL Editor:
+
+```sql
+update public.profiles set role = 'admin' where email = 'someone@example.com';
+```
+
 ## Everyday flow
 
 1. Add your **destinations** once (Destinations page).
 2. Add a **shipment**: description, kg, destination, and either a rate per kg (total is computed) or type the total yourself.
-3. When it's time to bill, create an **invoice**: pick the uninvoiced shipments, click **Print** for a PDF to send.
-4. When money arrives, open the invoice and **record the payment** — the balance and paid/partial/unpaid badge update automatically.
+3. Record the **delivery costs** for the shipment (Expenses page, or directly on the shipment) — the net profit updates automatically.
+4. When it's time to bill, create an **invoice**: pick the uninvoiced shipments, click **Print** for a PDF to send.
+5. When money arrives, open the invoice and **record the payment** — the balance and paid/partial/unpaid badge update automatically.
 
 ## Tweaks
 

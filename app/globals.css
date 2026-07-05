@@ -17,6 +17,9 @@
 }
 
 body {
+  /* Wide content (tables, charts) scrolls inside its own card — the page
+     itself must never scroll sideways. `clip` keeps position:sticky working. */
+  overflow-x: clip;
   font-family:
     system-ui,
     -apple-system,
