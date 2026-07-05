@@ -134,7 +134,7 @@ export default function NewInvoicePage() {
               {shipments.map((s) => (
                 <label
                   key={s.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                  className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/40"
                 >
                   <input
                     type="checkbox"

@@ -94,7 +94,7 @@ export default function ShipmentsPage() {
         }
       />
       <div className="mb-4 flex flex-wrap gap-3">
-        <div className="w-64">
+        <div className="w-full sm:w-64">
           <Input
             placeholder="Search description, destination…"
             value={query}
@@ -123,7 +123,37 @@ export default function ShipmentsPage() {
         </button>
       </div>
       <Card className="overflow-x-auto">
-        <table className="w-full">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+          {filtered.map((s) => (
+            <Link
+              key={s.id}
+              href={`/shipments/${s.id}`}
+              className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                  {shipmentRef(s.id)}
+                </span>
+                <Badge className={STATUS_CLASS[s.status]}>
+                  {STATUS_LABEL[s.status]}
+                </Badge>
+              </div>
+              <div className="mt-1 text-sm">{s.description}</div>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                {s.destinations?.name && <span>📍 {s.destinations.name}</span>}
+                <span>{fmtKg(Number(s.weight_kg))}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
+                  {fmtMoney(Number(s.total))}
+                </span>
+                <span>
+                  {s.invoice_id ? invoiceRef(s.invoice_id) : "not invoiced"}
+                </span>
+                <span>{fmtDate(s.ship_date)}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <table className="hidden w-full md:table">
           <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Ref</Th>

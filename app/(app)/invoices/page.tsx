@@ -62,7 +62,47 @@ export default function InvoicesPage() {
         }
       />
       <Card className="overflow-x-auto">
-        <table className="w-full">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+          {invoices.map((inv) => {
+            const t = totals(inv);
+            return (
+              <Link
+                key={inv.id}
+                href={`/invoices/${inv.id}`}
+                className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-orange-700 dark:text-orange-400">
+                    {invoiceRef(inv.id)}
+                  </span>
+                  {t.balance <= 0 && t.total > 0 ? (
+                    <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+                      Paid
+                    </Badge>
+                  ) : t.paid > 0 ? (
+                    <Badge className="bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300">
+                      Partial
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
+                      Unpaid
+                    </Badge>
+                  )}
+                </div>
+                <div className="mt-1 text-sm">{inv.bill_to || "—"}</div>
+                <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
+                  <span>Total {fmtMoney(t.total)}</span>
+                  <span>Paid {fmtMoney(t.paid)}</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">
+                    Balance {fmtMoney(t.balance)}
+                  </span>
+                  <span>{fmtDate(inv.issued_date)}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+        <table className="hidden w-full md:table">
           <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Invoice</Th>
