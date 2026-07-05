@@ -13,6 +13,26 @@ import {
   STATUS_LABEL,
 } from "@/lib/format";
 import { Badge, Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import {
+  AreaChart,
+  BarChart,
+  CHART_COLORS,
+  Donut,
+  type ChartPoint,
+} from "@/components/charts";
+
+function lastMonths(n: number) {
+  const months = [];
+  const now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      label: d.toLocaleDateString("en-US", { month: "short" }),
+    });
+  }
+  return months;
+}
 
 export default function DashboardPage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -40,16 +60,27 @@ export default function DashboardPage() {
     .filter((s) => s.invoice_id !== null)
     .reduce((sum, s) => sum + Number(s.total), 0);
   const received = payments.reduce((sum, p) => sum + Number(p.amount), 0);
-  const outstanding = invoiced - received;
+  const outstanding = Math.max(0, invoiced - received);
 
-  const now = new Date();
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const kgThisMonth = shipments
-    .filter((s) => (s.ship_date ?? s.created_at.slice(0, 10)).startsWith(monthKey))
-    .reduce((sum, s) => sum + Number(s.weight_kg), 0);
-  const receivedThisMonth = payments
-    .filter((p) => p.paid_date.startsWith(monthKey))
-    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const months = lastMonths(6);
+
+  const kgSeries: ChartPoint[] = months.map((m) => ({
+    label: m.label,
+    value: shipments
+      .filter((s) =>
+        (s.ship_date ?? s.created_at.slice(0, 10)).startsWith(m.key),
+      )
+      .reduce((sum, s) => sum + Number(s.weight_kg), 0),
+  }));
+  const paySeries: ChartPoint[] = months.map((m) => ({
+    label: m.label,
+    value: payments
+      .filter((p) => p.paid_date.startsWith(m.key))
+      .reduce((sum, p) => sum + Number(p.amount), 0),
+  }));
+
+  const kgThisMonth = kgSeries[kgSeries.length - 1].value;
+  const receivedThisMonth = paySeries[paySeries.length - 1].value;
 
   const stats = [
     { label: "Shipments", value: String(shipments.length) },
@@ -60,22 +91,19 @@ export default function DashboardPage() {
       value: fmtMoney(outstanding),
       accent: outstanding > 0,
     },
-    { label: "Shipped this month", value: fmtKg(kgThisMonth) },
-    { label: "Received this month", value: fmtMoney(receivedThisMonth) },
   ];
 
   return (
     <div>
       <PageHeader title="Dashboard" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
-          <Card key={s.label} className="p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              {s.label}
-            </div>
+          <Card key={s.label} className="p-5">
+            <div className="text-xs font-medium text-slate-500">{s.label}</div>
             <div
-              className={`mt-1 text-2xl font-bold ${
-                s.accent ? "text-orange-600" : ""
+              className={`mt-1.5 text-2xl font-bold tracking-tight md:text-3xl ${
+                s.accent ? "text-orange-600" : "text-slate-900"
               }`}
             >
               {loading ? "…" : s.value}
@@ -84,49 +112,129 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <h2 className="mt-8 mb-3 text-lg font-semibold">Recent shipments</h2>
-      <Card className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="border-b border-slate-200">
-            <tr>
-              <Th>Ref</Th>
-              <Th>Description</Th>
-              <Th>Destination</Th>
-              <Th>Weight</Th>
-              <Th>Total</Th>
-              <Th>Status</Th>
-              <Th>Date</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {shipments.slice(0, 5).map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50">
-                <Td>
-                  <Link
-                    href={`/shipments/${s.id}`}
-                    className="font-medium text-orange-700 hover:underline"
-                  >
-                    {shipmentRef(s.id)}
-                  </Link>
-                </Td>
-                <Td>{s.description}</Td>
-                <Td>{s.destinations?.name ?? "—"}</Td>
-                <Td>{fmtKg(Number(s.weight_kg))}</Td>
-                <Td>{fmtMoney(Number(s.total))}</Td>
-                <Td>
-                  <Badge className={STATUS_CLASS[s.status]}>
-                    {STATUS_LABEL[s.status]}
-                  </Badge>
-                </Td>
-                <Td>{fmtDate(s.ship_date)}</Td>
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <Card className="p-5 lg:col-span-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-sm font-semibold text-slate-900">
+                Kg shipped per month
+              </div>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span
+                  className="text-xl font-bold"
+                  style={{ color: CHART_COLORS.indigo }}
+                >
+                  ↑ {loading ? "…" : fmtKg(kgThisMonth)}
+                </span>
+                <span className="text-xs text-slate-500">this month</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-2">
+            <AreaChart
+              points={kgSeries}
+              color={CHART_COLORS.indigo}
+              format={fmtKg}
+            />
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <div className="text-sm font-semibold text-slate-900">
+            Payment status
+          </div>
+          {invoiced > 0 ? (
+            <div className="mt-3">
+              <Donut paid={received} due={outstanding} format={fmtMoney} />
+            </div>
+          ) : (
+            <p className="mt-8 text-center text-sm text-slate-500">
+              Nothing invoiced yet — create your first invoice to see paid vs.
+              due here.
+            </p>
+          )}
+        </Card>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <Card className="p-5">
+          <div className="text-sm font-semibold text-slate-900">
+            Received per month
+          </div>
+          <div className="mt-1 flex items-baseline gap-2">
+            <span
+              className="text-xl font-bold"
+              style={{ color: CHART_COLORS.orange }}
+            >
+              ↑ {loading ? "…" : fmtMoney(receivedThisMonth)}
+            </span>
+            <span className="text-xs text-slate-500">this month</span>
+          </div>
+          <div className="mt-2">
+            <BarChart
+              points={paySeries}
+              color={CHART_COLORS.orange}
+              format={fmtMoney}
+            />
+          </div>
+        </Card>
+
+        <Card className="overflow-x-auto lg:col-span-2">
+          <div className="flex items-center justify-between px-5 pt-4">
+            <h2 className="text-sm font-semibold text-slate-900">
+              Recent shipments
+            </h2>
+            <Link
+              href="/shipments"
+              className="text-xs font-medium text-indigo-600 hover:underline"
+            >
+              View all →
+            </Link>
+          </div>
+          <table className="mt-1 w-full">
+            <thead>
+              <tr>
+                <Th>Ref</Th>
+                <Th>Description</Th>
+                <Th>Weight</Th>
+                <Th>Total</Th>
+                <Th>Status</Th>
+                <Th>Date</Th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {!loading && shipments.length === 0 && (
-          <EmptyState message="No shipments yet — add your first one from the Shipments page." />
-        )}
-      </Card>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {shipments.slice(0, 5).map((s) => (
+                <tr key={s.id} className="hover:bg-slate-50">
+                  <Td className="whitespace-nowrap">
+                    <Link
+                      href={`/shipments/${s.id}`}
+                      className="font-medium text-indigo-600 hover:underline"
+                    >
+                      {shipmentRef(s.id)}
+                    </Link>
+                  </Td>
+                  <Td>{s.description}</Td>
+                  <Td className="whitespace-nowrap">
+                    {fmtKg(Number(s.weight_kg))}
+                  </Td>
+                  <Td className="whitespace-nowrap">
+                    {fmtMoney(Number(s.total))}
+                  </Td>
+                  <Td>
+                    <Badge className={STATUS_CLASS[s.status]}>
+                      {STATUS_LABEL[s.status]}
+                    </Badge>
+                  </Td>
+                  <Td className="whitespace-nowrap">{fmtDate(s.ship_date)}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!loading && shipments.length === 0 && (
+            <EmptyState message="No shipments yet — add your first one from the Shipments page." />
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
