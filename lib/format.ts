@@ -45,6 +45,12 @@ export const MODE_LABEL: Record<TransportMode, string> = {
   other: "📦 Other",
 };
 
+// Categories are free text since migration 0004; old rows may still hold the
+// legacy keys ('car', …), so map those to their labels.
+export function modeLabel(mode: string): string {
+  return (MODE_LABEL as Record<string, string>)[mode] ?? mode;
+}
+
 export const STATUS_CLASS: Record<ShipmentStatus, string> = {
   pending: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
   shipped: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300",

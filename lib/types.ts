@@ -11,6 +11,12 @@ export type Profile = {
 
 export type TransportMode = "airplane" | "car" | "motorcycle" | "other";
 
+export type ExpenseCategory = {
+  id: number;
+  name: string;
+  created_at: string;
+};
+
 export type Destination = {
   id: number;
   name: string;
@@ -44,7 +50,7 @@ export type Invoice = {
 export type Expense = {
   id: number;
   shipment_id: number;
-  transport_mode: TransportMode;
+  transport_mode: string;
   description: string | null;
   amount: number;
   expense_date: string;

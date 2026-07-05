@@ -2,22 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Expense, Shipment, TransportMode } from "@/lib/types";
-import { fmtDate, fmtMoney, MODE_LABEL } from "@/lib/format";
-import {
-  Button,
-  Card,
-  ErrorNote,
-  Field,
-  Input,
-  Select,
-} from "@/components/ui";
+import type { Expense, Shipment } from "@/lib/types";
+import { fmtDate, fmtMoney, modeLabel } from "@/lib/format";
+import { Button, Card, ErrorNote, Field, Input } from "@/components/ui";
+import { TransportSelect } from "@/components/transport-select";
 
 // Delivery costs for one shipment, plus the resulting net profit
 // (income from the customer − delivery expenses).
 export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [mode, setMode] = useState<TransportMode>("car");
+  const [mode, setMode] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
@@ -110,7 +104,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
         <ul className="mt-4 divide-y divide-slate-100 dark:divide-slate-700/60">
           {expenses.map((exp) => (
             <li key={exp.id} className="flex items-center gap-3 py-2 text-sm">
-              <span className="shrink-0">{MODE_LABEL[exp.transport_mode]}</span>
+              <span className="shrink-0">{modeLabel(exp.transport_mode)}</span>
               <span className="min-w-0 flex-1 truncate text-slate-500 dark:text-slate-400">
                 {exp.description || fmtDate(exp.expense_date)}
               </span>
@@ -130,16 +124,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
       <form onSubmit={add} className="mt-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Transport">
-            <Select
-              value={mode}
-              onChange={(e) => setMode(e.target.value as TransportMode)}
-            >
-              {(Object.keys(MODE_LABEL) as TransportMode[]).map((m) => (
-                <option key={m} value={m}>
-                  {MODE_LABEL[m]}
-                </option>
-              ))}
-            </Select>
+            <TransportSelect value={mode} onChange={setMode} />
           </Field>
           <Field label="Cost">
             <Input

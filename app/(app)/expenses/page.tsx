@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import type { Expense, Shipment, TransportMode } from "@/lib/types";
-import { fmtDate, fmtMoney, MODE_LABEL, shipmentRef } from "@/lib/format";
+import type { Expense, Shipment } from "@/lib/types";
+import { fmtDate, fmtMoney, modeLabel, shipmentRef } from "@/lib/format";
+import { TransportSelect } from "@/components/transport-select";
 import {
   Button,
   Card,
@@ -24,7 +25,7 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
 
   const [shipmentId, setShipmentId] = useState("");
-  const [mode, setMode] = useState<TransportMode>("car");
+  const [mode, setMode] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
@@ -153,16 +154,7 @@ export default function ExpensesPage() {
             </Field>
           </div>
           <Field label="Transport">
-            <Select
-              value={mode}
-              onChange={(e) => setMode(e.target.value as TransportMode)}
-            >
-              {(Object.keys(MODE_LABEL) as TransportMode[]).map((m) => (
-                <option key={m} value={m}>
-                  {MODE_LABEL[m]}
-                </option>
-              ))}
-            </Select>
+            <TransportSelect value={mode} onChange={setMode} />
           </Field>
           <Field label="Cost">
             <Input
@@ -201,7 +193,7 @@ export default function ExpensesPage() {
               className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
             >
               <div className="flex items-center justify-between gap-2">
-                <span>{MODE_LABEL[exp.transport_mode]}</span>
+                <span>{modeLabel(exp.transport_mode)}</span>
                 <span className="font-semibold text-red-600 dark:text-red-400">
                   −{fmtMoney(Number(exp.amount))}
                 </span>
@@ -252,7 +244,7 @@ export default function ExpensesPage() {
                   </Link>
                 </Td>
                 <Td className="whitespace-nowrap">
-                  {MODE_LABEL[exp.transport_mode]}
+                  {modeLabel(exp.transport_mode)}
                 </Td>
                 <Td>{exp.description ?? "—"}</Td>
                 <Td className="whitespace-nowrap font-medium text-red-600 dark:text-red-400">
