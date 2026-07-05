@@ -62,7 +62,32 @@ export default function PaymentsPage() {
         }
       />
       <Card className="overflow-x-auto">
-        <table className="w-full">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+          {payments.map((p) => (
+            <Link
+              key={p.id}
+              href={`/invoices/${p.invoice_id}`}
+              className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold">
+                  {fmtMoney(Number(p.amount))}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {fmtDate(p.paid_date)}
+                </span>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
+                <span className="text-orange-700 dark:text-orange-400">
+                  {invoiceRef(p.invoice_id)}
+                </span>
+                {p.invoices?.bill_to && <span>{p.invoices.bill_to}</span>}
+                {p.method && <span>{p.method}</span>}
+              </div>
+            </Link>
+          ))}
+        </div>
+        <table className="hidden w-full md:table">
           <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Date</Th>

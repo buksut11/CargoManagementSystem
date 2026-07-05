@@ -184,7 +184,30 @@ export default function InvoiceDetailPage() {
           </Card>
 
           <Card className="overflow-x-auto">
-            <table className="w-full">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+              {shipments.map((s) => (
+                <Link
+                  key={s.id}
+                  href={`/shipments/${s.id}`}
+                  className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-orange-700 dark:text-orange-400">
+                      {shipmentRef(s.id)}
+                    </span>
+                    <span className="text-sm font-semibold">
+                      {fmtMoney(Number(s.total))}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-sm">{s.description}</div>
+                  <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
+                    {s.destinations?.name && <span>📍 {s.destinations.name}</span>}
+                    <span>{fmtKg(Number(s.weight_kg))}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <table className="hidden w-full md:table">
               <thead className="border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <Th>Shipment</Th>
@@ -230,7 +253,36 @@ export default function InvoiceDetailPage() {
                 </Badge>
               )}
             </div>
-            <table className="mt-2 w-full">
+            <div className="mt-2 divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+              {payments.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3"
+                >
+                  <div>
+                    <div className="text-sm font-semibold">
+                      {fmtMoney(Number(p.amount))}
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {fmtDate(p.paid_date)}
+                      {p.method ? ` · ${p.method}` : ""}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removePayment(p)}
+                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+              {payments.length === 0 && (
+                <p className="px-4 py-3 text-sm text-slate-400">
+                  No payments yet.
+                </p>
+              )}
+            </div>
+            <table className="mt-2 hidden w-full md:table">
               <thead className="border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <Th>Date</Th>

@@ -191,7 +191,30 @@ export default function DashboardPage() {
               View all →
             </Link>
           </div>
-          <table className="mt-1 w-full">
+          <div className="mt-2 divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+            {shipments.slice(0, 5).map((s) => (
+              <Link
+                key={s.id}
+                href={`/shipments/${s.id}`}
+                className="block px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                    {shipmentRef(s.id)}
+                  </span>
+                  <Badge className={STATUS_CLASS[s.status]}>
+                    {STATUS_LABEL[s.status]}
+                  </Badge>
+                </div>
+                <div className="mt-1 text-sm">{s.description}</div>
+                <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
+                  <span>{fmtKg(Number(s.weight_kg))}</span>
+                  <span>{fmtDate(s.ship_date)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <table className="mt-1 hidden w-full md:table">
             <thead>
               <tr>
                 <Th>Ref</Th>
