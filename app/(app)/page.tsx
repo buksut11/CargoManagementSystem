@@ -102,7 +102,7 @@ export default function DashboardPage() {
           <Card key={s.label} className="p-5">
             <div className="text-xs font-medium text-slate-500">{s.label}</div>
             <div
-              className={`mt-1.5 text-2xl font-bold tracking-tight md:text-3xl ${
+              className={`mt-1.5 text-2xl font-bold tracking-tight whitespace-nowrap ${
                 s.accent ? "text-orange-600" : "text-slate-900"
               }`}
             >
@@ -197,7 +197,6 @@ export default function DashboardPage() {
                 <Th>Ref</Th>
                 <Th>Description</Th>
                 <Th>Weight</Th>
-                <Th>Total</Th>
                 <Th>Status</Th>
                 <Th>Date</Th>
               </tr>
@@ -216,9 +215,6 @@ export default function DashboardPage() {
                   <Td>{s.description}</Td>
                   <Td className="whitespace-nowrap">
                     {fmtKg(Number(s.weight_kg))}
-                  </Td>
-                  <Td className="whitespace-nowrap">
-                    {fmtMoney(Number(s.total))}
                   </Td>
                   <Td>
                     <Badge className={STATUS_CLASS[s.status]}>
