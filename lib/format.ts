@@ -1,0 +1,45 @@
+import type { ShipmentStatus } from "./types";
+
+// Change this if you bill in a different currency.
+export const CURRENCY = "USD";
+
+const money = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: CURRENCY,
+});
+
+export function fmtMoney(n: number): string {
+  return money.format(n);
+}
+
+export function fmtKg(n: number): string {
+  return `${n.toLocaleString("en-US", { maximumFractionDigits: 2 })} kg`;
+}
+
+export function fmtDate(d: string | null | undefined): string {
+  if (!d) return "—";
+  return new Date(d + (d.length === 10 ? "T00:00:00" : "")).toLocaleDateString(
+    "en-US",
+    { year: "numeric", month: "short", day: "numeric" },
+  );
+}
+
+export function shipmentRef(id: number): string {
+  return `SHP-${String(id).padStart(4, "0")}`;
+}
+
+export function invoiceRef(id: number): string {
+  return `INV-${String(id).padStart(4, "0")}`;
+}
+
+export const STATUS_LABEL: Record<ShipmentStatus, string> = {
+  pending: "Pending",
+  shipped: "Shipped",
+  delivered: "Delivered",
+};
+
+export const STATUS_CLASS: Record<ShipmentStatus, string> = {
+  pending: "bg-amber-100 text-amber-800",
+  shipped: "bg-blue-100 text-blue-800",
+  delivered: "bg-emerald-100 text-emerald-800",
+};
