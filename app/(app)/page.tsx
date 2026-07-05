@@ -191,12 +191,12 @@ export default function DashboardPage() {
               View all →
             </Link>
           </div>
-          <div className="mt-2 divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+          <div className="mt-2 space-y-3 px-4 pb-4 md:hidden">
             {shipments.slice(0, 5).map((s) => (
               <Link
                 key={s.id}
                 href={`/shipments/${s.id}`}
-                className="block px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-indigo-600 dark:text-indigo-400">
