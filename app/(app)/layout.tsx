@@ -59,9 +59,14 @@ export default function AppLayout({
   return (
     <div className="flex flex-1 p-3 md:p-6">
       <div className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#f4f5fc] shadow-2xl shadow-indigo-900/20">
-        <aside className="no-print flex w-16 shrink-0 flex-col items-center gap-2 rounded-r-3xl bg-indigo-600 py-5 md:w-20">
-          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-orange-500">
-            <UserIcon />
+        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 rounded-r-3xl bg-indigo-600 px-2.5 py-5 md:w-56 md:px-4">
+          <div className="mb-5 flex items-center gap-3 md:px-1">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-orange-500">
+              <UserIcon />
+            </div>
+            <span className="hidden text-base font-bold text-white md:inline">
+              CargoBook
+            </span>
           </div>
           {NAV.map((item) => {
             const active =
@@ -75,13 +80,16 @@ export default function AppLayout({
                 href={item.href}
                 title={item.label}
                 aria-label={item.label}
-                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
+                className={`flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium transition-colors md:justify-start md:px-3.5 ${
                   active
                     ? "bg-white text-indigo-600 shadow-md"
-                    : "text-indigo-200 hover:bg-indigo-500 hover:text-white"
+                    : "text-indigo-100 hover:bg-indigo-500 hover:text-white"
                 }`}
               >
-                <Icon />
+                <span className="shrink-0">
+                  <Icon />
+                </span>
+                <span className="hidden md:inline">{item.label}</span>
               </Link>
             );
           })}
@@ -93,9 +101,12 @@ export default function AppLayout({
               await supabase.auth.signOut();
               router.replace("/login");
             }}
-            className="flex h-11 w-11 items-center justify-center rounded-xl text-indigo-200 hover:bg-indigo-500 hover:text-white"
+            className="flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500 hover:text-white md:justify-start md:px-3.5"
           >
-            <LogoutIcon />
+            <span className="shrink-0">
+              <LogoutIcon />
+            </span>
+            <span className="hidden md:inline">Sign out</span>
           </button>
         </aside>
         <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
