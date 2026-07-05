@@ -62,14 +62,14 @@ export default function InvoicesPage() {
         }
       />
       <Card className="overflow-x-auto">
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+        <div className="space-y-3 p-3 md:hidden">
           {invoices.map((inv) => {
             const t = totals(inv);
             return (
               <Link
                 key={inv.id}
                 href={`/invoices/${inv.id}`}
-                className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-orange-700 dark:text-orange-400">

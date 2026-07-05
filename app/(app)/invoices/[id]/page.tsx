@@ -184,12 +184,12 @@ export default function InvoiceDetailPage() {
           </Card>
 
           <Card className="overflow-x-auto">
-            <div className="divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+            <div className="space-y-3 p-3 md:hidden">
               {shipments.map((s) => (
                 <Link
                   key={s.id}
                   href={`/shipments/${s.id}`}
-                  className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                  className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-orange-700 dark:text-orange-400">
@@ -253,11 +253,11 @@ export default function InvoiceDetailPage() {
                 </Badge>
               )}
             </div>
-            <div className="mt-2 divide-y divide-slate-100 dark:divide-slate-700/60 md:hidden">
+            <div className="mt-2 space-y-3 p-3 md:hidden">
               {payments.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700"
                 >
                   <div>
                     <div className="text-sm font-semibold">
