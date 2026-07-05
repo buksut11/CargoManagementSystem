@@ -4,13 +4,22 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  BoxIcon,
+  CoinsIcon,
+  HomeIcon,
+  InvoiceIcon,
+  LogoutIcon,
+  PinIcon,
+  UserIcon,
+} from "@/components/icons";
 
 const NAV = [
-  { href: "/", label: "Dashboard" },
-  { href: "/shipments", label: "Shipments" },
-  { href: "/invoices", label: "Invoices" },
-  { href: "/payments", label: "Payments" },
-  { href: "/destinations", label: "Destinations" },
+  { href: "/", label: "Dashboard", icon: HomeIcon },
+  { href: "/shipments", label: "Shipments", icon: BoxIcon },
+  { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
+  { href: "/payments", label: "Payments", icon: CoinsIcon },
+  { href: "/destinations", label: "Destinations", icon: PinIcon },
 ];
 
 export default function AppLayout({
@@ -41,54 +50,58 @@ export default function AppLayout({
 
   if (!ready) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-slate-400">
+      <div className="flex flex-1 items-center justify-center text-sm text-indigo-900/50">
         Loading…
       </div>
     );
   }
 
   return (
-    <>
-      <header className="no-print border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2 font-bold">
-            <span>📦</span> CargoBook
-          </Link>
-          <nav className="flex flex-1 items-center gap-1 overflow-x-auto">
-            {NAV.map((item) => {
-              const active =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap ${
-                    active
-                      ? "bg-orange-50 text-orange-700"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+    <div className="flex flex-1 p-3 md:p-6">
+      <div className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#f4f5fc] shadow-2xl shadow-indigo-900/20">
+        <aside className="no-print flex w-16 shrink-0 flex-col items-center gap-2 rounded-r-3xl bg-indigo-600 py-5 md:w-20">
+          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-orange-500">
+            <UserIcon />
+          </div>
+          {NAV.map((item) => {
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                title={item.label}
+                aria-label={item.label}
+                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
+                  active
+                    ? "bg-white text-indigo-600 shadow-md"
+                    : "text-indigo-200 hover:bg-indigo-500 hover:text-white"
+                }`}
+              >
+                <Icon />
+              </Link>
+            );
+          })}
+          <div className="flex-1" />
           <button
+            title="Sign out"
+            aria-label="Sign out"
             onClick={async () => {
               await supabase.auth.signOut();
               router.replace("/login");
             }}
-            className="text-sm text-slate-500 hover:text-slate-800"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-indigo-200 hover:bg-indigo-500 hover:text-white"
           >
-            Sign out
+            <LogoutIcon />
           </button>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-        {children}
-      </main>
-    </>
+        </aside>
+        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }

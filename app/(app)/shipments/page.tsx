@@ -139,28 +139,32 @@ export default function ShipmentsPage() {
           <tbody className="divide-y divide-slate-100">
             {filtered.map((s) => (
               <tr key={s.id} className="hover:bg-slate-50">
-                <Td>
+                <Td className="whitespace-nowrap">
                   <Link
                     href={`/shipments/${s.id}`}
-                    className="font-medium text-orange-700 hover:underline"
+                    className="font-medium text-indigo-600 hover:underline"
                   >
                     {shipmentRef(s.id)}
                   </Link>
                 </Td>
                 <Td>{s.description}</Td>
                 <Td>{s.destinations?.name ?? "—"}</Td>
-                <Td>{fmtKg(Number(s.weight_kg))}</Td>
-                <Td>{fmtMoney(Number(s.total))}</Td>
+                <Td className="whitespace-nowrap">
+                  {fmtKg(Number(s.weight_kg))}
+                </Td>
+                <Td className="whitespace-nowrap">
+                  {fmtMoney(Number(s.total))}
+                </Td>
                 <Td>
                   <Badge className={STATUS_CLASS[s.status]}>
                     {STATUS_LABEL[s.status]}
                   </Badge>
                 </Td>
-                <Td>
+                <Td className="whitespace-nowrap">
                   {s.invoice_id ? (
                     <Link
                       href={`/invoices/${s.invoice_id}`}
-                      className="text-orange-700 hover:underline"
+                      className="text-indigo-600 hover:underline"
                     >
                       {invoiceRef(s.invoice_id)}
                     </Link>
@@ -168,7 +172,7 @@ export default function ShipmentsPage() {
                     <span className="text-slate-400">not invoiced</span>
                   )}
                 </Td>
-                <Td>{fmtDate(s.ship_date)}</Td>
+                <Td className="whitespace-nowrap">{fmtDate(s.ship_date)}</Td>
               </tr>
             ))}
           </tbody>
