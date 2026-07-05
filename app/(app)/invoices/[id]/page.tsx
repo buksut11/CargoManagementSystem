@@ -123,7 +123,7 @@ export default function InvoiceDetailPage() {
   }
 
   if (notFound)
-    return <p className="text-sm text-slate-500">Invoice not found.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Invoice not found.</p>;
   if (!invoice) return <p className="text-sm text-slate-400">Loading…</p>;
 
   return (
@@ -150,26 +150,26 @@ export default function InvoiceDetailPage() {
           <Card className="p-6">
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
               <div>
-                <div className="text-xs uppercase text-slate-500">Bill to</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Bill to</div>
                 <div className="mt-0.5 font-medium">
                   {invoice.bill_to || "—"}
                 </div>
               </div>
               <div>
-                <div className="text-xs uppercase text-slate-500">Issued</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Issued</div>
                 <div className="mt-0.5 font-medium">
                   {fmtDate(invoice.issued_date)}
                 </div>
               </div>
               <div>
-                <div className="text-xs uppercase text-slate-500">Total</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Total</div>
                 <div className="mt-0.5 font-medium">{fmtMoney(total)}</div>
               </div>
               <div>
-                <div className="text-xs uppercase text-slate-500">Balance</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Balance</div>
                 <div
                   className={`mt-0.5 font-bold ${
-                    balance > 0 ? "text-orange-600" : "text-emerald-600"
+                    balance > 0 ? "text-orange-600 dark:text-orange-400" : "text-emerald-600 dark:text-emerald-400"
                   }`}
                 >
                   {fmtMoney(balance)}
@@ -177,7 +177,7 @@ export default function InvoiceDetailPage() {
               </div>
             </div>
             {invoice.notes && (
-              <p className="mt-4 border-t border-slate-100 pt-3 text-sm text-slate-600">
+              <p className="mt-4 border-t border-slate-100 pt-3 text-sm text-slate-600 dark:text-slate-300">
                 {invoice.notes}
               </p>
             )}
@@ -185,7 +185,7 @@ export default function InvoiceDetailPage() {
 
           <Card className="overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b border-slate-200">
+              <thead className="border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <Th>Shipment</Th>
                   <Th>Description</Th>
@@ -194,13 +194,13 @@ export default function InvoiceDetailPage() {
                   <Th>Amount</Th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
                 {shipments.map((s) => (
                   <tr key={s.id}>
                     <Td>
                       <Link
                         href={`/shipments/${s.id}`}
-                        className="font-medium text-orange-700 hover:underline"
+                        className="font-medium text-orange-700 dark:text-orange-400 hover:underline"
                       >
                         {shipmentRef(s.id)}
                       </Link>
@@ -221,17 +221,17 @@ export default function InvoiceDetailPage() {
             <div className="flex items-center justify-between px-4 pt-4">
               <h2 className="font-semibold">Payments</h2>
               {balance <= 0 && total > 0 ? (
-                <Badge className="bg-emerald-100 text-emerald-800">
+                <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
                   Paid in full
                 </Badge>
               ) : (
-                <Badge className="bg-amber-100 text-amber-800">
+                <Badge className="bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
                   {fmtMoney(balance)} due
                 </Badge>
               )}
             </div>
             <table className="mt-2 w-full">
-              <thead className="border-b border-slate-200">
+              <thead className="border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <Th>Date</Th>
                   <Th>Amount</Th>
@@ -239,7 +239,7 @@ export default function InvoiceDetailPage() {
                   <Th />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
                 {payments.map((p) => (
                   <tr key={p.id}>
                     <Td>{fmtDate(p.paid_date)}</Td>
@@ -250,7 +250,7 @@ export default function InvoiceDetailPage() {
                     <Td className="text-right">
                       <button
                         onClick={() => removePayment(p)}
-                        className="text-sm text-red-600 hover:underline"
+                        className="text-sm text-red-600 dark:text-red-400 hover:underline"
                       >
                         Delete
                       </button>
@@ -307,7 +307,7 @@ export default function InvoiceDetailPage() {
                 <button
                   type="button"
                   onClick={() => setAmount(balance.toFixed(2))}
-                  className="w-full text-center text-xs text-orange-700 hover:underline"
+                  className="w-full text-center text-xs text-orange-700 dark:text-orange-400 hover:underline"
                 >
                   Fill remaining balance ({fmtMoney(balance)})
                 </button>

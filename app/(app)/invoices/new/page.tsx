@@ -121,12 +121,12 @@ export default function NewInvoicePage() {
         <Card className="p-6">
           <h2 className="mb-3 font-semibold">
             Shipments to include{" "}
-            <span className="font-normal text-slate-500">
+            <span className="font-normal text-slate-500 dark:text-slate-400">
               (uninvoiced only)
             </span>
           </h2>
           {shipments.length === 0 ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               All shipments are already invoiced — add a new shipment first.
             </p>
           ) : (
@@ -134,7 +134,7 @@ export default function NewInvoicePage() {
               {shipments.map((s) => (
                 <label
                   key={s.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/40"
                 >
                   <input
                     type="checkbox"
@@ -147,7 +147,7 @@ export default function NewInvoicePage() {
                     {s.description}
                     {s.destinations?.name ? ` → ${s.destinations.name}` : ""}
                   </span>
-                  <span className="text-sm text-slate-500">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
                     {fmtKg(Number(s.weight_kg))}
                   </span>
                   <span className="w-24 text-right text-sm font-medium">
@@ -157,8 +157,8 @@ export default function NewInvoicePage() {
               ))}
             </div>
           )}
-          <div className="mt-4 flex justify-end border-t border-slate-200 pt-3 text-sm">
-            <span className="text-slate-500">Invoice total:&nbsp;</span>
+          <div className="mt-4 flex justify-end border-t border-slate-200 dark:border-slate-700 pt-3 text-sm">
+            <span className="text-slate-500 dark:text-slate-400">Invoice total:&nbsp;</span>
             <span className="font-bold">{fmtMoney(total)}</span>
           </div>
         </Card>

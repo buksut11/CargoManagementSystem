@@ -117,14 +117,14 @@ export default function ShipmentsPage() {
         <button
           onClick={exportCsv}
           disabled={filtered.length === 0}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 disabled:opacity-50"
         >
           ⬇ Export CSV
         </button>
       </div>
       <Card className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-slate-200">
+          <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Ref</Th>
               <Th>Description</Th>
@@ -136,13 +136,13 @@ export default function ShipmentsPage() {
               <Th>Date</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
             {filtered.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50">
+              <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
                 <Td className="whitespace-nowrap">
                   <Link
                     href={`/shipments/${s.id}`}
-                    className="font-medium text-indigo-600 hover:underline"
+                    className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
                   >
                     {shipmentRef(s.id)}
                   </Link>
@@ -164,7 +164,7 @@ export default function ShipmentsPage() {
                   {s.invoice_id ? (
                     <Link
                       href={`/invoices/${s.invoice_id}`}
-                      className="text-indigo-600 hover:underline"
+                      className="text-indigo-600 dark:text-indigo-400 hover:underline"
                     >
                       {invoiceRef(s.invoice_id)}
                     </Link>

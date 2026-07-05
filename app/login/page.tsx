@@ -34,12 +34,12 @@ export default function LoginPage() {
         <div className="mb-6 text-center">
           <div className="text-3xl">📦</div>
           <h1 className="mt-2 text-xl font-bold">CargoBook</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Your personal cargo tracker
           </p>
         </div>
         {!isConfigured && (
-          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <p className="mb-4 rounded-lg border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300">
             Supabase is not configured yet — copy <code>.env.example</code> to{" "}
             <code>.env.local</code> and fill in your project keys (see README).
           </p>
@@ -67,7 +67,7 @@ export default function LoginPage() {
             {busy ? "Signing in…" : "Sign in"}
           </Button>
         </form>
-        <p className="mt-4 text-center text-xs text-slate-500">
+        <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
           Create your account in the Supabase dashboard: Authentication → Users
           → Add user.
         </p>

@@ -36,7 +36,7 @@ export default function EditShipmentPage() {
   }
 
   if (notFound) {
-    return <p className="text-sm text-slate-500">Shipment not found.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Shipment not found.</p>;
   }
   if (!shipment) {
     return <p className="text-sm text-slate-400">Loading…</p>;
@@ -61,7 +61,7 @@ export default function EditShipmentPage() {
         }
       />
       {shipment.invoice_id && (
-        <p className="mb-4 max-w-xl rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+        <p className="mb-4 max-w-xl rounded-lg border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 px-3 py-2 text-sm text-blue-800 dark:text-blue-300">
           This shipment is on{" "}
           <Link
             href={`/invoices/${shipment.invoice_id}`}

@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* Dark mode is toggled by adding .dark to <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --chart-grid: #eef0f8;
+  --chart-muted: #94a3b8;
+  --chart-surface: #ffffff;
+  --chart-tooltip: #1e293b;
+}
+.dark {
+  --chart-grid: #334155;
+  --chart-muted: #64748b;
+  --chart-surface: #1e293b;
+  --chart-tooltip: #475569;
+}
+
 body {
   font-family:
     system-ui,
@@ -9,6 +25,18 @@ body {
     "Helvetica Neue",
     Arial,
     sans-serif;
+}
+
+/* Animated theme switching: colors cross-fade everywhere. */
+*,
+::before,
+::after {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    fill 0.3s ease,
+    stroke 0.3s ease;
 }
 
 @media print {
