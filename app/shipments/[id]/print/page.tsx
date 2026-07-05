@@ -64,7 +64,7 @@ export default function PrintShipmentPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl bg-white p-8 print:p-0">
+    <div className="mx-auto max-w-2xl bg-white p-8 text-slate-900 print:p-0">
       <div className="no-print mb-6 flex gap-3">
         <button
           onClick={() => window.print()}

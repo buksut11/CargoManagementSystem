@@ -84,7 +84,7 @@ export default function DestinationsPage() {
       <Card className="mb-6 max-w-xl p-4">
         <form onSubmit={add} className="flex flex-wrap items-end gap-3">
           <div className="min-w-40 flex-1">
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
               City / place
             </label>
             <Input
@@ -95,7 +95,7 @@ export default function DestinationsPage() {
             />
           </div>
           <div className="min-w-32 flex-1">
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
               Country (optional)
             </label>
             <Input
@@ -114,22 +114,22 @@ export default function DestinationsPage() {
       </Card>
       <Card className="max-w-xl overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-slate-200">
+          <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Name</Th>
               <Th>Country</Th>
               <Th />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
             {destinations.map((d) => (
-              <tr key={d.id} className="hover:bg-slate-50">
+              <tr key={d.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
                 <Td className="font-medium">{d.name}</Td>
                 <Td>{d.country ?? "—"}</Td>
                 <Td className="text-right">
                   <button
                     onClick={() => remove(d)}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
                   >
                     Delete
                   </button>

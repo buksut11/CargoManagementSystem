@@ -47,14 +47,14 @@ export default function PaymentsPage() {
         title="Payments"
         action={
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-slate-500 dark:text-slate-400">
               Total received:{" "}
               <span className="font-bold">{fmtMoney(total)}</span>
             </span>
             <button
               onClick={exportCsv}
               disabled={payments.length === 0}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 disabled:opacity-50"
             >
               ⬇ Export CSV
             </button>
@@ -63,7 +63,7 @@ export default function PaymentsPage() {
       />
       <Card className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-slate-200">
+          <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Date</Th>
               <Th>Amount</Th>
@@ -72,15 +72,15 @@ export default function PaymentsPage() {
               <Th>Method</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
             {payments.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50">
+              <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
                 <Td>{fmtDate(p.paid_date)}</Td>
                 <Td className="font-medium">{fmtMoney(Number(p.amount))}</Td>
                 <Td>
                   <Link
                     href={`/invoices/${p.invoice_id}`}
-                    className="text-orange-700 hover:underline"
+                    className="text-orange-700 dark:text-orange-400 hover:underline"
                   >
                     {invoiceRef(p.invoice_id)}
                   </Link>

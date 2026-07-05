@@ -37,7 +37,7 @@ function Tooltip({
   const ty = Math.max(y - 24, 2);
   return (
     <g pointerEvents="none">
-      <rect x={tx} y={ty} width={w} height={17} rx={5} fill="#1e293b" />
+      <rect x={tx} y={ty} width={w} height={17} rx={5} fill="var(--chart-tooltip)" />
       <text
         x={tx + w / 2}
         y={ty + 12}
@@ -64,7 +64,7 @@ function GridAndLabels({ points }: { points: ChartPoint[] }) {
             x2={W - PAD.right}
             y1={gy}
             y2={gy}
-            stroke="#eef0f8"
+            stroke="var(--chart-grid)"
             strokeWidth={1}
           />
         );
@@ -76,7 +76,7 @@ function GridAndLabels({ points }: { points: ChartPoint[] }) {
           y={H - 5}
           textAnchor="middle"
           fontSize={9}
-          fill="#94a3b8"
+          fill="var(--chart-muted)"
         >
           {p.label}
         </text>
@@ -145,7 +145,7 @@ export function AreaChart({
             cy={y(points[hover].value)}
             r={4.5}
             fill={color}
-            stroke="#ffffff"
+            stroke="var(--chart-surface)"
             strokeWidth={2}
           />
           <Tooltip
@@ -254,7 +254,7 @@ export function Donut({
               cy={size / 2}
               r={r}
               fill="none"
-              stroke="#eef0f8"
+              stroke="var(--chart-grid)"
               strokeWidth={15}
             />
             {paid > 0 && (
@@ -289,30 +289,30 @@ export function Donut({
           </g>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-slate-900">{pct}%</span>
-          <span className="text-xs text-slate-500">paid</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">{pct}%</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">paid</span>
         </div>
       </div>
       <div className="mt-4 w-full space-y-2 text-sm">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-slate-500">
+          <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: CHART_COLORS.indigo }}
             />
             Paid
           </span>
-          <span className="font-semibold text-slate-900">{format(paid)}</span>
+          <span className="font-semibold text-slate-900 dark:text-slate-100">{format(paid)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-slate-500">
+          <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: CHART_COLORS.orange }}
             />
             Due
           </span>
-          <span className="font-semibold text-slate-900">{format(due)}</span>
+          <span className="font-semibold text-slate-900 dark:text-slate-100">{format(due)}</span>
         </div>
       </div>
     </div>

@@ -100,10 +100,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label} className="p-5">
-            <div className="text-xs font-medium text-slate-500">{s.label}</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{s.label}</div>
             <div
               className={`mt-1.5 text-2xl font-bold tracking-tight whitespace-nowrap ${
-                s.accent ? "text-orange-600" : "text-slate-900"
+                s.accent ? "text-orange-600 dark:text-orange-400" : "text-slate-900 dark:text-slate-100"
               }`}
             >
               {loading ? "…" : s.value}
@@ -116,7 +116,7 @@ export default function DashboardPage() {
         <Card className="p-5 lg:col-span-2">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-sm font-semibold text-slate-900">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 Kg shipped per month
               </div>
               <div className="mt-1 flex items-baseline gap-2">
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                 >
                   ↑ {loading ? "…" : fmtKg(kgThisMonth)}
                 </span>
-                <span className="text-xs text-slate-500">this month</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">this month</span>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <div className="text-sm font-semibold text-slate-900">
+          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Payment status
           </div>
           {invoiced > 0 ? (
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               <Donut paid={received} due={outstanding} format={fmtMoney} />
             </div>
           ) : (
-            <p className="mt-8 text-center text-sm text-slate-500">
+            <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
               Nothing invoiced yet — create your first invoice to see paid vs.
               due here.
             </p>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Card className="p-5">
-          <div className="text-sm font-semibold text-slate-900">
+          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Received per month
           </div>
           <div className="mt-1 flex items-baseline gap-2">
@@ -168,7 +168,7 @@ export default function DashboardPage() {
             >
               ↑ {loading ? "…" : fmtMoney(receivedThisMonth)}
             </span>
-            <span className="text-xs text-slate-500">this month</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">this month</span>
           </div>
           <div className="mt-2">
             <BarChart
@@ -181,12 +181,12 @@ export default function DashboardPage() {
 
         <Card className="overflow-x-auto lg:col-span-2">
           <div className="flex items-center justify-between px-5 pt-4">
-            <h2 className="text-sm font-semibold text-slate-900">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               Recent shipments
             </h2>
             <Link
               href="/shipments"
-              className="text-xs font-medium text-indigo-600 hover:underline"
+              className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
             >
               View all →
             </Link>
@@ -201,13 +201,13 @@ export default function DashboardPage() {
                 <Th>Date</Th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
               {shipments.slice(0, 5).map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50">
+                <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
                   <Td className="whitespace-nowrap">
                     <Link
                       href={`/shipments/${s.id}`}
-                      className="font-medium text-indigo-600 hover:underline"
+                      className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
                     >
                       {shipmentRef(s.id)}
                     </Link>

@@ -63,7 +63,7 @@ export default function InvoicesPage() {
       />
       <Card className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-slate-200">
+          <thead className="border-b border-slate-200 dark:border-slate-700">
             <tr>
               <Th>Invoice</Th>
               <Th>Bill to</Th>
@@ -74,15 +74,15 @@ export default function InvoicesPage() {
               <Th>Status</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
             {invoices.map((inv) => {
               const t = totals(inv);
               return (
-                <tr key={inv.id} className="hover:bg-slate-50">
+                <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
                   <Td>
                     <Link
                       href={`/invoices/${inv.id}`}
-                      className="font-medium text-orange-700 hover:underline"
+                      className="font-medium text-orange-700 dark:text-orange-400 hover:underline"
                     >
                       {invoiceRef(inv.id)}
                     </Link>
@@ -94,15 +94,15 @@ export default function InvoicesPage() {
                   <Td className="font-medium">{fmtMoney(t.balance)}</Td>
                   <Td>
                     {t.balance <= 0 && t.total > 0 ? (
-                      <Badge className="bg-emerald-100 text-emerald-800">
+                      <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
                         Paid
                       </Badge>
                     ) : t.paid > 0 ? (
-                      <Badge className="bg-blue-100 text-blue-800">
+                      <Badge className="bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300">
                         Partial
                       </Badge>
                     ) : (
-                      <Badge className="bg-amber-100 text-amber-800">
+                      <Badge className="bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
                         Unpaid
                       </Badge>
                     )}

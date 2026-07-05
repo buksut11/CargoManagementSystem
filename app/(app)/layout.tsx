@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   BoxIcon,
   CoinsIcon,
@@ -21,6 +22,11 @@ const NAV = [
   { href: "/payments", label: "Payments", icon: CoinsIcon },
   { href: "/destinations", label: "Destinations", icon: PinIcon },
 ];
+
+const itemBase =
+  "flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium transition-colors md:justify-start md:px-3.5";
+const itemIdle =
+  "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-white";
 
 export default function AppLayout({
   children,
@@ -50,7 +56,7 @@ export default function AppLayout({
 
   if (!ready) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-indigo-900/50">
+      <div className="flex flex-1 items-center justify-center text-sm text-indigo-900/50 dark:text-slate-400">
         Loading…
       </div>
     );
@@ -58,13 +64,13 @@ export default function AppLayout({
 
   return (
     <div className="flex flex-1 p-3 md:p-6">
-      <div className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#f4f5fc] shadow-2xl shadow-indigo-900/20">
-        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 rounded-r-3xl bg-orange-100 px-2.5 py-5 md:w-56 md:px-4">
+      <div className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#f4f5fc] shadow-2xl shadow-indigo-900/20 dark:bg-slate-900 dark:shadow-black/40">
+        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 border-r border-slate-100 bg-white px-2.5 py-5 dark:border-slate-800 dark:bg-slate-800/60 md:w-56 md:px-4">
           <div className="mb-5 flex items-center gap-3 md:px-1">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white">
               <UserIcon />
             </div>
-            <span className="hidden text-base font-bold text-orange-950 md:inline">
+            <span className="hidden text-base font-bold text-slate-900 dark:text-white md:inline">
               CargoBook
             </span>
           </div>
@@ -80,10 +86,10 @@ export default function AppLayout({
                 href={item.href}
                 title={item.label}
                 aria-label={item.label}
-                className={`flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium transition-colors md:justify-start md:px-3.5 ${
+                className={`${itemBase} ${
                   active
-                    ? "bg-white text-orange-600 shadow-md"
-                    : "text-orange-900/70 hover:bg-orange-200/60 hover:text-orange-950"
+                    ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300"
+                    : itemIdle
                 }`}
               >
                 <span className="shrink-0">
@@ -94,6 +100,7 @@ export default function AppLayout({
             );
           })}
           <div className="flex-1" />
+          <ThemeToggle className={`${itemBase} ${itemIdle}`} />
           <button
             title="Sign out"
             aria-label="Sign out"
@@ -101,7 +108,7 @@ export default function AppLayout({
               await supabase.auth.signOut();
               router.replace("/login");
             }}
-            className="flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium text-orange-900/70 hover:bg-orange-200/60 hover:text-orange-950 md:justify-start md:px-3.5"
+            className={`${itemBase} ${itemIdle}`}
           >
             <span className="shrink-0">
               <LogoutIcon />
