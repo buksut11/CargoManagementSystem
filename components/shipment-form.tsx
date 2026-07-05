@@ -12,6 +12,7 @@ import {
   Field,
   Input,
   Select,
+  Textarea,
 } from "@/components/ui";
 
 export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
@@ -32,6 +33,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     shipment?.status ?? "pending",
   );
   const [shipDate, setShipDate] = useState(shipment?.ship_date ?? "");
+  const [notes, setNotes] = useState(shipment?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -64,6 +66,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
       total: total === "" ? 0 : parseFloat(total),
       status,
       ship_date: shipDate || null,
+      notes: notes.trim() || null,
     };
     const { error } = shipment
       ? await supabase.from("shipments").update(row).eq("id", shipment.id)
@@ -178,6 +181,16 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
           </Select>
+        </Field>
+        <Field
+          label="Notes (optional)"
+          hint="Shown on the printed shipment receipt."
+        >
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g. fragile — handle with care"
+          />
         </Field>
         <ErrorNote message={error} />
         <div className="flex gap-3 pt-2">

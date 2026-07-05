@@ -47,9 +47,17 @@ export default function EditShipmentPage() {
       <PageHeader
         title={`Edit ${shipmentRef(shipment.id)}`}
         action={
-          <Button variant="danger" onClick={remove}>
-            Delete
-          </Button>
+          <div className="flex gap-2">
+            <Link
+              href={`/shipments/${shipment.id}/print`}
+              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+            >
+              🖨 Print receipt
+            </Link>
+            <Button variant="danger" onClick={remove}>
+              Delete
+            </Button>
+          </div>
         }
       />
       {shipment.invoice_id && (

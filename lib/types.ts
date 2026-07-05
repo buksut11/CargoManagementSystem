@@ -16,6 +16,7 @@ export type Shipment = {
   total: number;
   status: ShipmentStatus;
   ship_date: string | null;
+  notes: string | null;
   invoice_id: number | null;
   created_at: string;
   destinations?: Pick<Destination, "id" | "name" | "country"> | null;

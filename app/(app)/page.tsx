@@ -42,6 +42,15 @@ export default function DashboardPage() {
   const received = payments.reduce((sum, p) => sum + Number(p.amount), 0);
   const outstanding = invoiced - received;
 
+  const now = new Date();
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const kgThisMonth = shipments
+    .filter((s) => (s.ship_date ?? s.created_at.slice(0, 10)).startsWith(monthKey))
+    .reduce((sum, s) => sum + Number(s.weight_kg), 0);
+  const receivedThisMonth = payments
+    .filter((p) => p.paid_date.startsWith(monthKey))
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+
   const stats = [
     { label: "Shipments", value: String(shipments.length) },
     { label: "Total weight", value: fmtKg(totalKg) },
@@ -51,12 +60,14 @@ export default function DashboardPage() {
       value: fmtMoney(outstanding),
       accent: outstanding > 0,
     },
+    { label: "Shipped this month", value: fmtKg(kgThisMonth) },
+    { label: "Received this month", value: fmtMoney(receivedThisMonth) },
   ];
 
   return (
     <div>
       <PageHeader title="Dashboard" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {stats.map((s) => (
           <Card key={s.label} className="p-4">
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
