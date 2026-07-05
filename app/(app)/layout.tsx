@@ -59,7 +59,7 @@ export default function AppLayout({
   return (
     <div className="flex flex-1 p-3 md:p-6">
       <div className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#f4f5fc] shadow-2xl shadow-indigo-900/20">
-        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 rounded-r-3xl bg-indigo-600 px-2.5 py-5 md:w-56 md:px-4">
+        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 rounded-r-3xl bg-orange-500 px-2.5 py-5 md:w-56 md:px-4">
           <div className="mb-5 flex items-center gap-3 md:px-1">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-orange-500">
               <UserIcon />
@@ -82,8 +82,8 @@ export default function AppLayout({
                 aria-label={item.label}
                 className={`flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium transition-colors md:justify-start md:px-3.5 ${
                   active
-                    ? "bg-white text-indigo-600 shadow-md"
-                    : "text-indigo-100 hover:bg-indigo-500 hover:text-white"
+                    ? "bg-white text-orange-600 shadow-md"
+                    : "text-orange-50 hover:bg-orange-400 hover:text-white"
                 }`}
               >
                 <span className="shrink-0">
@@ -101,7 +101,7 @@ export default function AppLayout({
               await supabase.auth.signOut();
               router.replace("/login");
             }}
-            className="flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500 hover:text-white md:justify-start md:px-3.5"
+            className="flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium text-orange-50 hover:bg-orange-400 hover:text-white md:justify-start md:px-3.5"
           >
             <span className="shrink-0">
               <LogoutIcon />
