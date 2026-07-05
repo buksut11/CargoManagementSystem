@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { downloadCsv } from "@/lib/csv";
 import type { Shipment, ShipmentStatus } from "@/lib/types";
 import {
   fmtDate,
@@ -40,6 +41,33 @@ export default function ShipmentsPage() {
         setLoading(false);
       });
   }, []);
+
+  function exportCsv() {
+    downloadCsv("shipments.csv", [
+      [
+        "Ref",
+        "Description",
+        "Destination",
+        "Weight (kg)",
+        "Rate per kg",
+        "Total",
+        "Status",
+        "Invoice",
+        "Ship date",
+      ],
+      ...filtered.map((s) => [
+        shipmentRef(s.id),
+        s.description,
+        s.destinations?.name ?? "",
+        Number(s.weight_kg),
+        s.rate_per_kg != null ? Number(s.rate_per_kg) : "",
+        Number(s.total),
+        STATUS_LABEL[s.status],
+        s.invoice_id ? invoiceRef(s.invoice_id) : "",
+        s.ship_date ?? "",
+      ]),
+    ]);
+  }
 
   const q = query.trim().toLowerCase();
   const filtered = shipments.filter((s) => {
@@ -86,6 +114,13 @@ export default function ShipmentsPage() {
             <option value="delivered">Delivered</option>
           </Select>
         </div>
+        <button
+          onClick={exportCsv}
+          disabled={filtered.length === 0}
+          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+        >
+          ⬇ Export CSV
+        </button>
       </div>
       <Card className="overflow-x-auto">
         <table className="w-full">
