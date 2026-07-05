@@ -59,12 +59,12 @@ export default function AppLayout({
   return (
     <div className="flex flex-1 p-3 md:p-6">
       <div className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#f4f5fc] shadow-2xl shadow-indigo-900/20">
-        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 rounded-r-3xl bg-orange-500 px-2.5 py-5 md:w-56 md:px-4">
+        <aside className="no-print flex w-16 shrink-0 flex-col gap-1.5 rounded-r-3xl bg-orange-100 px-2.5 py-5 md:w-56 md:px-4">
           <div className="mb-5 flex items-center gap-3 md:px-1">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-orange-500">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white">
               <UserIcon />
             </div>
-            <span className="hidden text-base font-bold text-white md:inline">
+            <span className="hidden text-base font-bold text-orange-950 md:inline">
               CargoBook
             </span>
           </div>
@@ -83,7 +83,7 @@ export default function AppLayout({
                 className={`flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium transition-colors md:justify-start md:px-3.5 ${
                   active
                     ? "bg-white text-orange-600 shadow-md"
-                    : "text-orange-50 hover:bg-orange-400 hover:text-white"
+                    : "text-orange-900/70 hover:bg-orange-200/60 hover:text-orange-950"
                 }`}
               >
                 <span className="shrink-0">
@@ -101,7 +101,7 @@ export default function AppLayout({
               await supabase.auth.signOut();
               router.replace("/login");
             }}
-            className="flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium text-orange-50 hover:bg-orange-400 hover:text-white md:justify-start md:px-3.5"
+            className="flex items-center justify-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium text-orange-900/70 hover:bg-orange-200/60 hover:text-orange-950 md:justify-start md:px-3.5"
           >
             <span className="shrink-0">
               <LogoutIcon />
