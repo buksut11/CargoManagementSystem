@@ -68,7 +68,7 @@ export function Field({
   hint?: string;
 }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
         {label}
       </span>
@@ -79,7 +79,7 @@ export function Field({
 }
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200";
+  "w-full min-w-0 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={inputClass} {...props} />;

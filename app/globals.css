@@ -42,6 +42,18 @@ body {
     stroke 0.3s ease;
 }
 
+/* iOS Safari gives date inputs a fixed intrinsic width that overflows grid
+   columns and centers their value; normalize them to behave like text inputs. */
+input[type="date"] {
+  min-width: 0;
+  min-height: 2.375rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 @media print {
   .no-print {
     display: none !important;
