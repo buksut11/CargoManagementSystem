@@ -74,6 +74,26 @@ export const MoonIcon = () => (
   </Base>
 );
 
+export const WalletIcon = () => (
+  <Base>
+    <path d="M3 7a2 2 0 0 1 2-2h13v3" />
+    <path d="M3 7v11a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z" />
+    <circle cx={16.5} cy={14} r={1} />
+  </Base>
+);
+
+export const MenuIcon = () => (
+  <Base>
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </Base>
+);
+
+export const CloseIcon = () => (
+  <Base>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </Base>
+);
+
 export const UserIcon = () => (
   <Base>
     <circle cx={12} cy={8} r={4} />

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import type { Payment, Shipment } from "@/lib/types";
+import type { Expense, Payment, Shipment } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
@@ -37,19 +37,22 @@ function lastMonths(n: number) {
 export default function DashboardPage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [s, p] = await Promise.all([
+      const [s, p, e] = await Promise.all([
         supabase
           .from("shipments")
           .select("*, destinations(id, name, country)")
           .order("created_at", { ascending: false }),
         supabase.from("payments").select("*"),
+        supabase.from("expenses").select("*"),
       ]);
       setShipments((s.data as Shipment[]) ?? []);
       setPayments((p.data as Payment[]) ?? []);
+      setExpenses((e.data as Expense[]) ?? []);
       setLoading(false);
     }
     load();
@@ -61,6 +64,9 @@ export default function DashboardPage() {
     .reduce((sum, s) => sum + Number(s.total), 0);
   const received = payments.reduce((sum, p) => sum + Number(p.amount), 0);
   const outstanding = Math.max(0, invoiced - received);
+  const income = shipments.reduce((sum, s) => sum + Number(s.total), 0);
+  const spent = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const netProfit = income - spent;
 
   const months = lastMonths(6);
 
@@ -91,18 +97,20 @@ export default function DashboardPage() {
       value: fmtMoney(outstanding),
       accent: outstanding > 0,
     },
+    { label: "Expenses", value: fmtMoney(spent), accent: spent > 0 },
+    { label: "Net profit", value: fmtMoney(netProfit), accent: netProfit < 0 },
   ];
 
   return (
     <div>
       <PageHeader title="Dashboard" />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
           <Card key={s.label} className="p-5">
             <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{s.label}</div>
             <div
-              className={`mt-1.5 text-2xl font-bold tracking-tight whitespace-nowrap ${
+              className={`mt-1.5 break-words text-xl font-bold tracking-tight lg:text-2xl ${
                 s.accent ? "text-orange-600 dark:text-orange-400" : "text-slate-900 dark:text-slate-100"
               }`}
             >

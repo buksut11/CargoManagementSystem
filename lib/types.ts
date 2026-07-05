@@ -1,5 +1,16 @@
 export type ShipmentStatus = "pending" | "shipped" | "delivered";
 
+export type UserRole = "admin" | "agent";
+
+export type Profile = {
+  id: string;
+  email: string | null;
+  role: UserRole;
+  created_at: string;
+};
+
+export type TransportMode = "airplane" | "car" | "motorcycle" | "other";
+
 export type Destination = {
   id: number;
   name: string;
@@ -28,6 +39,17 @@ export type Invoice = {
   issued_date: string;
   notes: string | null;
   created_at: string;
+};
+
+export type Expense = {
+  id: number;
+  shipment_id: number;
+  transport_mode: TransportMode;
+  description: string | null;
+  amount: number;
+  expense_date: string;
+  created_at: string;
+  shipments?: Pick<Shipment, "id" | "description" | "total"> | null;
 };
 
 export type Payment = {

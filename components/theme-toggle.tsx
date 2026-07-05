@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "@/components/icons";
 
-export function ThemeToggle({ className = "" }: { className?: string }) {
+export function ThemeToggle({
+  className = "",
+  labelClass = "hidden md:inline",
+}: {
+  className?: string;
+  labelClass?: string;
+}) {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -47,7 +53,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           <MoonIcon />
         </span>
       </span>
-      <span className="hidden md:inline">
+      <span className={labelClass}>
         {dark ? "Dark mode" : "Light mode"}
       </span>
     </button>

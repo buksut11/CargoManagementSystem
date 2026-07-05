@@ -1,4 +1,4 @@
-import type { ShipmentStatus } from "./types";
+import type { ShipmentStatus, TransportMode } from "./types";
 
 // Change this if you bill in a different currency.
 export const CURRENCY = "USD";
@@ -36,6 +36,13 @@ export const STATUS_LABEL: Record<ShipmentStatus, string> = {
   pending: "Pending",
   shipped: "Shipped",
   delivered: "Delivered",
+};
+
+export const MODE_LABEL: Record<TransportMode, string> = {
+  airplane: "✈️ Airplane",
+  car: "🚗 Car",
+  motorcycle: "🏍️ Motorcycle",
+  other: "📦 Other",
 };
 
 export const STATUS_CLASS: Record<ShipmentStatus, string> = {

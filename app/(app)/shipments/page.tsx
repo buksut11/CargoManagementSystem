@@ -24,8 +24,11 @@ import {
   Td,
   Th,
 } from "@/components/ui";
+import { useRole } from "@/components/role-context";
 
 export default function ShipmentsPage() {
+  const role = useRole();
+  const isAdmin = role === "admin";
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -85,12 +88,14 @@ export default function ShipmentsPage() {
       <PageHeader
         title="Shipments"
         action={
-          <Link
-            href="/shipments/new"
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
-          >
-            + New shipment
-          </Link>
+          isAdmin ? (
+            <Link
+              href="/shipments/new"
+              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+            >
+              + New shipment
+            </Link>
+          ) : undefined
         }
       />
       <div className="mb-4 flex flex-wrap gap-3">
@@ -114,13 +119,15 @@ export default function ShipmentsPage() {
             <option value="delivered">Delivered</option>
           </Select>
         </div>
-        <button
-          onClick={exportCsv}
-          disabled={filtered.length === 0}
-          className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 disabled:opacity-50"
-        >
-          ⬇ Export CSV
-        </button>
+        {isAdmin && (
+          <button
+            onClick={exportCsv}
+            disabled={filtered.length === 0}
+            className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 disabled:opacity-50"
+          >
+            ⬇ Export CSV
+          </button>
+        )}
       </div>
       <Card className="overflow-x-auto">
         <div className="space-y-3 p-3 md:hidden">
@@ -142,12 +149,16 @@ export default function ShipmentsPage() {
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                 {s.destinations?.name && <span>📍 {s.destinations.name}</span>}
                 <span>{fmtKg(Number(s.weight_kg))}</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {fmtMoney(Number(s.total))}
-                </span>
-                <span>
-                  {s.invoice_id ? invoiceRef(s.invoice_id) : "not invoiced"}
-                </span>
+                {isAdmin && (
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">
+                    {fmtMoney(Number(s.total))}
+                  </span>
+                )}
+                {isAdmin && (
+                  <span>
+                    {s.invoice_id ? invoiceRef(s.invoice_id) : "not invoiced"}
+                  </span>
+                )}
                 <span>{fmtDate(s.ship_date)}</span>
               </div>
             </Link>
@@ -160,9 +171,9 @@ export default function ShipmentsPage() {
               <Th>Description</Th>
               <Th>Destination</Th>
               <Th>Weight</Th>
-              <Th>Total</Th>
+              {isAdmin && <Th>Total</Th>}
               <Th>Status</Th>
-              <Th>Invoice</Th>
+              {isAdmin && <Th>Invoice</Th>}
               <Th>Date</Th>
             </tr>
           </thead>
@@ -182,26 +193,30 @@ export default function ShipmentsPage() {
                 <Td className="whitespace-nowrap">
                   {fmtKg(Number(s.weight_kg))}
                 </Td>
-                <Td className="whitespace-nowrap">
-                  {fmtMoney(Number(s.total))}
-                </Td>
+                {isAdmin && (
+                  <Td className="whitespace-nowrap">
+                    {fmtMoney(Number(s.total))}
+                  </Td>
+                )}
                 <Td>
                   <Badge className={STATUS_CLASS[s.status]}>
                     {STATUS_LABEL[s.status]}
                   </Badge>
                 </Td>
-                <Td className="whitespace-nowrap">
-                  {s.invoice_id ? (
-                    <Link
-                      href={`/invoices/${s.invoice_id}`}
-                      className="text-indigo-600 dark:text-indigo-400 hover:underline"
-                    >
-                      {invoiceRef(s.invoice_id)}
-                    </Link>
-                  ) : (
-                    <span className="text-slate-400">not invoiced</span>
-                  )}
-                </Td>
+                {isAdmin && (
+                  <Td className="whitespace-nowrap">
+                    {s.invoice_id ? (
+                      <Link
+                        href={`/invoices/${s.invoice_id}`}
+                        className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        {invoiceRef(s.invoice_id)}
+                      </Link>
+                    ) : (
+                      <span className="text-slate-400">not invoiced</span>
+                    )}
+                  </Td>
+                )}
                 <Td className="whitespace-nowrap">{fmtDate(s.ship_date)}</Td>
               </tr>
             ))}
@@ -211,7 +226,9 @@ export default function ShipmentsPage() {
           <EmptyState
             message={
               shipments.length === 0
-                ? "No shipments yet — click “New shipment” to add your first."
+                ? isAdmin
+                  ? "No shipments yet — click “New shipment” to add your first."
+                  : "No shipments yet."
                 : "No shipments match your search."
             }
           />
