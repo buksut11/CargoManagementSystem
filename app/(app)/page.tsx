@@ -13,6 +13,8 @@ import {
   STATUS_LABEL,
 } from "@/lib/format";
 import { Badge, Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import { CountUp } from "@/components/count-up";
+import { TiltCard } from "@/components/tilt-card";
 import {
   AreaChart,
   BarChart,
@@ -20,6 +22,9 @@ import {
   Donut,
   type ChartPoint,
 } from "@/components/charts";
+
+// Stable formatter for whole-number counts (kept module-level for CountUp).
+const fmtCount = (n: number) => Math.round(n).toLocaleString("en-US");
 
 function lastMonths(n: number) {
   const months = [];
@@ -89,16 +94,22 @@ export default function DashboardPage() {
   const receivedThisMonth = paySeries[paySeries.length - 1].value;
 
   const stats = [
-    { label: "Shipments", value: String(shipments.length) },
-    { label: "Total weight", value: fmtKg(totalKg) },
-    { label: "Invoiced", value: fmtMoney(invoiced) },
+    { label: "Shipments", value: shipments.length, format: fmtCount },
+    { label: "Total weight", value: totalKg, format: fmtKg },
+    { label: "Invoiced", value: invoiced, format: fmtMoney },
     {
       label: "Outstanding",
-      value: fmtMoney(outstanding),
+      value: outstanding,
+      format: fmtMoney,
       accent: outstanding > 0,
     },
-    { label: "Expenses", value: fmtMoney(spent), accent: spent > 0 },
-    { label: "Net profit", value: fmtMoney(netProfit), accent: netProfit < 0 },
+    { label: "Expenses", value: spent, format: fmtMoney, accent: spent > 0 },
+    {
+      label: "Net profit",
+      value: netProfit,
+      format: fmtMoney,
+      accent: netProfit < 0,
+    },
   ];
 
   return (
@@ -107,16 +118,18 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
-          <Card key={s.label} className="p-5">
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{s.label}</div>
-            <div
-              className={`mt-1.5 break-words text-xl font-bold tracking-tight lg:text-2xl ${
-                s.accent ? "text-orange-600 dark:text-orange-400" : "text-slate-900 dark:text-slate-100"
-              }`}
-            >
-              {loading ? "…" : s.value}
-            </div>
-          </Card>
+          <TiltCard key={s.label} className="h-full">
+            <Card className="h-full p-5">
+              <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{s.label}</div>
+              <div
+                className={`mt-1.5 break-words text-xl font-bold tracking-tight lg:text-2xl ${
+                  s.accent ? "text-orange-600 dark:text-orange-400" : "text-slate-900 dark:text-slate-100"
+                }`}
+              >
+                {loading ? "…" : <CountUp value={s.value} format={s.format} />}
+              </div>
+            </Card>
+          </TiltCard>
         ))}
       </div>
 
