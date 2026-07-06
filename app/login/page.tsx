@@ -115,15 +115,26 @@ export default function LoginPage() {
           <Field label="Email">
             <Input
               type="email"
+              name="email"
+              autoComplete="username"
+              list="recent-login-emails"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
             />
+            {/* Shows this device's recent logins as a native dropdown on the field */}
+            <datalist id="recent-login-emails">
+              {recent.map((em) => (
+                <option key={em} value={em} />
+              ))}
+            </datalist>
           </Field>
           <Field label="Password">
             <Input
               type="password"
+              name="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
