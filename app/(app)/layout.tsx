@@ -5,9 +5,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { UserRole } from "@/lib/types";
+import dynamic from "next/dynamic";
 import { RoleProvider } from "@/components/role-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
+
+// Rotating 3D logo mark — client-only WebGL, lazy-loaded.
+const Logo3D = dynamic(
+  () => import("@/components/logo3d").then((m) => m.Logo3D),
+  { ssr: false },
+);
 import {
   BoxIcon,
   ClockIcon,
@@ -18,7 +25,6 @@ import {
   LogoutIcon,
   MenuIcon,
   PinIcon,
-  UserIcon,
   WalletIcon,
 } from "@/components/icons";
 
@@ -59,8 +65,8 @@ function SidebarContent({
   return (
     <>
       <div className="mb-5 flex items-center gap-3 px-1">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white">
-          <UserIcon />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/15 to-orange-600/10 ring-1 ring-orange-500/20">
+          <Logo3D size={38} />
         </div>
         <div className="min-w-0">
           <div className="text-base font-bold text-slate-900 dark:text-white">
