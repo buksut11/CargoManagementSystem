@@ -81,7 +81,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   }
 
   return (
-    <Card className="max-w-xl p-5 sm:p-6">
+    <Card className="max-w-md p-5 sm:p-6">
       <form onSubmit={save} className="space-y-4">
         <Field label="Description">
           <Input
