@@ -20,28 +20,30 @@ import {
   Field,
   PageHeader,
   Select,
+  Textarea,
 } from "@/components/ui";
 import { ShipmentForm } from "@/components/shipment-form";
 import { ShipmentExpenses } from "@/components/shipment-expenses";
 import { useRole } from "@/components/role-context";
 import Link from "next/link";
 
-// Agents see the shipment read-only and may only change its status.
+// Agents see the shipment read-only and may only change its status and notes.
 function AgentShipmentView({ shipment }: { shipment: Shipment }) {
   const router = useRouter();
   const [status, setStatus] = useState<ShipmentStatus>(shipment.status);
+  const [notes, setNotes] = useState(shipment.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  async function saveStatus(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
     setSaved(false);
     const { error } = await supabase
       .from("shipments")
-      .update({ status })
+      .update({ status, notes: notes.trim() || null })
       .eq("id", shipment.id);
     setBusy(false);
     if (error) setError(error.message);
@@ -56,7 +58,6 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     ["Destination", shipment.destinations?.name ?? "—"],
     ["Weight", fmtKg(Number(shipment.weight_kg))],
     ["Ship date", fmtDate(shipment.ship_date)],
-    ["Notes", shipment.notes ?? "—"],
   ];
 
   return (
@@ -78,7 +79,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
             </div>
           ))}
         </dl>
-        <form onSubmit={saveStatus} className="mt-6 space-y-3">
+        <form onSubmit={save} className="mt-6 space-y-3">
           <Field label="Update status">
             <Select
               value={status}
@@ -92,15 +93,25 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
               <option value="delivered">Delivered</option>
             </Select>
           </Field>
+          <Field label="Notes">
+            <Textarea
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                setSaved(false);
+              }}
+              placeholder="Add a note about this shipment…"
+            />
+          </Field>
           <ErrorNote message={error} />
           {saved && (
             <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
-              Status updated.
+              Saved.
             </p>
           )}
           <div className="flex gap-3">
             <Button type="submit" disabled={busy}>
-              {busy ? "Saving…" : "Save status"}
+              {busy ? "Saving…" : "Save"}
             </Button>
             <Button
               type="button"
