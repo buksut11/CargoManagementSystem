@@ -7,7 +7,6 @@ import gsap from "gsap";
 import { supabase, isConfigured } from "@/lib/supabase";
 import { Button, ErrorNote, Field, Input } from "@/components/ui";
 import { BoxIcon } from "@/components/icons";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 // WebGL backdrop is client-only and lazy-loaded so it never blocks first paint.
 const ThreeBackground = dynamic(
@@ -40,7 +39,7 @@ export default function LoginPage() {
     }
   }, []);
 
-  // GSAP entrance: the toggle, hero and card cascade in on load.
+  // GSAP entrance: the hero and card cascade in on load.
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ctx = gsap.context(() => {
@@ -133,14 +132,6 @@ export default function LoginPage() {
         aria-hidden
       />
 
-      {/* Theme toggle, top-right. */}
-      <div data-animate style={{ opacity: 0 }} className="absolute right-5 top-5 z-20">
-        <ThemeToggle
-          className="flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/20"
-          labelClass="hidden sm:inline"
-        />
-      </div>
-
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-6 py-10 lg:flex-row lg:justify-between lg:px-10">
         {/* Brand hero — desktop only */}
         <section
@@ -174,7 +165,7 @@ export default function LoginPage() {
         <div
           data-animate
           style={{ opacity: 0 }}
-          className="w-full max-w-md rounded-3xl border border-white/40 bg-white/90 p-8 shadow-[0_25px_70px_-20px_rgba(2,6,23,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 sm:p-10"
+          className="w-full max-w-md rounded-3xl border border-white/40 bg-white/70 p-8 shadow-[0_25px_70px_-20px_rgba(2,6,23,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 sm:p-10"
         >
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
