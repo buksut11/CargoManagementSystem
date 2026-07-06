@@ -24,6 +24,16 @@ export function fmtDate(d: string | null | undefined): string {
   );
 }
 
+export function fmtDateTime(d: string): string {
+  return new Date(d).toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function shipmentRef(id: number): string {
   return `SHP-${String(id).padStart(4, "0")}`;
 }
