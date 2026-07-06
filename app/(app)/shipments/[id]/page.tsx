@@ -68,61 +68,65 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
           <Badge className={STATUS_CLASS[status]}>{STATUS_LABEL[status]}</Badge>
         }
       />
-      <Card className="max-w-xl p-6">
-        <dl className="space-y-3">
-          {rows.map(([label, value]) => (
-            <div key={label} className="flex gap-3 text-sm">
-              <dt className="w-28 shrink-0 font-medium text-slate-500 dark:text-slate-400">
-                {label}
-              </dt>
-              <dd className="min-w-0">{value}</dd>
+      <div className="grid items-start gap-5 lg:grid-cols-2">
+        <Card className="p-6">
+          <dl className="space-y-3">
+            {rows.map(([label, value]) => (
+              <div key={label} className="flex gap-3 text-sm">
+                <dt className="w-28 shrink-0 font-medium text-slate-500 dark:text-slate-400">
+                  {label}
+                </dt>
+                <dd className="min-w-0">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </Card>
+        <Card className="p-6">
+          <form onSubmit={save} className="space-y-3">
+            <Field label="Update status">
+              <Select
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value as ShipmentStatus);
+                  setSaved(false);
+                }}
+              >
+                <option value="pending">Pending</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+              </Select>
+            </Field>
+            <Field label="Notes">
+              <Textarea
+                value={notes}
+                onChange={(e) => {
+                  setNotes(e.target.value);
+                  setSaved(false);
+                }}
+                placeholder="Add a note about this shipment…"
+              />
+            </Field>
+            <ErrorNote message={error} />
+            {saved && (
+              <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+                Saved.
+              </p>
+            )}
+            <div className="flex gap-3">
+              <Button type="submit" disabled={busy}>
+                {busy ? "Saving…" : "Save"}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => router.push("/shipments")}
+              >
+                Back
+              </Button>
             </div>
-          ))}
-        </dl>
-        <form onSubmit={save} className="mt-6 space-y-3">
-          <Field label="Update status">
-            <Select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value as ShipmentStatus);
-                setSaved(false);
-              }}
-            >
-              <option value="pending">Pending</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-            </Select>
-          </Field>
-          <Field label="Notes">
-            <Textarea
-              value={notes}
-              onChange={(e) => {
-                setNotes(e.target.value);
-                setSaved(false);
-              }}
-              placeholder="Add a note about this shipment…"
-            />
-          </Field>
-          <ErrorNote message={error} />
-          {saved && (
-            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
-              Saved.
-            </p>
-          )}
-          <div className="flex gap-3">
-            <Button type="submit" disabled={busy}>
-              {busy ? "Saving…" : "Save"}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => router.push("/shipments")}
-            >
-              Back
-            </Button>
-          </div>
-        </form>
-      </Card>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }
