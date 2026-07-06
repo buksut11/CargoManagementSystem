@@ -27,11 +27,11 @@ export default function LoginPage() {
 
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-br from-sky-700 via-blue-900 to-slate-900 p-6 md:justify-end md:p-12 lg:pr-24">
-      {/* Full-bleed background photo (add public/login-bg.jpg). The gradient
+      {/* Full-bleed background photo (public/login-bg.webp). The gradient
           above shows through as a fallback if the image is missing. */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url(/login-bg.jpg)" }}
+        style={{ backgroundImage: "url(/login-bg.webp)" }}
         aria-hidden
       />
       {/* Slight dark overlay so the card stays legible over the photo. */}
