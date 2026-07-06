@@ -234,7 +234,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
               <img
                 src={attachmentUrl}
                 alt="Shipment attachment"
-                className="max-h-48 rounded-lg border border-slate-200 dark:border-slate-700 object-contain"
+                className="w-full max-h-64 rounded-lg border border-slate-200 dark:border-slate-700 object-cover"
               />
               <button
                 type="button"
