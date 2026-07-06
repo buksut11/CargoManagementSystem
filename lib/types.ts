@@ -59,6 +59,18 @@ export type Expense = {
   shipments?: Pick<Shipment, "id" | "description" | "total"> | null;
 };
 
+export type AuditEntry = {
+  id: number;
+  user_id: string | null;
+  user_email: string | null;
+  user_role: string | null;
+  action: "create" | "update" | "delete";
+  shipment_id: number | null;
+  shipment_desc: string | null;
+  changes: Record<string, { from: unknown; to: unknown }> | null;
+  created_at: string;
+};
+
 export type Payment = {
   id: number;
   invoice_id: number;

@@ -10,13 +10,14 @@ A simple app to track your cargo shipments and get paid:
 - **Expenses & profit** — record what each delivery cost you (airplane, car, motorcycle, or any type you add yourself via the dropdown's "➕ Add new type…"); the app subtracts those costs from the customer's price to show the **net profit per shipment** and overall
 - **Dashboard** — total shipments, total kg, invoiced amount, outstanding balance, expenses, net profit
 - **Admin & Agent roles** — admins have full access; agents only see shipments (no financials) and can only update the shipment status
+- **Audit trail** — admins can see who created, updated, or deleted every shipment (with the exact old → new values), recorded by a database trigger that agents cannot bypass
 
 Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.com) (free tier is plenty).
 
 ## One-time setup (~10 minutes)
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free account → New project).
-2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0005_…`).
+2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0006_…`).
 3. **Create your login user:** dashboard → **Authentication → Users → Add user** — enter your email and a password (tick "Auto confirm user").
 4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the two values from dashboard → **Project Settings → API**:
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL

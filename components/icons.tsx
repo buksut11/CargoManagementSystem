@@ -82,6 +82,13 @@ export const WalletIcon = () => (
   </Base>
 );
 
+export const ClockIcon = () => (
+  <Base>
+    <circle cx={12} cy={12} r={9} />
+    <path d="M12 7v5l3 3" />
+  </Base>
+);
+
 export const MenuIcon = () => (
   <Base>
     <path d="M4 6h16M4 12h16M4 18h16" />

@@ -9,6 +9,7 @@ import { RoleProvider } from "@/components/role-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   BoxIcon,
+  ClockIcon,
   CloseIcon,
   CoinsIcon,
   HomeIcon,
@@ -27,6 +28,7 @@ const ADMIN_NAV = [
   { href: "/payments", label: "Payments", icon: CoinsIcon },
   { href: "/expenses", label: "Expenses", icon: WalletIcon },
   { href: "/destinations", label: "Destinations", icon: PinIcon },
+  { href: "/audit", label: "Audit trail", icon: ClockIcon },
 ];
 
 const AGENT_NAV = [{ href: "/shipments", label: "Shipments", icon: BoxIcon }];
