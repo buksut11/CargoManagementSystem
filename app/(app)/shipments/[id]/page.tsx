@@ -50,6 +50,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
 
   const rows: [string, React.ReactNode][] = [
     ["Description", shipment.description],
+    ["Bill to", shipment.invoices?.bill_to || "—"],
     ["Destination", shipment.destinations?.name ?? "—"],
     ["Weight", fmtKg(Number(shipment.weight_kg))],
     ["Ship date", fmtDate(shipment.ship_date)],
@@ -123,7 +124,7 @@ export default function EditShipmentPage() {
   useEffect(() => {
     supabase
       .from("shipments")
-      .select("*, destinations(id, name, country)")
+      .select("*, destinations(id, name, country), invoices(id, bill_to)")
       .eq("id", Number(id))
       .single()
       .then(({ data }) => {
