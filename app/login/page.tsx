@@ -15,6 +15,12 @@ const ThreeBackground = dynamic(
   { ssr: false },
 );
 
+// Ripple layer for the background photo — also client-only and lazy-loaded.
+const RippleBackground = dynamic(
+  () => import("@/components/ripple-background").then((m) => m.RippleBackground),
+  { ssr: false },
+);
+
 const REMEMBER_KEY = "cargobook:email";
 
 export default function LoginPage() {
@@ -115,12 +121,15 @@ export default function LoginPage() {
       ref={rootRef}
       className="relative flex min-h-dvh flex-1 flex-col overflow-hidden bg-slate-950"
     >
-      {/* Full-bleed background photo (public/login-bg.webp). */}
+      {/* Full-bleed background photo (public/login-bg.webp) — instant paint,
+          also the fallback before the WebGL ripple layer mounts. */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url(/login-bg.webp)" }}
         aria-hidden
       />
+      {/* Water-ripple version of the photo, driven by pointer movement. */}
+      <RippleBackground />
       {/* Ambient WebGL layer — floating cargo containers. */}
       <ThreeBackground />
       {/* Brand-tinted scrims tie the layers to the card and keep text legible. */}
