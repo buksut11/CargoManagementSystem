@@ -20,6 +20,8 @@ export default function NewInvoicePage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [billTo, setBillTo] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [issuedDate, setIssuedDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -61,6 +63,8 @@ export default function NewInvoicePage() {
       .from("invoices")
       .insert({
         bill_to: billTo.trim(),
+        phone: phone.trim() || null,
+        address: address.trim() || null,
         issued_date: issuedDate,
         notes: notes.trim() || null,
       })
@@ -98,7 +102,15 @@ export default function NewInvoicePage() {
                 autoFocus
               />
             </Field>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Phone (optional)">
+                <Input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="e.g. +90 555 123 4567"
+                />
+              </Field>
               <Field label="Issue date">
                 <Input
                   type="date"
@@ -108,6 +120,13 @@ export default function NewInvoicePage() {
                 />
               </Field>
             </div>
+            <Field label="Address (optional)">
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="e.g. Kadıköy, İstanbul"
+              />
+            </Field>
             <Field label="Notes (optional)">
               <Textarea
                 value={notes}

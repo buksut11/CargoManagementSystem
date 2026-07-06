@@ -154,6 +154,16 @@ export default function InvoiceDetailPage() {
                 <div className="mt-0.5 font-medium">
                   {invoice.bill_to || "—"}
                 </div>
+                {invoice.phone && (
+                  <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    📞 {invoice.phone}
+                  </div>
+                )}
+                {invoice.address && (
+                  <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    📍 {invoice.address}
+                  </div>
+                )}
               </div>
               <div>
                 <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Issued</div>

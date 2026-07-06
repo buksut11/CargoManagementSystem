@@ -98,6 +98,14 @@ export default function PrintInvoicePage() {
           <div className="mt-1 text-lg font-medium">
             {invoice.bill_to || "—"}
           </div>
+          {invoice.phone && (
+            <div className="mt-0.5 text-sm text-slate-600">{invoice.phone}</div>
+          )}
+          {invoice.address && (
+            <div className="mt-0.5 text-sm text-slate-600">
+              {invoice.address}
+            </div>
+          )}
         </div>
 
         <table className="mt-8 w-full border-collapse text-sm">

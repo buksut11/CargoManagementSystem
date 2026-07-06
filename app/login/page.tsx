@@ -1,16 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, isConfigured } from "@/lib/supabase";
 import { Button, Card, ErrorNote, Field, Input } from "@/components/ui";
+
+// Emails that signed in successfully on this device, newest first.
+const RECENT_KEY = "recent-logins";
+const RECENT_MAX = 5;
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [recent, setRecent] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    // After first paint (avoids hydration mismatch) — same trick as ThemeToggle.
+    const id = requestAnimationFrame(() => {
+      try {
+        const list = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+        if (Array.isArray(list)) {
+          setRecent(list.filter((x): x is string => typeof x === "string"));
+        }
+      } catch {
+        // corrupt or unavailable storage — just show no suggestions
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  function saveRecent(list: string[]) {
+    setRecent(list);
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch {
+      // private mode — suggestions just won't persist
+    }
+  }
+
+  function removeRecent(em: string) {
+    saveRecent(recent.filter((e) => e !== em));
+  }
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -24,6 +57,9 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else {
+      saveRecent(
+        [email, ...recent.filter((e) => e !== email)].slice(0, RECENT_MAX),
+      );
       router.replace("/");
     }
   }
@@ -43,6 +79,37 @@ export default function LoginPage() {
             Supabase is not configured yet — copy <code>.env.example</code> to{" "}
             <code>.env.local</code> and fill in your project keys (see README).
           </p>
+        )}
+        {recent.length > 0 && (
+          <div className="mb-4">
+            <div className="mb-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+              Recent logins
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recent.map((em) => (
+                <span
+                  key={em}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 py-1 pl-3 pr-1.5 text-xs dark:border-slate-600 dark:bg-slate-700/40"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setEmail(em)}
+                    className="font-medium text-slate-700 hover:text-orange-600 dark:text-slate-200 dark:hover:text-orange-400"
+                  >
+                    {em}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${em} from recent logins`}
+                    onClick={() => removeRecent(em)}
+                    className="rounded-full px-1 text-slate-400 hover:text-red-500"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
         )}
         <form onSubmit={signIn} className="space-y-4">
           <Field label="Email">

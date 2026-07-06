@@ -37,12 +37,14 @@ export type Shipment = {
   invoice_id: number | null;
   created_at: string;
   destinations?: Pick<Destination, "id" | "name" | "country"> | null;
-  invoices?: Pick<Invoice, "id" | "bill_to"> | null;
+  invoices?: Pick<Invoice, "id" | "bill_to" | "phone" | "address"> | null;
 };
 
 export type Invoice = {
   id: number;
   bill_to: string;
+  phone: string | null;
+  address: string | null;
   issued_date: string;
   notes: string | null;
   created_at: string;
