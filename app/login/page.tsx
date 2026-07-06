@@ -26,8 +26,17 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-sm p-8">
+    <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-br from-sky-700 via-blue-900 to-slate-900 p-6 md:justify-end md:p-12 lg:pr-24">
+      {/* Full-bleed background photo (add public/login-bg.jpg). The gradient
+          above shows through as a fallback if the image is missing. */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/login-bg.jpg)" }}
+        aria-hidden
+      />
+      {/* Slight dark overlay so the card stays legible over the photo. */}
+      <div className="absolute inset-0 bg-black/25" aria-hidden />
+      <Card className="relative z-10 w-full max-w-sm p-8 shadow-2xl">
         <div className="mb-6 text-center">
           <div className="text-3xl">📦</div>
           <h1 className="mt-2 text-xl font-bold">CargoBook</h1>
