@@ -1,16 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import gsap from "gsap";
 import { supabase, isConfigured } from "@/lib/supabase";
 import { Button, ErrorNote, Field, Input } from "@/components/ui";
 import { BoxIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+// WebGL backdrop is client-only and lazy-loaded so it never blocks first paint.
+const ThreeBackground = dynamic(
+  () => import("@/components/three-background").then((m) => m.ThreeBackground),
+  { ssr: false },
+);
+
 const REMEMBER_KEY = "cargobook:email";
 
 export default function LoginPage() {
   const router = useRouter();
+  const rootRef = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -29,6 +38,32 @@ export default function LoginPage() {
     } catch {
       // localStorage unavailable — no prefill.
     }
+  }, []);
+
+  // GSAP entrance: the toggle, hero and card cascade in on load.
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ctx = gsap.context(() => {
+      const items = gsap.utils.toArray<HTMLElement>("[data-animate]");
+      if (reduce) {
+        gsap.set(items, { opacity: 1 });
+        return;
+      }
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 26 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          stagger: 0.14,
+          delay: 0.1,
+          clearProps: "transform",
+        },
+      );
+    }, rootRef);
+    return () => ctx.revert();
   }, []);
 
   function persistEmail() {
@@ -76,14 +111,19 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-dvh flex-1 flex-col overflow-hidden">
+    <main
+      ref={rootRef}
+      className="relative flex min-h-dvh flex-1 flex-col overflow-hidden bg-slate-950"
+    >
       {/* Full-bleed background photo (public/login-bg.webp). */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url(/login-bg.webp)" }}
         aria-hidden
       />
-      {/* Brand-tinted scrims tie the photo to the card and keep text legible. */}
+      {/* Ambient WebGL layer — floating cargo containers. */}
+      <ThreeBackground />
+      {/* Brand-tinted scrims tie the layers to the card and keep text legible. */}
       <div
         className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/45 to-slate-950/70"
         aria-hidden
@@ -94,14 +134,20 @@ export default function LoginPage() {
       />
 
       {/* Theme toggle, top-right. */}
-      <ThemeToggle
-        className="absolute right-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/20"
-        labelClass="hidden sm:inline"
-      />
+      <div data-animate style={{ opacity: 0 }} className="absolute right-5 top-5 z-20">
+        <ThemeToggle
+          className="flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/20"
+          labelClass="hidden sm:inline"
+        />
+      </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-6 py-10 lg:flex-row lg:justify-between lg:px-10">
         {/* Brand hero — desktop only */}
-        <section className="animate-rise-in hidden max-w-md flex-col gap-6 text-white lg:flex">
+        <section
+          data-animate
+          style={{ opacity: 0 }}
+          className="hidden max-w-md flex-col gap-6 text-white lg:flex"
+        >
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur">
               <BoxIcon />
@@ -125,7 +171,11 @@ export default function LoginPage() {
         </section>
 
         {/* Auth card */}
-        <div className="animate-rise-in-delayed w-full max-w-md rounded-3xl border border-white/40 bg-white/90 p-8 shadow-[0_25px_70px_-20px_rgba(2,6,23,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 sm:p-10">
+        <div
+          data-animate
+          style={{ opacity: 0 }}
+          className="w-full max-w-md rounded-3xl border border-white/40 bg-white/90 p-8 shadow-[0_25px_70px_-20px_rgba(2,6,23,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 sm:p-10"
+        >
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
               <BoxIcon />
