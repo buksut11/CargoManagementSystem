@@ -37,7 +37,9 @@ export default function ShipmentsPage() {
   useEffect(() => {
     supabase
       .from("shipments")
-      .select("*, destinations(id, name, country), invoices(id, bill_to)")
+      .select(
+        "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
+      )
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setShipments((data as Shipment[]) ?? []);
@@ -161,6 +163,7 @@ export default function ShipmentsPage() {
                   </span>
                 )}
                 {s.invoices?.bill_to && <span>👤 {s.invoices.bill_to}</span>}
+                {s.invoices?.phone && <span>📞 {s.invoices.phone}</span>}
                 <span>{fmtDate(s.ship_date)}</span>
               </div>
             </Link>
@@ -220,7 +223,16 @@ export default function ShipmentsPage() {
                     )}
                   </Td>
                 )}
-                {!isAdmin && <Td>{s.invoices?.bill_to || "—"}</Td>}
+                {!isAdmin && (
+                  <Td>
+                    {s.invoices?.bill_to || "—"}
+                    {s.invoices?.phone && (
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        📞 {s.invoices.phone}
+                      </div>
+                    )}
+                  </Td>
+                )}
                 <Td className="whitespace-nowrap">{fmtDate(s.ship_date)}</Td>
               </tr>
             ))}
