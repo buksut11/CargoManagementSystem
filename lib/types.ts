@@ -37,6 +37,7 @@ export type Shipment = {
   invoice_id: number | null;
   created_at: string;
   destinations?: Pick<Destination, "id" | "name" | "country"> | null;
+  invoices?: Pick<Invoice, "id" | "bill_to"> | null;
 };
 
 export type Invoice = {

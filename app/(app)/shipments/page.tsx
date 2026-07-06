@@ -37,7 +37,7 @@ export default function ShipmentsPage() {
   useEffect(() => {
     supabase
       .from("shipments")
-      .select("*, destinations(id, name, country)")
+      .select("*, destinations(id, name, country), invoices(id, bill_to)")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setShipments((data as Shipment[]) ?? []);
@@ -79,6 +79,7 @@ export default function ShipmentsPage() {
     return (
       s.description.toLowerCase().includes(q) ||
       (s.destinations?.name ?? "").toLowerCase().includes(q) ||
+      (s.invoices?.bill_to ?? "").toLowerCase().includes(q) ||
       shipmentRef(s.id).toLowerCase().includes(q)
     );
   });
@@ -159,6 +160,7 @@ export default function ShipmentsPage() {
                     {s.invoice_id ? invoiceRef(s.invoice_id) : "not invoiced"}
                   </span>
                 )}
+                {s.invoices?.bill_to && <span>👤 {s.invoices.bill_to}</span>}
                 <span>{fmtDate(s.ship_date)}</span>
               </div>
             </Link>
@@ -174,6 +176,7 @@ export default function ShipmentsPage() {
               {isAdmin && <Th>Total</Th>}
               <Th>Status</Th>
               {isAdmin && <Th>Invoice</Th>}
+              {!isAdmin && <Th>Bill to</Th>}
               <Th>Date</Th>
             </tr>
           </thead>
@@ -217,6 +220,7 @@ export default function ShipmentsPage() {
                     )}
                   </Td>
                 )}
+                {!isAdmin && <Td>{s.invoices?.bill_to || "—"}</Td>}
                 <Td className="whitespace-nowrap">{fmtDate(s.ship_date)}</Td>
               </tr>
             ))}
