@@ -2,7 +2,7 @@
 
 A simple app to track your cargo shipments and get paid:
 
-- **Shipments** — description, weight (kg), destination, status (pending → shipped → delivered), price (either weight × rate-per-kg, or a manual total)
+- **Shipments** — description, weight (kg), destination, status (pending → shipped → delivered), price (either weight × rate-per-kg, or a manual total), and an optional **attachment image** (a photo of the parcel or receipt) that admins upload and agents can view
 - **Destinations** — your own list of the places you ship to
 - **Invoices** — group uninvoiced shipments into an invoice, with a clean **printable view** (Print / Save as PDF from the browser); each shipment also has its own **printable receipt** with signature lines
 - **CSV export** — download your shipments and payments for Excel / Google Sheets
@@ -17,7 +17,7 @@ Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.co
 ## One-time setup (~10 minutes)
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free account → New project).
-2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0008_…`).
+2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0009_…`).
 3. **Create your login user:** dashboard → **Authentication → Users → Add user** — enter your email and a password (tick "Auto confirm user").
 4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the two values from dashboard → **Project Settings → API**:
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL

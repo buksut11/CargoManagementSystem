@@ -80,6 +80,25 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
               </div>
             ))}
           </dl>
+          {shipment.attachment_url && (
+            <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+              <p className="mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+                Attachment
+              </p>
+              <a
+                href={shipment.attachment_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={shipment.attachment_url}
+                  alt="Shipment attachment"
+                  className="max-h-64 rounded-lg border border-slate-200 dark:border-slate-700 object-contain"
+                />
+              </a>
+            </div>
+          )}
         </Card>
         <Card className="p-6">
           <form onSubmit={save} className="space-y-3">
