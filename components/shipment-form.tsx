@@ -34,6 +34,10 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   );
   const [shipDate, setShipDate] = useState(shipment?.ship_date ?? "");
   const [notes, setNotes] = useState(shipment?.notes ?? "");
+  const [attachmentUrl, setAttachmentUrl] = useState(
+    shipment?.attachment_url ?? "",
+  );
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -54,6 +58,33 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     }
   }
 
+  async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${shipment?.id ?? "new"}/${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("shipment-attachments")
+      .upload(path, file, { upsert: true });
+    if (uploadError) {
+      setUploading(false);
+      setError(uploadError.message);
+      return;
+    }
+    const { data } = supabase.storage
+      .from("shipment-attachments")
+      .getPublicUrl(path);
+    setAttachmentUrl(data.publicUrl);
+    setUploading(false);
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -67,6 +98,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
       status,
       ship_date: shipDate || null,
       notes: notes.trim() || null,
+      attachment_url: attachmentUrl || null,
     };
     const { error } = shipment
       ? await supabase.from("shipments").update(row).eq("id", shipment.id)
@@ -192,9 +224,47 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             placeholder="e.g. fragile — handle with care"
           />
         </Field>
+        <Field
+          label="Attachment image (optional)"
+          hint="A photo of the parcel or receipt. Agents can view it but not change it."
+        >
+          {attachmentUrl && (
+            <div className="mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={attachmentUrl}
+                alt="Shipment attachment"
+                className="max-h-48 rounded-lg border border-slate-200 dark:border-slate-700 object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setAttachmentUrl("")}
+                className="mt-2 text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
+              >
+                Remove image
+              </button>
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={uploadImage}
+            disabled={uploading}
+            className="block w-full text-sm text-slate-600 dark:text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-orange-700 disabled:opacity-50"
+          />
+          {uploading && (
+            <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+              Uploading…
+            </span>
+          )}
+        </Field>
         <ErrorNote message={error} />
         <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-          <Button type="submit" disabled={busy} className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            disabled={busy || uploading}
+            className="w-full sm:w-auto"
+          >
             {busy ? "Saving…" : shipment ? "Save changes" : "Add shipment"}
           </Button>
           <Button

@@ -120,6 +120,20 @@ export default function PrintShipmentPage() {
           </p>
         )}
 
+        {shipment.attachment_url && (
+          <div className="mt-8 border-t border-slate-200 pt-4">
+            <div className="mb-2 text-sm font-semibold text-slate-500">
+              Attachment
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={shipment.attachment_url}
+              alt="Shipment attachment"
+              className="max-h-64 rounded border border-slate-200 object-contain"
+            />
+          </div>
+        )}
+
         <div className="mt-14 grid grid-cols-2 gap-10 text-sm text-slate-500">
           <div className="border-t border-slate-400 pt-2">Sender signature</div>
           <div className="border-t border-slate-400 pt-2">
