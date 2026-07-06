@@ -9,7 +9,7 @@ A simple app to track your cargo shipments and get paid:
 - **Payments** — record payments against invoices, see paid / partial / unpaid status and remaining balances
 - **Expenses & profit** — record what each delivery cost you (airplane, car, motorcycle, or any type you add yourself via the dropdown's "➕ Add new type…"); the app subtracts those costs from the customer's price to show the **net profit per shipment** and overall
 - **Dashboard** — total shipments, total kg, invoiced amount, outstanding balance, expenses, net profit
-- **Admin & Agent roles** — admins have full access; agents only see shipments (no financials) and can only update the shipment status
+- **Admin & Agent roles** — admins have full access; agents only see shipments (no financials) and can only update the shipment status and notes
 - **Audit trail** — admins can see who created, updated, or deleted every shipment (with the exact old → new values), recorded by a database trigger that agents cannot bypass
 
 Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.com) (free tier is plenty).
@@ -17,7 +17,7 @@ Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.co
 ## One-time setup (~10 minutes)
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free account → New project).
-2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0007_…`).
+2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0008_…`).
 3. **Create your login user:** dashboard → **Authentication → Users → Add user** — enter your email and a password (tick "Auto confirm user").
 4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the two values from dashboard → **Project Settings → API**:
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL
@@ -37,7 +37,7 @@ Open [http://localhost:3000](http://localhost:3000) and sign in with the user yo
 Migration `0003` adds a `profiles` table with a `role` per user:
 
 - **Admin** — full access to everything (shipments, invoices, payments, expenses, destinations).
-- **Agent** — sees only the shipments list and shipment details, including who each shipment is billed to (but no prices), and can only change a shipment's **status** (Pending / Shipped / Delivered). This is enforced in the database (row-level security + a trigger), not just hidden in the UI.
+- **Agent** — sees only the shipments list and shipment details, including who each shipment is billed to (but no prices), and can only change a shipment's **status** (Pending / Shipped / Delivered) and its **notes**. This is enforced in the database (row-level security + a trigger), not just hidden in the UI.
 
 Users that existed before the migration become **admins** automatically; users added afterwards default to **agent**. To change a user's role, run this in the SQL Editor:
 
