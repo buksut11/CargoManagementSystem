@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import type { UserRole } from "@/lib/types";
 import { RoleProvider } from "@/components/role-context";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { PageTransition } from "@/components/page-transition";
 import {
   BoxIcon,
   ClockIcon,
@@ -219,7 +220,9 @@ export default function AppLayout({
           </header>
 
           <main className="min-w-0 flex-1 px-4 py-5 md:px-8 md:py-8">
-            <div className="mx-auto w-full max-w-6xl">{children}</div>
+            <div className="mx-auto w-full max-w-6xl">
+              <PageTransition>{children}</PageTransition>
+            </div>
           </main>
         </div>
       </div>
