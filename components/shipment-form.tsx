@@ -81,7 +81,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   }
 
   return (
-    <Card className="max-w-xl p-6">
+    <Card className="max-w-xl p-5 sm:p-6">
       <form onSubmit={save} className="space-y-4">
         <Field label="Description">
           <Input
@@ -121,7 +121,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             </Link>
           </div>
         </Field>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Weight (kg)">
             <Input
               type="number"
@@ -149,7 +149,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             />
           </Field>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field
             label="Total price"
             hint={ratePerKg !== "" ? "Computed from weight × rate." : undefined}
@@ -193,14 +193,15 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
           />
         </Field>
         <ErrorNote message={error} />
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={busy}>
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+          <Button type="submit" disabled={busy} className="w-full sm:w-auto">
             {busy ? "Saving…" : shipment ? "Save changes" : "Add shipment"}
           </Button>
           <Button
             type="button"
             variant="secondary"
             onClick={() => router.push("/shipments")}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
