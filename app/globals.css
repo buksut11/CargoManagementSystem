@@ -54,6 +54,31 @@ input[type="date"]::-webkit-date-and-time-value {
   text-align: left;
 }
 
+/* Entrance animations for the login screen. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-rise-in {
+  animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-rise-in-delayed {
+  animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.12s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise-in,
+  .animate-rise-in-delayed {
+    animation: none;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;
