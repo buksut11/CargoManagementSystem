@@ -233,7 +233,10 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             // Stop clicks inside the preview from bubbling to the surrounding
             // <label>, which would otherwise activate the first labelable
             // control (the Remove button) and clear the image unexpectedly.
-            <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="relative mb-2"
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentUrl}
@@ -241,14 +244,14 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
                 style={{ imageOrientation: "none" }}
                 className="max-h-64 max-w-full rounded-lg border border-slate-200 dark:border-slate-700"
               />
-              <Button
+              <button
                 type="button"
-                variant="danger"
                 onClick={() => setAttachmentUrl("")}
-                className="mt-2"
+                className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-lg bg-slate-900/70 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-red-600"
               >
-                Remove image
-              </Button>
+                <span aria-hidden>✕</span>
+                Remove
+              </button>
             </div>
           )}
           <input
