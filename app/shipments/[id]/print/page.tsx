@@ -130,7 +130,7 @@ export default function PrintShipmentPage() {
               src={shipment.attachment_url}
               alt="Shipment attachment"
               style={{ imageOrientation: "none" }}
-              className="max-h-64 rounded border border-slate-200 object-contain"
+              className="max-h-64 max-w-full rounded border border-slate-200"
             />
           </div>
         )}
