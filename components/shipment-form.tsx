@@ -229,20 +229,24 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
           hint="A photo of the parcel or receipt. Agents can view it but not change it."
         >
           {attachmentUrl && (
-            <div className="mb-2">
+            // Stop clicks inside the preview from bubbling to the surrounding
+            // <label>, which would otherwise activate the first labelable
+            // control (the Remove button) and clear the image unexpectedly.
+            <div className="mb-2" onClick={(e) => e.stopPropagation()}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentUrl}
                 alt="Shipment attachment"
                 className="w-full max-h-64 rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 object-contain"
               />
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={() => setAttachmentUrl("")}
-                className="mt-2 text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
+                className="mt-2"
               >
                 Remove image
-              </button>
+              </Button>
             </div>
           )}
           <input
