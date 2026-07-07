@@ -33,11 +33,16 @@ function Changes({ entry }: { entry: AuditEntry }) {
   return (
     <ul className="space-y-0.5">
       {Object.entries(entry.changes).map(([field, c]) => (
-        <li key={field} className="text-xs text-slate-500 dark:text-slate-400">
+        <li
+          key={field}
+          className="text-xs text-slate-500 [overflow-wrap:anywhere] dark:text-slate-400"
+        >
           <span className="font-medium text-slate-700 dark:text-slate-200">
             {field.replace(/_/g, " ")}:
           </span>{" "}
-          {fmtVal(field, c.from)} → {fmtVal(field, c.to)}
+          <span className="break-all">
+            {fmtVal(field, c.from)} → {fmtVal(field, c.to)}
+          </span>
         </li>
       ))}
     </ul>
@@ -177,7 +182,9 @@ export default function AuditPage() {
                   )}
                 </Td>
                 <Td>
-                  <Changes entry={e} />
+                  <div className="max-w-md">
+                    <Changes entry={e} />
+                  </div>
                 </Td>
               </tr>
             ))}
