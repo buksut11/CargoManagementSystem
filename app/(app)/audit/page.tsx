@@ -33,7 +33,10 @@ function Changes({ entry }: { entry: AuditEntry }) {
   return (
     <ul className="space-y-0.5">
       {Object.entries(entry.changes).map(([field, c]) => (
-        <li key={field} className="text-xs text-slate-500 dark:text-slate-400">
+        <li
+          key={field}
+          className="break-words text-xs text-slate-500 dark:text-slate-400"
+        >
           <span className="font-medium text-slate-700 dark:text-slate-200">
             {field.replace(/_/g, " ")}:
           </span>{" "}
@@ -177,7 +180,9 @@ export default function AuditPage() {
                   )}
                 </Td>
                 <Td>
-                  <Changes entry={e} />
+                  <div className="max-w-md">
+                    <Changes entry={e} />
+                  </div>
                 </Td>
               </tr>
             ))}
