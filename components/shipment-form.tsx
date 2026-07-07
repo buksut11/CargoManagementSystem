@@ -15,6 +15,43 @@ import {
   Textarea,
 } from "@/components/ui";
 
+// Re-encode an uploaded image so its EXIF orientation is baked into the
+// pixels (phones store portrait photos rotated with an orientation flag,
+// which not every viewer honours) and downscale very large photos. Returns
+// a normalized JPEG blob, or the original file if anything goes wrong so an
+// upload never fails just because of this.
+async function normalizeImage(file: File): Promise<Blob> {
+  const MAX_DIMENSION = 2000;
+  try {
+    if (typeof createImageBitmap !== "function") return file;
+    const bitmap = await createImageBitmap(file, {
+      imageOrientation: "from-image",
+    });
+    const scale = Math.min(
+      1,
+      MAX_DIMENSION / Math.max(bitmap.width, bitmap.height),
+    );
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      bitmap.close();
+      return file;
+    }
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.9),
+    );
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
 export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   const router = useRouter();
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -68,11 +105,16 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     }
     setUploading(true);
     setError(null);
-    const ext = file.name.split(".").pop() ?? "jpg";
+    const normalized = await normalizeImage(file);
+    // normalizeImage re-encodes to JPEG; fall back to the file's own type
+    // and extension when it returned the original untouched.
+    const isJpeg = normalized !== file;
+    const contentType = isJpeg ? "image/jpeg" : file.type;
+    const ext = isJpeg ? "jpg" : (file.name.split(".").pop() ?? "jpg");
     const path = `${shipment?.id ?? "new"}/${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("shipment-attachments")
-      .upload(path, file, { upsert: true });
+      .upload(path, normalized, { upsert: true, contentType });
     if (uploadError) {
       setUploading(false);
       setError(uploadError.message);
