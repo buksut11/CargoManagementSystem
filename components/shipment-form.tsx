@@ -225,48 +225,113 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             placeholder="e.g. fragile — handle with care"
           />
         </Field>
-        <Field
-          label="Attachment image (optional)"
-          hint="A photo of the parcel or receipt. Agents can view it but not change it."
-        >
-          {attachmentUrl && (
-            // Stop clicks inside the preview from bubbling to the surrounding
-            // <label>, which would otherwise activate the first labelable
-            // control (the Remove button) and clear the image unexpectedly.
-            <div
-              className="relative mb-2"
-              onClick={(e) => e.stopPropagation()}
-            >
+        {/*
+          This section is deliberately NOT wrapped in the <label>-based Field
+          component. A <label> forwards clicks on any of its non-interactive
+          children (like the image preview) to its first labelable control,
+          which would activate the Remove button and clear the image. Here the
+          only element tied to the file input is the explicit upload trigger,
+          so clicking the preview does nothing unexpected.
+        */}
+        <div className="min-w-0">
+          <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+            Attachment image{" "}
+            <span className="font-normal text-slate-400 dark:text-slate-500">
+              (optional)
+            </span>
+          </span>
+
+          {/* Hidden native input, driven by the styled triggers below. */}
+          <input
+            id="attachment-file"
+            type="file"
+            accept="image/*"
+            onChange={uploadImage}
+            disabled={uploading}
+            className="sr-only"
+          />
+
+          {attachmentUrl ? (
+            <figure className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/50">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentUrl}
                 alt="Shipment attachment"
                 style={{ imageOrientation: "none" }}
-                className="max-h-64 max-w-full rounded-lg border border-slate-200 dark:border-slate-700"
+                className="mx-auto block max-h-72 w-full object-contain"
               />
-              <button
-                type="button"
-                onClick={() => setAttachmentUrl("")}
-                className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-lg bg-slate-900/70 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-red-600"
-              >
-                <span aria-hidden>✕</span>
-                Remove
-              </button>
-            </div>
+              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-slate-900/70 via-slate-900/30 to-transparent px-3 py-2.5">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white/90">
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="h-4 w-4 text-emerald-400"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.3 3.29 6.8-6.8a1 1 0 0 1 1.4 0Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Attached
+                </span>
+                <div className="pointer-events-auto flex items-center gap-2">
+                  <label
+                    htmlFor="attachment-file"
+                    className={`inline-flex cursor-pointer items-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25 ${
+                      uploading ? "pointer-events-none opacity-60" : ""
+                    }`}
+                  >
+                    Replace
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setAttachmentUrl("")}
+                    disabled={uploading}
+                    className="inline-flex items-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-red-600 disabled:opacity-60"
+                  >
+                    <span aria-hidden>✕</span>
+                    Remove
+                  </button>
+                </div>
+              </figcaption>
+            </figure>
+          ) : (
+            <label
+              htmlFor="attachment-file"
+              className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/30 px-6 py-8 text-center transition-colors hover:border-orange-400 hover:bg-orange-50/50 dark:hover:border-orange-500 dark:hover:bg-orange-500/5 ${
+                uploading ? "pointer-events-none opacity-60" : ""
+              }`}
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400">
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M12 16V4m0 0L8 8m4-4 4 4" />
+                  <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                </svg>
+              </span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {uploading ? "Uploading…" : "Click to upload an image"}
+              </span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                PNG or JPG · a photo of the parcel or receipt
+              </span>
+            </label>
           )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={uploadImage}
-            disabled={uploading}
-            className="block w-full text-sm text-slate-600 dark:text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-orange-700 disabled:opacity-50"
-          />
-          {uploading && (
-            <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-              Uploading…
-            </span>
-          )}
-        </Field>
+
+          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+            Agents can view it but not change it.
+          </p>
+        </div>
         <ErrorNote message={error} />
         <div className="flex flex-col gap-3 pt-2 sm:flex-row">
           <Button
