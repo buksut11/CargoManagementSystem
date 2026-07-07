@@ -94,6 +94,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
                 <img
                   src={shipment.attachment_url}
                   alt="Shipment attachment"
+                  style={{ imageOrientation: "none" }}
                   className="max-h-64 rounded-lg border border-slate-200 dark:border-slate-700 object-contain"
                 />
               </a>
