@@ -173,18 +173,34 @@ export default function EditShipmentPage() {
         else setNotFound(true);
         return;
       }
-      // Agents read the price-masking view (total / rate_per_kg come back
-      // NULL) and we attach destination + invoice info client-side.
-      const { data } = await supabase
+      // Agents read the price-masking view; if the 0011 migration hasn't been
+      // run yet the view won't exist, so fall back to the base table and strip
+      // prices client-side. Either way the agent still sees the item, bill-to /
+      // phone / address and can update status + notes.
+      const viewRes = await supabase
         .from("shipments_view")
         .select("*")
         .eq("id", Number(id))
         .single();
-      if (!data) {
+      let row = viewRes.data as Shipment | null;
+      if (viewRes.error) {
+        const fb = await supabase
+          .from("shipments")
+          .select("*")
+          .eq("id", Number(id))
+          .single();
+        row = fb.data
+          ? {
+              ...(fb.data as Shipment),
+              total: null as unknown as number,
+              rate_per_kg: null,
+            }
+          : null;
+      }
+      if (!row) {
         setNotFound(true);
         return;
       }
-      const row = data as Shipment;
       const [dest, inv] = await Promise.all([
         row.destination_id
           ? supabase

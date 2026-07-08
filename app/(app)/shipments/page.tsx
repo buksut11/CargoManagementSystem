@@ -51,8 +51,10 @@ export default function ShipmentsPage() {
           .order("created_at", { ascending: false });
         setShipments((data as Shipment[]) ?? []);
       } else {
-        // Agents read the price-masking view (total / rate_per_kg come back
-        // NULL) and we attach destination + invoice info client-side.
+        // Agents read the price-masking view; if the 0011 migration hasn't
+        // been run yet the view won't exist, so fall back to the base table
+        // and strip prices client-side. Either way the agent still sees the
+        // item, bill-to / phone / address and can update status + notes.
         const [rows, dests, invs] = await Promise.all([
           supabase
             .from("shipments_view")
@@ -61,6 +63,18 @@ export default function ShipmentsPage() {
           supabase.from("destinations").select("id, name, country"),
           supabase.from("invoices").select("id, bill_to, phone, address"),
         ]);
+        let shipRows = (rows.data as Shipment[]) ?? [];
+        if (rows.error) {
+          const fb = await supabase
+            .from("shipments")
+            .select("*")
+            .order("created_at", { ascending: false });
+          shipRows = ((fb.data as Shipment[]) ?? []).map((s) => ({
+            ...s,
+            total: null as unknown as number,
+            rate_per_kg: null,
+          }));
+        }
         const dmap = new Map(
           ((dests.data as Destination[]) ?? []).map((d) => [d.id, d]),
         );
@@ -68,7 +82,7 @@ export default function ShipmentsPage() {
           ((invs.data as Invoice[]) ?? []).map((i) => [i.id, i]),
         );
         setShipments(
-          ((rows.data as Shipment[]) ?? []).map((s) => ({
+          shipRows.map((s) => ({
             ...s,
             destinations: s.destination_id
               ? dmap.get(s.destination_id) ?? null
