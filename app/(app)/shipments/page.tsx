@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
@@ -74,17 +74,19 @@ export default function ShipmentsPage() {
     ]);
   }
 
-  const q = query.trim().toLowerCase();
-  const filtered = shipments.filter((s) => {
-    if (statusFilter && s.status !== statusFilter) return false;
-    if (!q) return true;
-    return (
-      s.description.toLowerCase().includes(q) ||
-      (s.destinations?.name ?? "").toLowerCase().includes(q) ||
-      (s.invoices?.bill_to ?? "").toLowerCase().includes(q) ||
-      shipmentRef(s.id).toLowerCase().includes(q)
-    );
-  });
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return shipments.filter((s) => {
+      if (statusFilter && s.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        s.description.toLowerCase().includes(q) ||
+        (s.destinations?.name ?? "").toLowerCase().includes(q) ||
+        (s.invoices?.bill_to ?? "").toLowerCase().includes(q) ||
+        shipmentRef(s.id).toLowerCase().includes(q)
+      );
+    });
+  }, [shipments, query, statusFilter]);
 
   return (
     <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { Invoice, Payment, Shipment } from "@/lib/types";
@@ -27,8 +27,8 @@ export default function InvoicesPage() {
           .from("invoices")
           .select("*")
           .order("created_at", { ascending: false }),
-        supabase.from("shipments").select("*"),
-        supabase.from("payments").select("*"),
+        supabase.from("shipments").select("id, total, invoice_id"),
+        supabase.from("payments").select("id, invoice_id, amount"),
       ]);
       setInvoices((i.data as Invoice[]) ?? []);
       setShipments((s.data as Shipment[]) ?? []);
@@ -38,13 +38,28 @@ export default function InvoicesPage() {
     load();
   }, []);
 
+  // Roll up shipment totals and payments per invoice in a single pass each,
+  // then look them up by id — avoids re-scanning every shipment and payment
+  // for every invoice row on every render (was O(invoices × rows)).
+  const totalsByInvoice = useMemo(() => {
+    const totals = new Map<number, number>();
+    for (const s of shipments) {
+      if (s.invoice_id == null) continue;
+      totals.set(s.invoice_id, (totals.get(s.invoice_id) ?? 0) + Number(s.total));
+    }
+    const paidByInvoice = new Map<number, number>();
+    for (const p of payments) {
+      paidByInvoice.set(
+        p.invoice_id,
+        (paidByInvoice.get(p.invoice_id) ?? 0) + Number(p.amount),
+      );
+    }
+    return { totals, paidByInvoice };
+  }, [shipments, payments]);
+
   function totals(inv: Invoice) {
-    const total = shipments
-      .filter((s) => s.invoice_id === inv.id)
-      .reduce((sum, s) => sum + Number(s.total), 0);
-    const paid = payments
-      .filter((p) => p.invoice_id === inv.id)
-      .reduce((sum, p) => sum + Number(p.amount), 0);
+    const total = totalsByInvoice.totals.get(inv.id) ?? 0;
+    const paid = totalsByInvoice.paidByInvoice.get(inv.id) ?? 0;
     return { total, paid, balance: total - paid };
   }
 

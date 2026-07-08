@@ -48,9 +48,10 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       const [s, p, e] = await Promise.all([
+        // The dashboard doesn't render destination names, so skip that join.
         supabase
           .from("shipments")
-          .select("*, destinations(id, name, country)")
+          .select("*")
           .order("created_at", { ascending: false }),
         supabase.from("payments").select("*"),
         supabase.from("expenses").select("*"),
