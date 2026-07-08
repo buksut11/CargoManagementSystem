@@ -4,12 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type {
-  Destination,
-  Invoice,
-  Shipment,
-  ShipmentStatus,
-} from "@/lib/types";
+import type { Shipment, ShipmentStatus } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
@@ -40,61 +35,20 @@ export default function ShipmentsPage() {
   const [statusFilter, setStatusFilter] = useState<"" | ShipmentStatus>("");
 
   useEffect(() => {
-    async function load() {
-      if (isAdmin) {
-        // Admins read the base table directly (prices included) — unchanged.
-        const { data } = await supabase
-          .from("shipments")
-          .select(
-            "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
-          )
-          .order("created_at", { ascending: false });
+    // Both admins and agents read the shipments (with destination + invoice
+    // info). Agents can see the details but the database still lets them
+    // change only the status and notes.
+    supabase
+      .from("shipments")
+      .select(
+        "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
+      )
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
         setShipments((data as Shipment[]) ?? []);
-      } else {
-        // Agents read the price-masking view; if the 0011 migration hasn't
-        // been run yet the view won't exist, so fall back to the base table
-        // and strip prices client-side. Either way the agent still sees the
-        // item, bill-to / phone / address and can update status + notes.
-        const [rows, dests, invs] = await Promise.all([
-          supabase
-            .from("shipments_view")
-            .select("*")
-            .order("created_at", { ascending: false }),
-          supabase.from("destinations").select("id, name, country"),
-          supabase.from("invoices").select("id, bill_to, phone, address"),
-        ]);
-        let shipRows = (rows.data as Shipment[]) ?? [];
-        if (rows.error) {
-          const fb = await supabase
-            .from("shipments")
-            .select("*")
-            .order("created_at", { ascending: false });
-          shipRows = ((fb.data as Shipment[]) ?? []).map((s) => ({
-            ...s,
-            total: null as unknown as number,
-            rate_per_kg: null,
-          }));
-        }
-        const dmap = new Map(
-          ((dests.data as Destination[]) ?? []).map((d) => [d.id, d]),
-        );
-        const imap = new Map(
-          ((invs.data as Invoice[]) ?? []).map((i) => [i.id, i]),
-        );
-        setShipments(
-          shipRows.map((s) => ({
-            ...s,
-            destinations: s.destination_id
-              ? dmap.get(s.destination_id) ?? null
-              : null,
-            invoices: s.invoice_id ? imap.get(s.invoice_id) ?? null : null,
-          })),
-        );
-      }
-      setLoading(false);
-    }
-    load();
-  }, [isAdmin]);
+        setLoading(false);
+      });
+  }, []);
 
   function exportCsv() {
     downloadCsv("shipments.csv", [
@@ -203,11 +157,9 @@ export default function ShipmentsPage() {
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                 {s.destinations?.name && <span>📍 {s.destinations.name}</span>}
                 <span>{fmtKg(Number(s.weight_kg))}</span>
-                {isAdmin && (
-                  <span className="font-semibold text-slate-900 dark:text-slate-100">
-                    {fmtMoney(Number(s.total))}
-                  </span>
-                )}
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
+                  {fmtMoney(Number(s.total))}
+                </span>
                 {isAdmin && (
                   <span>
                     {s.invoice_id ? invoiceRef(s.invoice_id) : "not invoiced"}
@@ -227,7 +179,7 @@ export default function ShipmentsPage() {
               <Th>Description</Th>
               <Th>Destination</Th>
               <Th>Weight</Th>
-              {isAdmin && <Th>Total</Th>}
+              <Th>Total</Th>
               <Th>Status</Th>
               {isAdmin && <Th>Invoice</Th>}
               {!isAdmin && <Th>Bill to</Th>}
@@ -250,11 +202,9 @@ export default function ShipmentsPage() {
                 <Td className="whitespace-nowrap">
                   {fmtKg(Number(s.weight_kg))}
                 </Td>
-                {isAdmin && (
-                  <Td className="whitespace-nowrap">
-                    {fmtMoney(Number(s.total))}
-                  </Td>
-                )}
+                <Td className="whitespace-nowrap">
+                  {fmtMoney(Number(s.total))}
+                </Td>
                 <Td>
                   <Badge className={STATUS_CLASS[s.status]}>
                     {STATUS_LABEL[s.status]}

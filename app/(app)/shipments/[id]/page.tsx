@@ -7,6 +7,7 @@ import type { Shipment, ShipmentStatus } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
+  fmtMoney,
   invoiceRef,
   shipmentRef,
   STATUS_CLASS,
@@ -57,6 +58,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     ["Address", shipment.invoices?.address || "—"],
     ["Destination", shipment.destinations?.name ?? "—"],
     ["Weight", fmtKg(Number(shipment.weight_kg))],
+    ["Total price", fmtMoney(Number(shipment.total))],
     ["Ship date", fmtDate(shipment.ship_date)],
   ];
 
@@ -159,69 +161,19 @@ export default function EditShipmentPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    // Both admins and agents read the shipment (with destination + invoice
+    // info). Agents can view the details but the database still lets them
+    // change only the status and notes.
     async function load() {
-      if (role === "admin") {
-        // Admins read the base table directly (prices included) — unchanged.
-        const { data } = await supabase
-          .from("shipments")
-          .select(
-            "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
-          )
-          .eq("id", Number(id))
-          .single();
-        if (data) setShipment(data as Shipment);
-        else setNotFound(true);
-        return;
-      }
-      // Agents read the price-masking view; if the 0011 migration hasn't been
-      // run yet the view won't exist, so fall back to the base table and strip
-      // prices client-side. Either way the agent still sees the item, bill-to /
-      // phone / address and can update status + notes.
-      const viewRes = await supabase
-        .from("shipments_view")
-        .select("*")
+      const { data } = await supabase
+        .from("shipments")
+        .select(
+          "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
+        )
         .eq("id", Number(id))
         .single();
-      let row = viewRes.data as Shipment | null;
-      if (viewRes.error) {
-        const fb = await supabase
-          .from("shipments")
-          .select("*")
-          .eq("id", Number(id))
-          .single();
-        row = fb.data
-          ? {
-              ...(fb.data as Shipment),
-              total: null as unknown as number,
-              rate_per_kg: null,
-            }
-          : null;
-      }
-      if (!row) {
-        setNotFound(true);
-        return;
-      }
-      const [dest, inv] = await Promise.all([
-        row.destination_id
-          ? supabase
-              .from("destinations")
-              .select("id, name, country")
-              .eq("id", row.destination_id)
-              .single()
-          : Promise.resolve({ data: null }),
-        row.invoice_id
-          ? supabase
-              .from("invoices")
-              .select("id, bill_to, phone, address")
-              .eq("id", row.invoice_id)
-              .single()
-          : Promise.resolve({ data: null }),
-      ]);
-      setShipment({
-        ...row,
-        destinations: (dest.data as Shipment["destinations"]) ?? null,
-        invoices: (inv.data as Shipment["invoices"]) ?? null,
-      });
+      if (data) setShipment(data as Shipment);
+      else setNotFound(true);
     }
     load();
   }, [id, role]);
