@@ -6,6 +6,7 @@ import type { Destination } from "@/lib/types";
 import {
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   ErrorNote,
   Input,
@@ -21,6 +22,8 @@ export default function DestinationsPage() {
   const [country, setCountry] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<Destination | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
@@ -63,19 +66,17 @@ export default function DestinationsPage() {
     reload();
   }
 
-  async function remove(d: Destination) {
-    if (
-      !confirm(
-        `Delete "${d.name}"? Shipments using it will show no destination.`,
-      )
-    )
-      return;
+  async function confirmRemove() {
+    if (!pending) return;
+    setDeleting(true);
     const { error } = await supabase
       .from("destinations")
       .delete()
-      .eq("id", d.id);
+      .eq("id", pending.id);
+    setDeleting(false);
     if (error) setError(error.message);
     else reload();
+    setPending(null);
   }
 
   return (
@@ -128,7 +129,7 @@ export default function DestinationsPage() {
                 <Td>{d.country ?? "—"}</Td>
                 <Td className="text-right">
                   <button
-                    onClick={() => remove(d)}
+                    onClick={() => setPending(d)}
                     className="text-sm text-red-600 dark:text-red-400 hover:underline"
                   >
                     Delete
@@ -142,6 +143,19 @@ export default function DestinationsPage() {
           <EmptyState message="No destinations yet — add the places you ship to." />
         )}
       </Card>
+
+      <ConfirmDialog
+        open={!!pending}
+        title="Delete destination?"
+        message={
+          pending
+            ? `Delete "${pending.name}"? Shipments using it will show no destination.`
+            : undefined
+        }
+        busy={deleting}
+        onConfirm={confirmRemove}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   ErrorNote,
   Field,
   PageHeader,
@@ -159,6 +160,8 @@ export default function EditShipmentPage() {
   const role = useRole();
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     // Both admins and agents read the shipment (with destination + invoice
@@ -178,10 +181,9 @@ export default function EditShipmentPage() {
     load();
   }, [id, role]);
 
-  async function remove() {
+  async function confirmRemove() {
     if (!shipment) return;
-    if (!confirm(`Delete ${shipmentRef(shipment.id)}? This cannot be undone.`))
-      return;
+    setDeleting(true);
     await supabase.from("shipments").delete().eq("id", shipment.id);
     router.push("/shipments");
   }
@@ -209,11 +211,19 @@ export default function EditShipmentPage() {
             >
               🖨 Print receipt
             </Link>
-            <Button variant="danger" onClick={remove}>
+            <Button variant="danger" onClick={() => setConfirmOpen(true)}>
               Delete
             </Button>
           </div>
         }
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        title={`Delete ${shipmentRef(shipment.id)}?`}
+        message="This permanently removes the shipment. This cannot be undone."
+        busy={deleting}
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmOpen(false)}
       />
       {shipment.invoice_id && (
         <p className="mb-4 max-w-xl rounded-lg border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 px-3 py-2 text-sm text-blue-800 dark:text-blue-300">

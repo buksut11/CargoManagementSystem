@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Expense, Shipment } from "@/lib/types";
 import { fmtDate, fmtMoney, modeLabel } from "@/lib/format";
-import { Button, Card, ErrorNote, Field, Input } from "@/components/ui";
+import {
+  Button,
+  Card,
+  ConfirmDialog,
+  ErrorNote,
+  Field,
+  Input,
+} from "@/components/ui";
 import { TransportSelect } from "@/components/transport-select";
 
 // Delivery costs for one shipment, plus the resulting net profit
@@ -17,6 +24,8 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<Expense | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
@@ -58,11 +67,17 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
     reload();
   }
 
-  async function remove(exp: Expense) {
-    if (!confirm(`Delete this ${fmtMoney(Number(exp.amount))} expense?`)) return;
-    const { error } = await supabase.from("expenses").delete().eq("id", exp.id);
+  async function confirmRemove() {
+    if (!pending) return;
+    setDeleting(true);
+    const { error } = await supabase
+      .from("expenses")
+      .delete()
+      .eq("id", pending.id);
+    setDeleting(false);
     if (error) setError(error.message);
     else reload();
+    setPending(null);
   }
 
   const income = Number(shipment.total);
@@ -111,7 +126,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
               <span className="font-medium">{fmtMoney(Number(exp.amount))}</span>
               <button
                 type="button"
-                onClick={() => remove(exp)}
+                onClick={() => setPending(exp)}
                 className="text-xs text-red-600 hover:underline dark:text-red-400"
               >
                 Delete
@@ -158,6 +173,21 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
           {busy ? "Adding…" : "+ Add expense"}
         </Button>
       </form>
+
+      <ConfirmDialog
+        open={!!pending}
+        title="Delete expense?"
+        message={
+          pending
+            ? `This removes the ${fmtMoney(
+                Number(pending.amount),
+              )} expense. This cannot be undone.`
+            : undefined
+        }
+        busy={deleting}
+        onConfirm={confirmRemove}
+        onCancel={() => setPending(null)}
+      />
     </Card>
   );
 }

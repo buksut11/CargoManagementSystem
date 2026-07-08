@@ -16,6 +16,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   ErrorNote,
   Field,
   Input,
@@ -42,6 +43,9 @@ export default function InvoiceDetailPage() {
   );
   const [method, setMethod] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingPayment, setPendingPayment] = useState<Payment | null>(null);
+  const [confirmInvoiceOpen, setConfirmInvoiceOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
@@ -101,25 +105,26 @@ export default function InvoiceDetailPage() {
     reload();
   }
 
-  async function removePayment(p: Payment) {
-    if (!confirm(`Delete payment of ${fmtMoney(Number(p.amount))}?`)) return;
-    await supabase.from("payments").delete().eq("id", p.id);
+  async function confirmRemovePayment() {
+    if (!pendingPayment) return;
+    setDeleting(true);
+    await supabase.from("payments").delete().eq("id", pendingPayment.id);
+    setDeleting(false);
+    setPendingPayment(null);
     reload();
   }
 
-  async function removeInvoice() {
-    if (
-      !confirm(
-        `Delete ${invoiceRef(invoiceId)}? Its payments will be deleted and its shipments become uninvoiced again.`,
-      )
-    )
-      return;
+  async function confirmRemoveInvoice() {
+    setDeleting(true);
     const { error } = await supabase
       .from("invoices")
       .delete()
       .eq("id", invoiceId);
-    if (error) setError(error.message);
-    else router.push("/invoices");
+    setDeleting(false);
+    if (error) {
+      setError(error.message);
+      setConfirmInvoiceOpen(false);
+    } else router.push("/invoices");
   }
 
   if (notFound)
@@ -138,7 +143,7 @@ export default function InvoiceDetailPage() {
             >
               🖨 Print
             </Link>
-            <Button variant="danger" onClick={removeInvoice}>
+            <Button variant="danger" onClick={() => setConfirmInvoiceOpen(true)}>
               Delete
             </Button>
           </div>
@@ -279,7 +284,7 @@ export default function InvoiceDetailPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => removePayment(p)}
+                    onClick={() => setPendingPayment(p)}
                     className="text-sm text-red-600 dark:text-red-400 hover:underline"
                   >
                     Delete
@@ -311,7 +316,7 @@ export default function InvoiceDetailPage() {
                     <Td>{p.method ?? "—"}</Td>
                     <Td className="text-right">
                       <button
-                        onClick={() => removePayment(p)}
+                        onClick={() => setPendingPayment(p)}
                         className="text-sm text-red-600 dark:text-red-400 hover:underline"
                       >
                         Delete
@@ -378,6 +383,29 @@ export default function InvoiceDetailPage() {
           </Card>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!pendingPayment}
+        title="Delete payment?"
+        message={
+          pendingPayment
+            ? `This removes the ${fmtMoney(
+                Number(pendingPayment.amount),
+              )} payment. This cannot be undone.`
+            : undefined
+        }
+        busy={deleting}
+        onConfirm={confirmRemovePayment}
+        onCancel={() => setPendingPayment(null)}
+      />
+      <ConfirmDialog
+        open={confirmInvoiceOpen}
+        title={`Delete ${invoiceRef(invoiceId)}?`}
+        message="Its payments will be deleted and its shipments become uninvoiced again. This cannot be undone."
+        busy={deleting}
+        onConfirm={confirmRemoveInvoice}
+        onCancel={() => setConfirmInvoiceOpen(false)}
+      />
     </div>
   );
 }

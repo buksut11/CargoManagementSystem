@@ -9,6 +9,7 @@ import { TransportSelect } from "@/components/transport-select";
 import {
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   ErrorNote,
   Field,
@@ -31,6 +32,8 @@ export default function ExpensesPage() {
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<Expense | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
@@ -81,11 +84,17 @@ export default function ExpensesPage() {
     reload();
   }
 
-  async function remove(exp: Expense) {
-    if (!confirm(`Delete this ${fmtMoney(Number(exp.amount))} expense?`)) return;
-    const { error } = await supabase.from("expenses").delete().eq("id", exp.id);
+  async function confirmRemove() {
+    if (!pending) return;
+    setDeleting(true);
+    const { error } = await supabase
+      .from("expenses")
+      .delete()
+      .eq("id", pending.id);
+    setDeleting(false);
     if (error) setError(error.message);
     else reload();
+    setPending(null);
   }
 
   const expensesByShipment = new Map<number, number>();
@@ -208,7 +217,7 @@ export default function ExpensesPage() {
                 {exp.description && <span>{exp.description}</span>}
                 <span>{fmtDate(exp.expense_date)}</span>
                 <button
-                  onClick={() => remove(exp)}
+                  onClick={() => setPending(exp)}
                   className="ml-auto text-red-600 hover:underline dark:text-red-400"
                 >
                   Delete
@@ -252,7 +261,7 @@ export default function ExpensesPage() {
                 </Td>
                 <Td className="text-right">
                   <button
-                    onClick={() => remove(exp)}
+                    onClick={() => setPending(exp)}
                     className="text-sm text-red-600 hover:underline dark:text-red-400"
                   >
                     Delete
@@ -356,6 +365,21 @@ export default function ExpensesPage() {
           <EmptyState message="No shipments yet — profit per shipment will appear here." />
         )}
       </Card>
+
+      <ConfirmDialog
+        open={!!pending}
+        title="Delete expense?"
+        message={
+          pending
+            ? `This removes the ${fmtMoney(
+                Number(pending.amount),
+              )} expense. This cannot be undone.`
+            : undefined
+        }
+        busy={deleting}
+        onConfirm={confirmRemove}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }
