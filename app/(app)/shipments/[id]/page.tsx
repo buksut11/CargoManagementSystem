@@ -159,18 +159,56 @@ export default function EditShipmentPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from("shipments")
-      .select(
-        "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
-      )
-      .eq("id", Number(id))
-      .single()
-      .then(({ data }) => {
+    async function load() {
+      if (role === "admin") {
+        // Admins read the base table directly (prices included) — unchanged.
+        const { data } = await supabase
+          .from("shipments")
+          .select(
+            "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
+          )
+          .eq("id", Number(id))
+          .single();
         if (data) setShipment(data as Shipment);
         else setNotFound(true);
+        return;
+      }
+      // Agents read the price-masking view (total / rate_per_kg come back
+      // NULL) and we attach destination + invoice info client-side.
+      const { data } = await supabase
+        .from("shipments_view")
+        .select("*")
+        .eq("id", Number(id))
+        .single();
+      if (!data) {
+        setNotFound(true);
+        return;
+      }
+      const row = data as Shipment;
+      const [dest, inv] = await Promise.all([
+        row.destination_id
+          ? supabase
+              .from("destinations")
+              .select("id, name, country")
+              .eq("id", row.destination_id)
+              .single()
+          : Promise.resolve({ data: null }),
+        row.invoice_id
+          ? supabase
+              .from("invoices")
+              .select("id, bill_to, phone, address")
+              .eq("id", row.invoice_id)
+              .single()
+          : Promise.resolve({ data: null }),
+      ]);
+      setShipment({
+        ...row,
+        destinations: (dest.data as Shipment["destinations"]) ?? null,
+        invoices: (inv.data as Shipment["invoices"]) ?? null,
       });
-  }, [id]);
+    }
+    load();
+  }, [id, role]);
 
   async function remove() {
     if (!shipment) return;

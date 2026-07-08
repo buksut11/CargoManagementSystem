@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type { Shipment, ShipmentStatus } from "@/lib/types";
+import type {
+  Destination,
+  Invoice,
+  Shipment,
+  ShipmentStatus,
+} from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
@@ -35,17 +40,47 @@ export default function ShipmentsPage() {
   const [statusFilter, setStatusFilter] = useState<"" | ShipmentStatus>("");
 
   useEffect(() => {
-    supabase
-      .from("shipments")
-      .select(
-        "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
-      )
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
+    async function load() {
+      if (isAdmin) {
+        // Admins read the base table directly (prices included) — unchanged.
+        const { data } = await supabase
+          .from("shipments")
+          .select(
+            "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
+          )
+          .order("created_at", { ascending: false });
         setShipments((data as Shipment[]) ?? []);
-        setLoading(false);
-      });
-  }, []);
+      } else {
+        // Agents read the price-masking view (total / rate_per_kg come back
+        // NULL) and we attach destination + invoice info client-side.
+        const [rows, dests, invs] = await Promise.all([
+          supabase
+            .from("shipments_view")
+            .select("*")
+            .order("created_at", { ascending: false }),
+          supabase.from("destinations").select("id, name, country"),
+          supabase.from("invoices").select("id, bill_to, phone, address"),
+        ]);
+        const dmap = new Map(
+          ((dests.data as Destination[]) ?? []).map((d) => [d.id, d]),
+        );
+        const imap = new Map(
+          ((invs.data as Invoice[]) ?? []).map((i) => [i.id, i]),
+        );
+        setShipments(
+          ((rows.data as Shipment[]) ?? []).map((s) => ({
+            ...s,
+            destinations: s.destination_id
+              ? dmap.get(s.destination_id) ?? null
+              : null,
+            invoices: s.invoice_id ? imap.get(s.invoice_id) ?? null : null,
+          })),
+        );
+      }
+      setLoading(false);
+    }
+    load();
+  }, [isAdmin]);
 
   function exportCsv() {
     downloadCsv("shipments.csv", [
