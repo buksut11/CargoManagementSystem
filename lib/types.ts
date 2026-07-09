@@ -2,6 +2,29 @@ export type ShipmentStatus = "pending" | "shipped" | "delivered";
 
 export type UserRole = "admin" | "agent";
 
+// Per-organization role, stored in public.memberships. "owner" and "admin"
+// both have full write access; "owner" additionally owns billing/org lifecycle.
+export type OrgRole = "owner" | "admin" | "agent";
+
+export type Organization = {
+  id: string;
+  name: string;
+  slug: string | null;
+  plan: string;
+  subscription_status: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  created_at: string;
+};
+
+export type Membership = {
+  id: string;
+  org_id: string;
+  user_id: string;
+  role: OrgRole;
+  created_at: string;
+};
+
 export type Profile = {
   id: string;
   email: string | null;

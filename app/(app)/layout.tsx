@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { UserRole } from "@/lib/types";
+import type { OrgRole, UserRole } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { RoleProvider } from "@/components/role-context";
+import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
 
@@ -40,6 +41,9 @@ const ADMIN_NAV = [
 
 const AGENT_NAV = [{ href: "/shipments", label: "Shipments", icon: BoxIcon }];
 
+// Remembers which organization the user last acted in (for multi-org accounts).
+const ACTIVE_ORG_KEY = "cargobook:activeOrg";
+
 // Agents may only see the shipment list and individual shipments.
 function agentAllowed(path: string) {
   return path === "/shipments" || /^\/shipments\/\d+$/.test(path);
@@ -52,11 +56,13 @@ const itemIdle =
 
 function SidebarContent({
   role,
+  orgName,
   pathname,
   onNavigate,
   onSignOut,
 }: {
   role: UserRole;
+  orgName: string;
   pathname: string;
   onNavigate?: () => void;
   onSignOut: () => void;
@@ -69,11 +75,11 @@ function SidebarContent({
           <Logo3D size={38} />
         </div>
         <div className="min-w-0">
-          <div className="text-base font-bold text-slate-900 dark:text-white">
-            CargoBook
+          <div className="truncate text-base font-bold text-slate-900 dark:text-white">
+            {orgName}
           </div>
           <div className="text-xs capitalize text-slate-500 dark:text-slate-400">
-            {role}
+            CargoBook · {role}
           </div>
         </div>
       </div>
@@ -116,28 +122,83 @@ export default function AppLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
   const pathname = usePathname();
-  const [role, setRole] = useState<UserRole | null>(null);
+  const [resolved, setResolved] = useState<{
+    uiRole: UserRole;
+    org: OrgContextValue;
+  } | null>(null);
+  const [noOrg, setNoOrg] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const role = resolved?.uiRole ?? null;
 
   useEffect(() => {
     let active = true;
     async function load() {
       const { data } = await supabase.auth.getSession();
       if (!active) return;
-      if (!data.session) {
+      const session = data.session;
+      if (!session) {
         router.replace("/login");
         return;
       }
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.session.user.id)
-        .single();
+
+      // Resolve the organizations this user belongs to, via their memberships.
+      const { data: rows, error } = await supabase
+        .from("memberships")
+        .select("org_id, role, organizations(name)")
+        .order("created_at", { ascending: true });
       if (!active) return;
-      // No profile row (migration not applied yet) → assume admin so the
-      // original single-user setup keeps working. The database enforces the
-      // real permissions either way.
-      setRole(profile?.role === "agent" ? "agent" : "admin");
+
+      if (error) {
+        // Database predates the multi-tenant migrations — fall back to the
+        // global profiles.role so the app still works.
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+        if (!active) return;
+        const uiRole: UserRole = profile?.role === "agent" ? "agent" : "admin";
+        setResolved({
+          uiRole,
+          org: { orgId: "", orgName: "CargoBook", role: uiRole },
+        });
+        return;
+      }
+
+      if (!rows || rows.length === 0) {
+        // Signed in but not a member of any organization (invite-only).
+        setNoOrg(true);
+        return;
+      }
+
+      const orgs = rows.map(
+        (m: {
+          org_id: string;
+          role: OrgRole;
+          organizations: { name?: string } | { name?: string }[] | null;
+        }) => {
+          const rel = m.organizations;
+          const name = Array.isArray(rel) ? rel[0]?.name : rel?.name;
+          return { id: m.org_id, name: name ?? "Organization", role: m.role };
+        },
+      );
+
+      let storedId: string | null = null;
+      try {
+        storedId = localStorage.getItem(ACTIVE_ORG_KEY);
+      } catch {
+        // localStorage unavailable — fall through to the first org.
+      }
+      const activeOrg = orgs.find((o) => o.id === storedId) ?? orgs[0];
+      const uiRole: UserRole = activeOrg.role === "agent" ? "agent" : "admin";
+      setResolved({
+        uiRole,
+        org: {
+          orgId: activeOrg.id,
+          orgName: activeOrg.name,
+          role: activeOrg.role,
+        },
+      });
     }
     load();
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -168,7 +229,11 @@ export default function AppLayout({
     router.replace("/login");
   }
 
-  if (!role || (role === "agent" && !agentAllowed(pathname))) {
+  if (noOrg) {
+    return <NoOrgScreen onSignOut={signOut} />;
+  }
+
+  if (!resolved || (role === "agent" && !agentAllowed(pathname))) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-slate-500 dark:text-slate-400">
         Loading…
@@ -177,11 +242,17 @@ export default function AppLayout({
   }
 
   return (
-    <RoleProvider role={role}>
+    <OrgProvider value={resolved.org}>
+    <RoleProvider role={resolved.uiRole}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
         <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-slate-200 bg-white px-4 py-5 dark:border-slate-800 dark:bg-slate-800/60 md:flex">
-          <SidebarContent role={role} pathname={pathname} onSignOut={signOut} />
+          <SidebarContent
+            role={resolved.uiRole}
+            orgName={resolved.org.orgName}
+            pathname={pathname}
+            onSignOut={signOut}
+          />
         </aside>
 
         {/* Mobile drawer */}
@@ -201,7 +272,8 @@ export default function AppLayout({
                 <CloseIcon />
               </button>
               <SidebarContent
-                role={role}
+                role={resolved.uiRole}
+                orgName={resolved.org.orgName}
                 pathname={pathname}
                 onNavigate={() => setMenuOpen(false)}
                 onSignOut={signOut}
@@ -233,5 +305,32 @@ export default function AppLayout({
         </div>
       </div>
     </RoleProvider>
+    </OrgProvider>
+  );
+}
+
+// Signed in, but the account has no organization membership (invite-only).
+function NoOrgScreen({ onSignOut }: { onSignOut: () => void }) {
+  return (
+    <div className="flex min-h-dvh flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
+        <BoxIcon />
+      </div>
+      <div>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+          No organization yet
+        </h1>
+        <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+          Your account isn’t part of any organization. Ask an admin to invite
+          you, then sign in again.
+        </p>
+      </div>
+      <button
+        onClick={onSignOut}
+        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+      >
+        Sign out
+      </button>
+    </div>
   );
 }
