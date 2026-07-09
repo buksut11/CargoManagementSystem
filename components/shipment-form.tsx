@@ -336,41 +336,24 @@ function AttachmentSlot({
             style={{ imageOrientation: "none" }}
             className="mx-auto block h-48 w-full object-contain"
           />
-          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-slate-900/70 via-slate-900/30 to-transparent px-3 py-2.5">
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white/90">
-              <svg
-                aria-hidden
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="h-4 w-4 text-emerald-400"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.3 3.29 6.8-6.8a1 1 0 0 1 1.4 0Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Attached
-            </span>
-            <div className="pointer-events-auto flex items-center gap-2">
-              <label
-                htmlFor={inputId}
-                className={`inline-flex cursor-pointer items-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25 ${
-                  uploading ? "pointer-events-none opacity-60" : ""
-                }`}
-              >
-                Replace
-              </label>
-              <button
-                type="button"
-                onClick={onRemove}
-                disabled={uploading}
-                className="inline-flex items-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-red-600 disabled:opacity-60"
-              >
-                <span aria-hidden>✕</span>
-                Remove
-              </button>
-            </div>
+          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-end gap-2 bg-gradient-to-t from-slate-900/70 via-slate-900/30 to-transparent px-2.5 py-2.5">
+            <label
+              htmlFor={inputId}
+              className={`pointer-events-auto inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25 ${
+                uploading ? "pointer-events-none opacity-60" : ""
+              }`}
+            >
+              Replace
+            </label>
+            <button
+              type="button"
+              onClick={onRemove}
+              disabled={uploading}
+              className="pointer-events-auto inline-flex items-center justify-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-red-600 disabled:opacity-60"
+            >
+              <span aria-hidden>✕</span>
+              Remove
+            </button>
           </figcaption>
         </figure>
       ) : (
