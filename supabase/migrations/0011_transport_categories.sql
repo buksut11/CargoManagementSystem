@@ -2,15 +2,16 @@
 -- option and add "Sahal" and "Porter" (with emoji icons to match the built-ins).
 -- Run this in your Supabase project: Dashboard → SQL Editor → paste → Run.
 
--- Remove the generic catch-all from the dropdown. Any existing expense row
--- that already used it keeps its stored label — it just stops being offered
--- as a new choice.
-delete from public.expense_categories where name = '📦 Other';
+-- Remove the generic catch-all from the dropdown (and an earlier "🧳 Porter"
+-- label if it was already added). Any existing expense row that used one of
+-- these keeps its stored label — it just stops being offered as a new choice.
+delete from public.expense_categories where name in ('📦 Other', '🧳 Porter');
 
--- Add the two new transport types. Idempotent, so re-running is safe.
+-- Add the two new transport types. "Porter" uses a walking-person icon.
+-- Idempotent, so re-running is safe.
 insert into public.expense_categories (name) values
   ('🚌 Sahal'),
-  ('🧳 Porter')
+  ('🚶 Porter')
 on conflict (name) do nothing;
 
 -- The old default pointed at the now-removed "Other"; point it at a type
