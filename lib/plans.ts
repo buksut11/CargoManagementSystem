@@ -18,8 +18,8 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "free",
     name: "Free",
     priceLabel: "$0",
-    maxShipments: 50,
-    features: ["Up to 50 shipments", "Invoices & payments", "1 organization"],
+    maxShipments: Infinity,
+    features: ["Unlimited shipments", "Invoices & payments", "1 organization"],
   },
   pro: {
     id: "pro",
