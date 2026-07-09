@@ -7,6 +7,9 @@
 -- these keeps its stored label — it just stops being offered as a new choice.
 delete from public.expense_categories where name in ('📦 Other', '🧳 Porter');
 
+-- Drop any plain-text "sahal" entry (no emoji) so only "🚌 Sahal" remains.
+delete from public.expense_categories where lower(trim(name)) = 'sahal';
+
 -- Add the two new transport types. "Porter" uses a walking-person icon.
 -- Idempotent, so re-running is safe.
 insert into public.expense_categories (name) values
