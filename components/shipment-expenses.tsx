@@ -169,7 +169,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
           </Field>
         </div>
         <ErrorNote message={error} />
-        <Button type="submit" variant="secondary" disabled={busy}>
+        <Button type="submit" disabled={busy}>
           {busy ? "Adding…" : "+ Add expense"}
         </Button>
       </form>
