@@ -16,7 +16,7 @@ export type Plan = {
 export const PLANS: Record<PlanId, Plan> = {
   free: {
     id: "free",
-    name: "Free",
+    name: "Pro",
     priceLabel: "$0",
     maxShipments: Infinity,
     features: ["Unlimited shipments", "Invoices & payments", "1 organization"],
