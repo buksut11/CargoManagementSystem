@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useOrg } from "@/components/org-context";
 import type { Destination, Shipment, ShipmentStatus } from "@/lib/types";
 import {
   Button,
@@ -17,6 +18,7 @@ import {
 
 export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   const router = useRouter();
+  const org = useOrg();
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [description, setDescription] = useState(shipment?.description ?? "");
   const [destinationId, setDestinationId] = useState(
@@ -69,8 +71,10 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     setUploading(true);
     setError(null);
     // Upload the original image untouched — no re-encoding or rotation.
+    // Path is prefixed with the organization id so storage RLS can scope
+    // writes per-tenant: {org_id}/{shipment}/{timestamp}.{ext}
     const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `${shipment?.id ?? "new"}/${Date.now()}.${ext}`;
+    const path = `${org?.orgId ?? "unknown"}/${shipment?.id ?? "new"}/${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("shipment-attachments")
       .upload(path, file, { upsert: true });

@@ -26,6 +26,8 @@ import {
   LogoutIcon,
   MenuIcon,
   PinIcon,
+  SettingsIcon,
+  UsersIcon,
   WalletIcon,
 } from "@/components/icons";
 
@@ -37,6 +39,8 @@ const ADMIN_NAV = [
   { href: "/expenses", label: "Expenses", icon: WalletIcon },
   { href: "/destinations", label: "Destinations", icon: PinIcon },
   { href: "/audit", label: "Audit trail", icon: ClockIcon },
+  { href: "/members", label: "Members", icon: UsersIcon },
+  { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
 const AGENT_NAV = [{ href: "/shipments", label: "Shipments", icon: BoxIcon }];

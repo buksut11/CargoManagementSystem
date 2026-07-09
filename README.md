@@ -17,11 +17,13 @@ Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.co
 ## One-time setup (~10 minutes)
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free account → New project).
-2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0016_…`).
+2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0017_…`).
 3. **Create your login user:** dashboard → **Authentication → Users → Add user** — enter your email and a password (tick "Auto confirm user").
-4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the two values from dashboard → **Project Settings → API**:
+4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the values from dashboard → **Project Settings → API**:
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the `anon` / `public` key
+   - `SUPABASE_SERVICE_ROLE_KEY` — the `service_role` key (server-only; powers teammate invites). Keep it secret.
+   - Stripe keys are optional — only needed to turn on billing (see `.env.example`).
 
 ## Run it
 
