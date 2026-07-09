@@ -1,0 +1,19 @@
+-- Refresh the transport / expense-type dropdown: drop the generic "Other"
+-- option and add "Sahal" and "Porter" (with emoji icons to match the built-ins).
+-- Run this in your Supabase project: Dashboard → SQL Editor → paste → Run.
+
+-- Remove the generic catch-all from the dropdown. Any existing expense row
+-- that already used it keeps its stored label — it just stops being offered
+-- as a new choice.
+delete from public.expense_categories where name = '📦 Other';
+
+-- Add the two new transport types. Idempotent, so re-running is safe.
+insert into public.expense_categories (name) values
+  ('🚌 Sahal'),
+  ('🧳 Porter')
+on conflict (name) do nothing;
+
+-- The old default pointed at the now-removed "Other"; point it at a type
+-- that still exists. (The dropdown also pre-selects the first option, so this
+-- is just a safety net for direct inserts.)
+alter table public.expenses alter column transport_mode set default '✈️ Airplane';

@@ -101,10 +101,10 @@ RLS policies need to know *which* org the caller is acting as. Approach:
 
 ## 3. Data model changes (migrations)
 
-New migrations, numbered continuing from `0010`. Sketches below are the intent,
-not final SQL.
+New migrations, numbered continuing from `0011` (the transport-category change).
+Sketches below are the intent, not final SQL.
 
-### `0011_organizations.sql`
+### `0012_organizations.sql`
 
 ```sql
 create table public.organizations (
@@ -120,7 +120,7 @@ create table public.organizations (
 );
 ```
 
-### `0012_memberships.sql`
+### `0013_memberships.sql`
 
 ```sql
 create table public.memberships (
@@ -137,7 +137,7 @@ create table public.memberships (
   existing `admin` / `agent`. `admin` and `agent` keep their current meaning,
   now scoped to the org.
 
-### `0013_invitations.sql` (invite-only onboarding)
+### `0014_invitations.sql` (invite-only onboarding)
 
 ```sql
 create table public.invitations (
@@ -153,7 +153,7 @@ create table public.invitations (
 );
 ```
 
-### `0014_add_org_id.sql` (the big one)
+### `0015_add_org_id.sql` (the big one)
 
 - Add `organization_id uuid references public.organizations(id)` to:
   `destinations`, `invoices`, `shipments`, `payments`, `expenses`,
@@ -164,7 +164,7 @@ create table public.invitations (
 - Then set the columns `not null` and add indexes on `organization_id`
   (extends `0010`'s index work).
 
-### `0015_rls_rewrite.sql` (the security boundary)
+### `0016_rls_rewrite.sql` (the security boundary)
 
 - Add helper functions: `current_org_ids()` (all orgs the caller belongs to),
   `is_org_admin(org_id)`, `is_org_member(org_id)`.
@@ -189,7 +189,7 @@ create table public.invitations (
 - Update the audit trigger (`0006`) to stamp `organization_id` on every audit
   row so the trail stays per-tenant.
 
-### `0016_profiles_cleanup.sql`
+### `0017_profiles_cleanup.sql`
 
 - `profiles.role` is superseded by `memberships.role`. Keep `profiles` for
   per-user data (email, display name, active-org preference) but stop using its
@@ -290,7 +290,7 @@ We are **not** building Stripe now. We only make sure nothing blocks it:
 
 ## 7. Phased roadmap (build order)
 
-1. **Phase 1 — Tenancy foundation** (`0011`–`0016`): org + membership +
+1. **Phase 1 — Tenancy foundation** (`0012`–`0017`): org + membership +
    invitations tables, `organization_id` everywhere, backfill existing data
    into one org, RLS rewrite, storage RLS. *No user-visible change; the current
    business keeps working.*
@@ -324,7 +324,7 @@ to happen**, so isolation lands first and is tested before anything is charged.
 
 ## 9. First concrete step when we start building
 
-Phase 1, migration `0011_organizations.sql` + `0012_memberships.sql`, followed
-immediately by `0014_add_org_id.sql` with the backfill so the existing data is
+Phase 1, migration `0012_organizations.sql` + `0013_memberships.sql`, followed
+immediately by `0015_add_org_id.sql` with the backfill so the existing data is
 never left un-tenanted. Nothing user-facing changes until Phase 2, which makes
 Phase 1 safe to ship and verify on its own.
