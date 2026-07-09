@@ -5,17 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { OrgRole, UserRole } from "@/lib/types";
-import dynamic from "next/dynamic";
 import { RoleProvider } from "@/components/role-context";
 import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
-
-// Rotating 3D logo mark — client-only WebGL, lazy-loaded.
-const Logo3D = dynamic(
-  () => import("@/components/logo3d").then((m) => m.Logo3D),
-  { ssr: false },
-);
 import {
   BoxIcon,
   ClockIcon,
@@ -93,11 +86,21 @@ function SidebarContent({
   return (
     <>
       <div className="mb-5 flex items-center gap-3 px-1">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/15 to-orange-600/10 ring-1 ring-orange-500/20">
-          <Logo3D size={38} />
+        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/icc-logo.svg"
+            alt="ICC"
+            width={44}
+            height={44}
+            className="h-full w-full object-cover"
+          />
         </div>
-        <div className="min-w-0">
-          <div className="truncate text-base font-bold text-slate-900 dark:text-white">
+        <div className="min-w-0 flex-1">
+          <div
+            className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 dark:text-white"
+            title={orgName}
+          >
             {orgName}
           </div>
           <div className="text-xs capitalize text-slate-500 dark:text-slate-400">
@@ -114,13 +117,13 @@ function SidebarContent({
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className={`${itemBase} ${
+            className={`group ${itemBase} ${
               active
                 ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300"
                 : itemIdle
             }`}
           >
-            <span className="shrink-0">
+            <span className="shrink-0 transition-transform duration-300 ease-out group-hover:-rotate-12 group-hover:scale-125">
               <Icon />
             </span>
             <span>{item.label}</span>
