@@ -120,18 +120,25 @@ export default function PrintShipmentPage() {
           </p>
         )}
 
-        {shipment.attachment_url && (
+        {(shipment.attachment_url || shipment.attachment_url_2) && (
           <div className="mt-8 border-t border-slate-200 pt-4">
             <div className="mb-2 text-sm font-semibold text-slate-500">
-              Attachment
+              Attachments
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={shipment.attachment_url}
-              alt="Shipment attachment"
-              style={{ imageOrientation: "none" }}
-              className="max-h-64 max-w-full rounded border border-slate-200"
-            />
+            <div className="grid grid-cols-2 gap-3">
+              {[shipment.attachment_url, shipment.attachment_url_2]
+                .filter((url): url is string => !!url)
+                .map((url) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={url}
+                    src={url}
+                    alt="Shipment attachment"
+                    style={{ imageOrientation: "none" }}
+                    className="max-h-64 w-full rounded border border-slate-200 object-contain"
+                  />
+                ))}
+            </div>
           </div>
         )}
 

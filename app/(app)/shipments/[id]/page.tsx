@@ -83,24 +83,31 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
               </div>
             ))}
           </dl>
-          {shipment.attachment_url && (
+          {(shipment.attachment_url || shipment.attachment_url_2) && (
             <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
               <p className="mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-                Attachment
+                Attachments
               </p>
-              <a
-                href={shipment.attachment_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={shipment.attachment_url}
-                  alt="Shipment attachment"
-                  style={{ imageOrientation: "none" }}
-                  className="max-h-64 max-w-full rounded-lg border border-slate-200 dark:border-slate-700"
-                />
-              </a>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[shipment.attachment_url, shipment.attachment_url_2]
+                  .filter((url): url is string => !!url)
+                  .map((url) => (
+                    <a
+                      key={url}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={url}
+                        alt="Shipment attachment"
+                        style={{ imageOrientation: "none" }}
+                        className="max-h-64 w-full rounded-lg border border-slate-200 dark:border-slate-700 object-contain"
+                      />
+                    </a>
+                  ))}
+              </div>
             </div>
           )}
         </Card>
