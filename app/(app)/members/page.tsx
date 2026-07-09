@@ -46,6 +46,7 @@ export default function MembersPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [lastLink, setLastLink] = useState<string | null>(null);
+  const [emailed, setEmailed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<Member | null>(null);
   const [removing, setRemoving] = useState(false);
@@ -110,22 +111,26 @@ export default function MembersPage() {
     setBusy(true);
     setError(null);
     setLastLink(null);
+    setEmailed(false);
     setCopied(false);
-    const token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "");
-    const { data: userData } = await supabase.auth.getUser();
-    const { error: insErr } = await supabase.from("invitations").insert({
-      org_id: orgId,
-      email: email.trim().toLowerCase(),
-      role,
-      token,
-      invited_by: userData.user?.id ?? null,
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    const res = await fetch("/api/invitations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken ?? ""}`,
+      },
+      body: JSON.stringify({ orgId, email: email.trim().toLowerCase(), role }),
     });
+    const data = await res.json();
     setBusy(false);
-    if (insErr) {
-      setError(insErr.message);
+    if (!res.ok || !data.link) {
+      setError(data.error ?? "Could not create the invite.");
       return;
     }
-    setLastLink(`${window.location.origin}/invite/${token}`);
+    setLastLink(data.link);
+    setEmailed(Boolean(data.emailed));
     setEmail("");
     reload();
   }
@@ -205,7 +210,9 @@ export default function MembersPage() {
             {lastLink && (
               <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs dark:border-emerald-500/30 dark:bg-emerald-500/10">
                 <p className="mb-2 font-medium text-emerald-800 dark:text-emerald-300">
-                  Invite link ready — share it with them:
+                  {emailed
+                    ? "Invite emailed — you can also share this link:"
+                    : "Invite link ready — share it with them:"}
                 </p>
                 <div className="flex items-center gap-2">
                   <input
