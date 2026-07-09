@@ -67,3 +67,26 @@ export const STATUS_CLASS: Record<ShipmentStatus, string> = {
   delivered:
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
 };
+
+// Whether an invoice is fully paid, partially paid, or not paid at all — the
+// same three-way rule the invoices page uses, extracted so agents can see it
+// on shipments too.
+export type PaymentState = "paid" | "partial" | "unpaid";
+
+export function paymentState(total: number, paid: number): PaymentState {
+  if (total > 0 && paid >= total) return "paid";
+  if (paid > 0) return "partial";
+  return "unpaid";
+}
+
+export const PAYMENT_LABEL: Record<PaymentState, string> = {
+  paid: "Paid",
+  partial: "Partial",
+  unpaid: "Unpaid",
+};
+
+export const PAYMENT_CLASS: Record<PaymentState, string> = {
+  paid: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
+  partial: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300",
+  unpaid: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
+};

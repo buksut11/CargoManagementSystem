@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { Invoice, Payment, Shipment } from "@/lib/types";
-import { fmtDate, fmtMoney, invoiceRef } from "@/lib/format";
+import {
+  fmtDate,
+  fmtMoney,
+  invoiceRef,
+  PAYMENT_CLASS,
+  PAYMENT_LABEL,
+  paymentState,
+} from "@/lib/format";
 import {
   Badge,
   Card,
@@ -60,7 +67,11 @@ export default function InvoicesPage() {
   function totals(inv: Invoice) {
     const total = totalsByInvoice.totals.get(inv.id) ?? 0;
     const paid = totalsByInvoice.paidByInvoice.get(inv.id) ?? 0;
-    return { total, paid, balance: total - paid };
+    return { total, paid, balance: total - paid, state: paymentState(total, paid) };
+  }
+
+  function StatusBadge({ state }: { state: ReturnType<typeof paymentState> }) {
+    return <Badge className={PAYMENT_CLASS[state]}>{PAYMENT_LABEL[state]}</Badge>;
   }
 
   return (
@@ -90,19 +101,7 @@ export default function InvoicesPage() {
                   <span className="font-medium text-orange-700 dark:text-orange-400">
                     {invoiceRef(inv.id)}
                   </span>
-                  {t.balance <= 0 && t.total > 0 ? (
-                    <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                      Paid
-                    </Badge>
-                  ) : t.paid > 0 ? (
-                    <Badge className="bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300">
-                      Partial
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                      Unpaid
-                    </Badge>
-                  )}
+                  <StatusBadge state={t.state} />
                 </div>
                 <div className="mt-1 text-sm">{inv.bill_to || "—"}</div>
                 <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
@@ -148,19 +147,7 @@ export default function InvoicesPage() {
                   <Td>{fmtMoney(t.paid)}</Td>
                   <Td className="font-medium">{fmtMoney(t.balance)}</Td>
                   <Td>
-                    {t.balance <= 0 && t.total > 0 ? (
-                      <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                        Paid
-                      </Badge>
-                    ) : t.paid > 0 ? (
-                      <Badge className="bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300">
-                        Partial
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                        Unpaid
-                      </Badge>
-                    )}
+                    <StatusBadge state={t.state} />
                   </Td>
                 </tr>
               );

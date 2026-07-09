@@ -9,6 +9,10 @@ import {
   fmtKg,
   fmtMoney,
   invoiceRef,
+  PAYMENT_CLASS,
+  PAYMENT_LABEL,
+  paymentState,
+  type PaymentState,
   shipmentRef,
   STATUS_CLASS,
   STATUS_LABEL,
@@ -37,6 +41,39 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [payState, setPayState] = useState<PaymentState | null>(null);
+
+  // Work out whether this shipment's invoice is paid / partial / unpaid. An
+  // invoice can carry several shipments, so sum every shipment on it against
+  // the payments recorded for it (agents may read payments — migration 0020).
+  useEffect(() => {
+    const invoiceId = shipment.invoice_id;
+    let cancelled = false;
+    async function load() {
+      if (invoiceId == null) {
+        if (!cancelled) setPayState(null);
+        return;
+      }
+      const [s, p] = await Promise.all([
+        supabase.from("shipments").select("total").eq("invoice_id", invoiceId),
+        supabase.from("payments").select("amount").eq("invoice_id", invoiceId),
+      ]);
+      if (cancelled) return;
+      const total = ((s.data as { total: number }[]) ?? []).reduce(
+        (sum, r) => sum + Number(r.total),
+        0,
+      );
+      const paid = ((p.data as { amount: number }[]) ?? []).reduce(
+        (sum, r) => sum + Number(r.amount),
+        0,
+      );
+      setPayState(paymentState(total, paid));
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [shipment.invoice_id]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +97,16 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     ["Destination", shipment.destinations?.name ?? "—"],
     ["Weight", fmtKg(Number(shipment.weight_kg))],
     ["Total price", fmtMoney(Number(shipment.total))],
+    [
+      "Payment",
+      shipment.invoice_id == null ? (
+        <span className="text-slate-400">Not invoiced</span>
+      ) : payState ? (
+        <Badge className={PAYMENT_CLASS[payState]}>{PAYMENT_LABEL[payState]}</Badge>
+      ) : (
+        <span className="text-slate-400">—</span>
+      ),
+    ],
     ["Ship date", fmtDate(shipment.ship_date)],
   ];
 

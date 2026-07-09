@@ -4,12 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type { Shipment, ShipmentStatus } from "@/lib/types";
+import type { Payment, Shipment, ShipmentStatus } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
   fmtMoney,
   invoiceRef,
+  PAYMENT_CLASS,
+  PAYMENT_LABEL,
+  paymentState,
   shipmentRef,
   STATUS_CLASS,
   STATUS_LABEL,
@@ -30,6 +33,9 @@ export default function ShipmentsPage() {
   const role = useRole();
   const isAdmin = role === "admin";
   const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [payments, setPayments] = useState<Pick<Payment, "invoice_id" | "amount">[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"" | ShipmentStatus>("");
@@ -37,18 +43,62 @@ export default function ShipmentsPage() {
   useEffect(() => {
     // Both admins and agents read the shipments (with destination + invoice
     // info). Agents can see the details but the database still lets them
-    // change only the status and notes.
-    supabase
-      .from("shipments")
-      .select(
-        "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
-      )
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setShipments((data as Shipment[]) ?? []);
-        setLoading(false);
-      });
+    // change only the status and notes. Payments come along too so the list
+    // can show a Paid / Partial / Unpaid badge (agents may read, not write,
+    // payments — see migration 0020).
+    async function load() {
+      const [s, p] = await Promise.all([
+        supabase
+          .from("shipments")
+          .select(
+            "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
+          )
+          .order("created_at", { ascending: false }),
+        supabase.from("payments").select("invoice_id, amount"),
+      ]);
+      setShipments((s.data as Shipment[]) ?? []);
+      setPayments(
+        (p.data as Pick<Payment, "invoice_id" | "amount">[]) ?? [],
+      );
+      setLoading(false);
+    }
+    load();
   }, []);
+
+  // Roll shipment totals and payments up per invoice so each shipment can show
+  // whether its invoice is paid, partially paid, or unpaid. An invoice can hold
+  // several shipments, so the status reflects the whole invoice, not one line.
+  const payStateByInvoice = useMemo(() => {
+    const totalByInvoice = new Map<number, number>();
+    for (const s of shipments) {
+      if (s.invoice_id == null) continue;
+      totalByInvoice.set(
+        s.invoice_id,
+        (totalByInvoice.get(s.invoice_id) ?? 0) + Number(s.total),
+      );
+    }
+    const paidByInvoice = new Map<number, number>();
+    for (const p of payments) {
+      paidByInvoice.set(
+        p.invoice_id,
+        (paidByInvoice.get(p.invoice_id) ?? 0) + Number(p.amount),
+      );
+    }
+    const state = new Map<number, ReturnType<typeof paymentState>>();
+    for (const [invoiceId, total] of totalByInvoice) {
+      state.set(invoiceId, paymentState(total, paidByInvoice.get(invoiceId) ?? 0));
+    }
+    return state;
+  }, [shipments, payments]);
+
+  function payBadge(s: Shipment) {
+    if (s.invoice_id == null) return null;
+    const state = payStateByInvoice.get(s.invoice_id);
+    if (!state) return null;
+    return (
+      <Badge className={PAYMENT_CLASS[state]}>{PAYMENT_LABEL[state]}</Badge>
+    );
+  }
 
   function exportCsv() {
     downloadCsv("shipments.csv", [
@@ -168,6 +218,7 @@ export default function ShipmentsPage() {
                 {s.invoices?.bill_to && <span>👤 {s.invoices.bill_to}</span>}
                 {s.invoices?.phone && <span>📞 {s.invoices.phone}</span>}
                 <span>{fmtDate(s.ship_date)}</span>
+                {payBadge(s)}
               </div>
             </Link>
           ))}
@@ -181,6 +232,7 @@ export default function ShipmentsPage() {
               <Th>Weight</Th>
               <Th>Total</Th>
               <Th>Status</Th>
+              <Th>Payment</Th>
               {isAdmin && <Th>Invoice</Th>}
               {!isAdmin && <Th>Bill to</Th>}
               <Th>Date</Th>
@@ -210,6 +262,7 @@ export default function ShipmentsPage() {
                     {STATUS_LABEL[s.status]}
                   </Badge>
                 </Td>
+                <Td>{payBadge(s) ?? <span className="text-slate-400">—</span>}</Td>
                 {isAdmin && (
                   <Td className="whitespace-nowrap">
                     {s.invoice_id ? (
