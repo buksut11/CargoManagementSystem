@@ -83,7 +83,9 @@ export default function InvitePage({
               ? "This invitation has already been used."
               : info.reason === "expired"
                 ? "This invitation has expired. Ask for a new one."
-                : "This invitation link is invalid."}
+                : info.reason === "server"
+                  ? "Invites aren’t fully set up yet. Ask the admin to add the SUPABASE_SERVICE_ROLE_KEY to the site’s environment."
+                  : "This invitation link is invalid."}
           </p>
         )}
 
