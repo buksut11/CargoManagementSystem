@@ -16,7 +16,9 @@ export async function POST(request: Request) {
   }
   const orgId = body.orgId;
   const email = body.email?.trim().toLowerCase();
-  const role = body.role === "admin" ? "admin" : "agent";
+  const role = ["admin", "manager", "agent"].includes(body.role ?? "")
+    ? (body.role as string)
+    : "agent";
   if (!token || !orgId || !email) {
     return NextResponse.json({ error: "Missing email or organization." }, { status: 400 });
   }

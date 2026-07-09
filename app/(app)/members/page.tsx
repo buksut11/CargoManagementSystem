@@ -197,6 +197,7 @@ export default function MembersPage() {
               <Field label="Role">
                 <Select value={role} onChange={(e) => setRole(e.target.value)}>
                   <option value="agent">Agent</option>
+                  <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
                 </Select>
               </Field>
@@ -288,6 +289,7 @@ export default function MembersPage() {
                           onChange={(e) => changeRole(m, e.target.value as OrgRole)}
                         >
                           <option value="agent">Agent</option>
+                          <option value="manager">Manager</option>
                           <option value="admin">Admin</option>
                         </Select>
                       )}

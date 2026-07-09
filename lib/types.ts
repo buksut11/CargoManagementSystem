@@ -2,9 +2,12 @@ export type ShipmentStatus = "pending" | "shipped" | "delivered";
 
 export type UserRole = "admin" | "agent";
 
-// Per-organization role, stored in public.memberships. "owner" and "admin"
-// both have full write access; "owner" additionally owns billing/org lifecycle.
-export type OrgRole = "owner" | "admin" | "agent";
+// Per-organization role, stored in public.memberships.
+// - owner / admin: full access, including members, settings and billing.
+// - manager: full operational access (shipments, invoices, payments, expenses,
+//   destinations, audit) but NOT members/settings/billing.
+// - agent: read shipments; may only change a shipment's status and notes.
+export type OrgRole = "owner" | "admin" | "manager" | "agent";
 
 export type Organization = {
   id: string;

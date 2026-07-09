@@ -45,12 +45,30 @@ const ADMIN_NAV = [
 
 const AGENT_NAV = [{ href: "/shipments", label: "Shipments", icon: BoxIcon }];
 
+// Managers get everything operational, minus member management and settings.
+const MANAGER_NAV = ADMIN_NAV.filter(
+  (item) => item.href !== "/members" && item.href !== "/settings",
+);
+
 // Remembers which organization the user last acted in (for multi-org accounts).
 const ACTIVE_ORG_KEY = "cargobook:activeOrg";
 
-// Agents may only see the shipment list and individual shipments.
-function agentAllowed(path: string) {
-  return path === "/shipments" || /^\/shipments\/\d+$/.test(path);
+function navForRole(role: OrgRole) {
+  if (role === "agent") return AGENT_NAV;
+  if (role === "manager") return MANAGER_NAV;
+  return ADMIN_NAV;
+}
+
+// Which paths each role may visit (agents: shipments only; managers: everything
+// except member management and settings).
+function pathAllowed(role: OrgRole, path: string) {
+  if (role === "agent") {
+    return path === "/shipments" || /^\/shipments\/\d+$/.test(path);
+  }
+  if (role === "manager") {
+    return path !== "/members" && path !== "/settings";
+  }
+  return true;
 }
 
 const itemBase =
@@ -59,19 +77,19 @@ const itemIdle =
   "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-white";
 
 function SidebarContent({
-  role,
+  orgRole,
   orgName,
   pathname,
   onNavigate,
   onSignOut,
 }: {
-  role: UserRole;
+  orgRole: OrgRole;
   orgName: string;
   pathname: string;
   onNavigate?: () => void;
   onSignOut: () => void;
 }) {
-  const nav = role === "admin" ? ADMIN_NAV : AGENT_NAV;
+  const nav = navForRole(orgRole);
   return (
     <>
       <div className="mb-5 flex items-center gap-3 px-1">
@@ -83,7 +101,7 @@ function SidebarContent({
             {orgName}
           </div>
           <div className="text-xs capitalize text-slate-500 dark:text-slate-400">
-            CargoBook · {role}
+            CargoBook · {orgRole}
           </div>
         </div>
       </div>
@@ -132,7 +150,7 @@ export default function AppLayout({
   } | null>(null);
   const [noOrg, setNoOrg] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const role = resolved?.uiRole ?? null;
+  const orgRole = resolved?.org.role ?? null;
 
   useEffect(() => {
     let active = true;
@@ -214,12 +232,12 @@ export default function AppLayout({
     };
   }, [router]);
 
-  // Keep agents on the pages they are allowed to see.
+  // Keep each role on the pages they are allowed to see.
   useEffect(() => {
-    if (role === "agent" && !agentAllowed(pathname)) {
-      router.replace("/shipments");
+    if (orgRole && !pathAllowed(orgRole, pathname)) {
+      router.replace(orgRole === "agent" ? "/shipments" : "/");
     }
-  }, [role, pathname, router]);
+  }, [orgRole, pathname, router]);
 
   // Close the mobile drawer whenever the route changes.
   const [lastPath, setLastPath] = useState(pathname);
@@ -237,7 +255,7 @@ export default function AppLayout({
     return <NoOrgScreen onSignOut={signOut} />;
   }
 
-  if (!resolved || (role === "agent" && !agentAllowed(pathname))) {
+  if (!resolved || (orgRole && !pathAllowed(orgRole, pathname))) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-slate-500 dark:text-slate-400">
         Loading…
@@ -252,7 +270,7 @@ export default function AppLayout({
         {/* Desktop sidebar */}
         <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-slate-200 bg-white px-4 py-5 dark:border-slate-800 dark:bg-slate-800/60 md:flex">
           <SidebarContent
-            role={resolved.uiRole}
+            orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
             pathname={pathname}
             onSignOut={signOut}
@@ -276,7 +294,7 @@ export default function AppLayout({
                 <CloseIcon />
               </button>
               <SidebarContent
-                role={resolved.uiRole}
+                orgRole={resolved.org.role}
                 orgName={resolved.org.orgName}
                 pathname={pathname}
                 onNavigate={() => setMenuOpen(false)}
