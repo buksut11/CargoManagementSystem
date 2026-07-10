@@ -65,6 +65,17 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 0 1000px #1e293b inset;
   caret-color: #f1f5f9;
 }
+/* The background repaint above is a box-shadow, which otherwise swallows the
+   Tailwind focus:ring. Re-add the orange ring when an autofilled input is
+   focused so it matches a normally-typed input (e.g. the password field). */
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset, 0 0 0 2px #fed7aa; /* orange-200 */
+  box-shadow: 0 0 0 1000px #ffffff inset, 0 0 0 2px #fed7aa;
+}
+.dark input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #1e293b inset, 0 0 0 2px #fed7aa;
+  box-shadow: 0 0 0 1000px #1e293b inset, 0 0 0 2px #fed7aa;
+}
 
 /* iOS Safari gives date inputs a fixed intrinsic width that overflows grid
    columns and centers their value; normalize them to behave like text inputs. */
