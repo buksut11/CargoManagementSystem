@@ -163,13 +163,14 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
                 href={shipment.attachment_url}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="block overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-900/50"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={shipment.attachment_url}
                   alt="Shipment attachment"
                   style={{ imageOrientation: "none" }}
-                  className="max-h-64 w-full rounded-lg border border-slate-200 dark:border-slate-700 object-contain"
+                  className="mx-auto block h-64 w-full object-contain"
                 />
               </a>
             </div>
