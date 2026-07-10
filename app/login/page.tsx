@@ -29,7 +29,7 @@ const REMEMBER_KEY = "cargobook:email";
 // Glass input styling shared by both fields: frosted fill, soft border, and
 // room on the left for the leading icon.
 const glassInput =
-  "glass-field w-full min-w-0 rounded-xl border border-white/70 bg-white/55 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-orange-400 dark:focus:ring-orange-500/30";
+  "glass-field w-full min-w-0 rounded-xl border border-slate-200 bg-white/90 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-orange-400 dark:focus:ring-orange-500/30";
 
 const featureItems = [
   { label: "Shipments", icon: <BoxIcon /> },
