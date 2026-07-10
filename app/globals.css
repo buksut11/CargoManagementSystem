@@ -123,38 +123,6 @@ input[type="date"]::-webkit-date-and-time-value {
     0 30px 80px -20px rgba(0, 0, 0, 0.85);
 }
 
-/* Soft feathered blur behind the hero text (left side) so the headline pops
-   off the busy photo. Deliberately NOT a card: no border, no corners, no
-   shadow — the blur lives on a ::before layer whose edges fade to nothing
-   via a radial mask, so it melts into the backdrop. */
-.hero-blur {
-  position: relative;
-}
-.hero-blur::before {
-  content: "";
-  position: absolute;
-  inset: -3rem -3.5rem;
-  z-index: -1;
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
-  background: radial-gradient(
-    65% 60% at 45% 45%,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0)
-  );
-  -webkit-mask-image: radial-gradient(
-    72% 72% at 50% 50%,
-    black 40%,
-    transparent 96%
-  );
-  mask-image: radial-gradient(72% 72% at 50% 50%, black 40%, transparent 96%);
-}
-/* Dark mode: the blur layer's edge reads as a faint border against the dark
-   photo, and the white headline is already legible there — drop it entirely. */
-.dark .hero-blur::before {
-  display: none;
-}
-
 /* Matching glass for the input fields: lighter blur so text stays sharp,
    with the same top-edge highlight. */
 .glass-field {
