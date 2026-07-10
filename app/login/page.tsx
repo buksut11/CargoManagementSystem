@@ -29,7 +29,7 @@ const REMEMBER_KEY = "cargobook:email";
 // Glass input styling shared by both fields: frosted fill, soft border, and
 // room on the left for the leading icon.
 const glassInput =
-  "w-full min-w-0 rounded-xl border border-slate-300/80 bg-white/75 py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-300/60 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-orange-400 dark:focus:ring-orange-500/30";
+  "glass-field w-full min-w-0 rounded-xl border border-white/70 bg-white/55 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-orange-400 dark:focus:ring-orange-500/30";
 
 const featureItems = [
   { label: "Shipments", icon: <BoxIcon /> },
@@ -191,7 +191,7 @@ export default function LoginPage() {
         <div
           data-animate
           style={{ opacity: 0 }}
-          className="relative w-full max-w-md rounded-3xl border border-white/60 bg-white/65 p-8 shadow-[0_25px_70px_-20px_rgba(2,6,23,0.7)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/50 sm:p-10"
+          className="glass-card relative w-full max-w-md rounded-[1.75rem] p-8 sm:p-10"
         >
           <ThemeTogglePill className="absolute right-5 top-5" />
 

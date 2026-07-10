@@ -89,6 +89,53 @@ input[type="date"]::-webkit-date-and-time-value {
   text-align: left;
 }
 
+/* Thick frosted glass for the login card. The look comes from four layers:
+   heavy backdrop blur with boosted saturation (so the photo glows through),
+   a translucent gradient fill (denser at the top, airier at the bottom),
+   a crisp 1px inner highlight along the top edge (the "glass rim"),
+   and a deep drop shadow lifting the slab off the backdrop. */
+.glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.68),
+    rgba(255, 255, 255, 0.38) 55%,
+    rgba(255, 255, 255, 0.52)
+  );
+  -webkit-backdrop-filter: blur(32px) saturate(1.7);
+  backdrop-filter: blur(32px) saturate(1.7);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    inset 1px 0 0 rgba(255, 255, 255, 0.3),
+    inset -1px 0 0 rgba(255, 255, 255, 0.3),
+    0 30px 80px -20px rgba(2, 6, 23, 0.65);
+}
+.dark .glass-card {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(
+    165deg,
+    rgba(30, 41, 59, 0.72),
+    rgba(8, 13, 26, 0.78) 55%,
+    rgba(15, 23, 42, 0.74)
+  );
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 30px 80px -20px rgba(0, 0, 0, 0.85);
+}
+
+/* Matching glass for the input fields: lighter blur so text stays sharp,
+   with the same top-edge highlight. */
+.glass-field {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.dark .glass-field {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 /* Entrance animations for the login screen. */
 @keyframes rise-in {
   from {
