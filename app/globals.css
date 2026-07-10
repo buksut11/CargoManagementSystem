@@ -135,11 +135,11 @@ input[type="date"]::-webkit-date-and-time-value {
   position: absolute;
   inset: -3rem -3.5rem;
   z-index: -1;
-  -webkit-backdrop-filter: blur(18px) saturate(1.35);
-  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(7px) saturate(1.2);
+  backdrop-filter: blur(7px) saturate(1.2);
   background: radial-gradient(
     65% 60% at 45% 45%,
-    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.16),
     rgba(255, 255, 255, 0)
   );
   -webkit-mask-image: radial-gradient(
@@ -152,7 +152,7 @@ input[type="date"]::-webkit-date-and-time-value {
 .dark .hero-blur::before {
   background: radial-gradient(
     65% 60% at 45% 45%,
-    rgba(2, 6, 23, 0.45),
+    rgba(2, 6, 23, 0.3),
     rgba(2, 6, 23, 0)
   );
 }
