@@ -125,7 +125,7 @@ function SidebarContent({
                 : itemIdle
             }`}
           >
-            <span className="shrink-0 transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:-rotate-6 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
+            <span className="shrink-0 transform-gpu transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
               <Icon />
             </span>
             <span>{item.label}</span>
