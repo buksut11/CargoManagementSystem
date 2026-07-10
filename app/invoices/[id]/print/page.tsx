@@ -124,7 +124,7 @@ export default function PrintInvoicePage() {
         {/* Customer details on the left, invoice number/date on the right */}
         <div className="mt-8 flex flex-wrap items-start justify-between gap-6">
           <div className="min-w-0">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-bold uppercase tracking-wide text-slate-600">
               Bill to
             </div>
             <dl className="mt-2 space-y-1 text-sm">
