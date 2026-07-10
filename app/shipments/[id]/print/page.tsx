@@ -137,7 +137,7 @@ export default function PrintShipmentPage() {
           <tbody>
             {rows.map(([label, value]) => (
               <tr key={label} className="border-b border-slate-200">
-                <td className="w-40 py-3 pr-4 font-semibold text-slate-500">
+                <td className="w-40 py-3 pr-4 font-bold text-slate-600">
                   {label}
                 </td>
                 <td className="py-3">{value}</td>
