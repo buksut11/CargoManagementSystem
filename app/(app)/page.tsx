@@ -124,7 +124,7 @@ export default function DashboardPage() {
               <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{s.label}</div>
               <div
                 className={`mt-1.5 break-words text-xl font-bold tracking-tight lg:text-2xl ${
-                  s.accent ? "text-orange-600 dark:text-orange-400" : "text-slate-900 dark:text-slate-100"
+                  s.accent ? "text-amber-600 dark:text-amber-400" : "text-slate-900 dark:text-slate-100"
                 }`}
               >
                 {loading ? "…" : <CountUp value={s.value} format={s.format} />}
@@ -144,7 +144,7 @@ export default function DashboardPage() {
               <div className="mt-1 flex items-baseline gap-2">
                 <span
                   className="text-xl font-bold"
-                  style={{ color: CHART_COLORS.indigo }}
+                  style={{ color: CHART_COLORS.blue }}
                 >
                   ↑ {loading ? "…" : fmtKg(kgThisMonth)}
                 </span>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
           <div className="mt-2">
             <AreaChart
               points={kgSeries}
-              color={CHART_COLORS.indigo}
+              color={CHART_COLORS.blue}
               format={fmtKg}
             />
           </div>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
           <div className="mt-1 flex items-baseline gap-2">
             <span
               className="text-xl font-bold"
-              style={{ color: CHART_COLORS.orange }}
+              style={{ color: CHART_COLORS.amber }}
             >
               ↑ {loading ? "…" : fmtMoney(receivedThisMonth)}
             </span>
@@ -195,7 +195,7 @@ export default function DashboardPage() {
           <div className="mt-2">
             <BarChart
               points={paySeries}
-              color={CHART_COLORS.orange}
+              color={CHART_COLORS.amber}
               format={fmtMoney}
             />
           </div>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             </h2>
             <Link
               href="/shipments"
-              className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
             >
               View all →
             </Link>
@@ -218,10 +218,10 @@ export default function DashboardPage() {
               <Link
                 key={s.id}
                 href={`/shipments/${s.id}`}
-                className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
+                className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                  <span className="font-medium text-blue-600 dark:text-blue-400">
                     {shipmentRef(s.id)}
                   </span>
                   <Badge className={STATUS_CLASS[s.status]}>
@@ -246,13 +246,13 @@ export default function DashboardPage() {
                 <Th>Date</Th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+            <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
               {shipments.slice(0, 5).map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                <tr key={s.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                   <Td className="whitespace-nowrap">
                     <Link
                       href={`/shipments/${s.id}`}
-                      className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       {shipmentRef(s.id)}
                     </Link>

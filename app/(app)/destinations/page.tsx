@@ -116,16 +116,16 @@ export default function DestinationsPage() {
       </Card>
       <Card className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Name</Th>
               <Th>Country</Th>
               <Th />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {destinations.map((d) => (
-              <tr key={d.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+              <tr key={d.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                 <Td className="font-medium">{d.name}</Td>
                 <Td>{d.country ?? "—"}</Td>
                 <Td className="text-right">

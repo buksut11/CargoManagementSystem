@@ -155,7 +155,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
             ))}
           </dl>
           {shipment.attachment_url && (
-            <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+            <div className="mt-4 border-t border-slate-200/60 dark:border-white/10 pt-4">
               <p className="mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                 Attachment
               </p>
@@ -163,7 +163,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
                 href={shipment.attachment_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-900/50"
+                className="block overflow-hidden rounded-lg border border-slate-200/60 bg-slate-100 dark:border-white/10 dark:bg-slate-900/50"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -279,7 +279,7 @@ export default function EditShipmentPage() {
           <div className="flex gap-2">
             <Link
               href={`/shipments/${shipment.id}/print`}
-              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
               🖨 Print receipt
             </Link>

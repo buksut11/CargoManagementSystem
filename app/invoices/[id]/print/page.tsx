@@ -79,7 +79,7 @@ export default function PrintInvoicePage() {
       <div className="no-print mb-6 flex gap-3">
         <button
           onClick={() => window.print()}
-          className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+          className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
         >
           🖨 Print / Save as PDF
         </button>

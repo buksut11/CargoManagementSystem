@@ -34,17 +34,18 @@ export function ThreeBackground() {
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     mount.appendChild(renderer.domElement);
 
-    // Lighting — a warm key light plus cool fill for depth.
-    scene.add(new THREE.AmbientLight(0x6b7fb0, 0.9));
-    const key = new THREE.DirectionalLight(0xffb066, 1.1);
+    // Lighting — a bright neutral key plus a violet fill for depth.
+    scene.add(new THREE.AmbientLight(0x9aa8d8, 0.9));
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
     key.position.set(6, 8, 10);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0x4f7bd6, 0.7);
+    const fill = new THREE.DirectionalLight(0x8b5cf6, 0.7);
     fill.position.set(-8, -4, 6);
     scene.add(fill);
 
-    // Container colours echo the real cargo photo (reds, yellows, blues, steel).
-    const palette = [0xd94b3a, 0xe6b422, 0xdb4a55, 0xc23b2e, 0xe0a92e, 0x3f6fb0, 0x8a94a6];
+    // Container colours echo the pastel 3D shapes of the reference art
+    // (periwinkles, violets, sky blues, with a coral and a pink accent).
+    const palette = [0x818cf8, 0xa78bfa, 0x60a5fa, 0xfb7185, 0xc4b5fd, 0x38bdf8, 0xf9a8d4];
     const geometry = new THREE.BoxGeometry(2.2, 1, 1);
 
     const group = new THREE.Group();

@@ -219,12 +219,12 @@ export default function MembersPage() {
                   <input
                     readOnly
                     value={lastLink}
-                    className="min-w-0 flex-1 truncate rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                    className="min-w-0 flex-1 truncate rounded-lg border border-white/60 bg-white/60 px-2 py-1.5 text-slate-700 backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"
                   />
                   <button
                     type="button"
                     onClick={copyLink}
-                    className="shrink-0 rounded-lg bg-slate-900 px-2.5 py-1.5 font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900"
+                    className="shrink-0 rounded-full bg-blue-600 px-2.5 py-1.5 font-medium text-white hover:bg-blue-700"
                   >
                     {copied ? "Copied" : "Copy"}
                   </button>
@@ -263,19 +263,19 @@ export default function MembersPage() {
 
         <Card className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 dark:border-slate-700">
+            <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Email</Th>
                 <Th>Role</Th>
                 <Th />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+            <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
               {members.map((m) => {
                 const isSelf = m.user_id === meId;
                 const isOwner = m.role === "owner";
                 return (
-                  <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                  <tr key={m.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                     <Td className="font-medium">
                       {m.email ?? "—"}
                       {isSelf && <span className="ml-1 text-xs text-slate-400">(you)</span>}

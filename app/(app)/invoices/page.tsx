@@ -81,7 +81,7 @@ export default function InvoicesPage() {
         action={
           <Link
             href="/invoices/new"
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+            className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
           >
             + New invoice
           </Link>
@@ -95,10 +95,10 @@ export default function InvoicesPage() {
               <Link
                 key={inv.id}
                 href={`/invoices/${inv.id}`}
-                className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
+                className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-orange-700 dark:text-orange-400">
+                  <span className="font-medium text-amber-600 dark:text-amber-400">
                     {invoiceRef(inv.id)}
                   </span>
                   <StatusBadge state={t.state} />
@@ -117,7 +117,7 @@ export default function InvoicesPage() {
           })}
         </div>
         <table className="hidden w-full md:table">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Invoice</Th>
               <Th>Bill to</Th>
@@ -128,15 +128,15 @@ export default function InvoicesPage() {
               <Th>Status</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {invoices.map((inv) => {
               const t = totals(inv);
               return (
-                <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                <tr key={inv.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                   <Td>
                     <Link
                       href={`/invoices/${inv.id}`}
-                      className="font-medium text-orange-700 dark:text-orange-400 hover:underline"
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       {invoiceRef(inv.id)}
                     </Link>

@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col bg-[#f4f5fc] text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+      <body className="app-bg min-h-full flex flex-col text-slate-900 dark:text-slate-100">
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         {children}
       </body>

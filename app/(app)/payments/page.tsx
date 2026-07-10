@@ -54,7 +54,7 @@ export default function PaymentsPage() {
             <button
               onClick={exportCsv}
               disabled={payments.length === 0}
-              className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 disabled:opacity-50"
+              className="rounded-full border border-white/60 dark:border-white/10 bg-white/55 dark:bg-white/[0.07] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
             >
               ⬇ Export CSV
             </button>
@@ -67,7 +67,7 @@ export default function PaymentsPage() {
             <Link
               key={p.id}
               href={`/invoices/${p.invoice_id}`}
-              className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
+              className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="font-semibold">
@@ -78,7 +78,7 @@ export default function PaymentsPage() {
                 </span>
               </div>
               <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
-                <span className="text-orange-700 dark:text-orange-400">
+                <span className="text-amber-600 dark:text-amber-400">
                   {invoiceRef(p.invoice_id)}
                 </span>
                 {p.invoices?.bill_to && <span>{p.invoices.bill_to}</span>}
@@ -88,7 +88,7 @@ export default function PaymentsPage() {
           ))}
         </div>
         <table className="hidden w-full md:table">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Date</Th>
               <Th>Amount</Th>
@@ -97,15 +97,15 @@ export default function PaymentsPage() {
               <Th>Method</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {payments.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+              <tr key={p.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                 <Td>{fmtDate(p.paid_date)}</Td>
                 <Td className="font-medium">{fmtMoney(Number(p.amount))}</Td>
                 <Td>
                   <Link
                     href={`/invoices/${p.invoice_id}`}
-                    className="text-orange-700 dark:text-orange-400 hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     {invoiceRef(p.invoice_id)}
                   </Link>

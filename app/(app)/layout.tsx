@@ -65,9 +65,9 @@ function pathAllowed(role: OrgRole, path: string) {
 }
 
 const itemBase =
-  "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors";
+  "flex w-full items-center gap-3 rounded-full px-3.5 py-2.5 text-sm font-medium transition-colors";
 const itemIdle =
-  "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-white";
+  "text-slate-600 hover:bg-white/50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white";
 
 function SidebarContent({
   orgRole,
@@ -121,7 +121,7 @@ function SidebarContent({
             onClick={onNavigate}
             className={`group ${itemBase} ${
               active
-                ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300"
+                ? "bg-white/80 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
                 : itemIdle
             }`}
           >
@@ -290,7 +290,7 @@ export default function AppLayout({
     <RoleProvider role={resolved.uiRole}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
-        <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-slate-200 bg-white px-4 py-5 dark:border-slate-800 dark:bg-slate-800/60 md:flex">
+        <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-white/50 bg-white/35 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 md:flex">
           <SidebarContent
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
@@ -308,11 +308,11 @@ export default function AppLayout({
               onClick={() => setMenuOpen(false)}
               aria-hidden
             />
-            <aside className="absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto bg-white px-4 py-5 shadow-2xl dark:bg-slate-800">
+            <aside className="absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/70 px-4 py-5 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/80">
               <button
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close menu"
-                className="absolute right-3 top-4 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/60"
+                className="absolute right-3 top-4 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
               >
                 <CloseIcon />
               </button>
@@ -330,11 +330,11 @@ export default function AppLayout({
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar with hamburger */}
-          <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-800/95 md:hidden">
+          <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-white/50 bg-white/50 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 md:hidden">
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/60"
+              className="rounded-full p-1.5 text-slate-600 hover:bg-white/60 dark:text-slate-300 dark:hover:bg-white/10"
             >
               <MenuIcon />
             </button>
@@ -359,7 +359,7 @@ export default function AppLayout({
 function NoOrgScreen({ onSignOut }: { onSignOut: () => void }) {
   return (
     <div className="flex min-h-dvh flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30">
         <BoxIcon />
       </div>
       <div>
@@ -373,7 +373,7 @@ function NoOrgScreen({ onSignOut }: { onSignOut: () => void }) {
       </div>
       <button
         onClick={onSignOut}
-        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+        className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
       >
         Sign out
       </button>

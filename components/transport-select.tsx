@@ -106,7 +106,7 @@ export function TransportSelect({
             onClick={() => setAdding(false)}
             aria-hidden
           />
-          <div className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-800">
+          <div className="relative w-full max-w-sm glass-panel rounded-2xl p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               New transport / expense type
             </h3>

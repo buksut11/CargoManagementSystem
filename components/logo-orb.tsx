@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 /**
- * The CargoBook "materialized" logo: a glowing orange cargo cube set into a
+ * The CargoBook "materialized" logo: a glowing blue cargo cube set into a
  * metallic glass orb, rendered as pure SVG gradients so it stays crisp at any
  * size and needs no raster asset. Matches the login reference art in both
  * themes (the orb face is dark glass, which reads well on light and dark).
@@ -10,11 +10,11 @@ export function LogoOrb(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 120 120" aria-hidden {...props}>
       <defs>
-        {/* Soft orange halo bleeding past the ring. */}
+        {/* Soft blue halo bleeding past the ring. */}
         <radialGradient id="orb-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fb923c" stopOpacity="0.5" />
-          <stop offset="65%" stopColor="#fb923c" stopOpacity="0.12" />
-          <stop offset="100%" stopColor="#fb923c" stopOpacity="0" />
+          <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.5" />
+          <stop offset="65%" stopColor="#60a5fa" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
         </radialGradient>
         {/* Metallic bezel: lit from above, falling into shadow below. */}
         <linearGradient id="orb-ring" x1="0" y1="0" x2="0" y2="1">
@@ -29,11 +29,11 @@ export function LogoOrb(props: SVGProps<SVGSVGElement>) {
           <stop offset="55%" stopColor="#1e293b" />
           <stop offset="100%" stopColor="#020617" />
         </radialGradient>
-        {/* The orange cube tile. */}
+        {/* The blue cube tile. */}
         <linearGradient id="orb-cube" x1="0" y1="0" x2="0.7" y2="1">
-          <stop offset="0%" stopColor="#fdba74" />
-          <stop offset="40%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#c2410c" />
+          <stop offset="0%" stopColor="#93c5fd" />
+          <stop offset="40%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#1d4ed8" />
         </linearGradient>
         {/* Glossy sheen across the top of the cube. */}
         <linearGradient id="orb-sheen" x1="0" y1="0" x2="0" y2="1">

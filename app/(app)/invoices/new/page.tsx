@@ -153,13 +153,13 @@ export default function NewInvoicePage() {
               {shipments.map((s) => (
                 <label
                   key={s.id}
-                  className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                  className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-slate-200/60 dark:border-white/10 px-3 py-2 hover:bg-white/60 dark:hover:bg-white/[0.08]"
                 >
                   <input
                     type="checkbox"
                     checked={selected.has(s.id)}
                     onChange={() => toggle(s.id)}
-                    className="h-4 w-4 accent-orange-600"
+                    className="h-4 w-4 accent-blue-600"
                   />
                   <span className="flex-1 text-sm">
                     <span className="font-medium">{shipmentRef(s.id)}</span> —{" "}
@@ -176,7 +176,7 @@ export default function NewInvoicePage() {
               ))}
             </div>
           )}
-          <div className="mt-4 flex justify-end border-t border-slate-200 dark:border-slate-700 pt-3 text-sm">
+          <div className="mt-4 flex justify-end border-t border-slate-200/60 dark:border-white/10 pt-3 text-sm">
             <span className="text-slate-500 dark:text-slate-400">Invoice total:&nbsp;</span>
             <span className="font-bold">{fmtMoney(total)}</span>
           </div>

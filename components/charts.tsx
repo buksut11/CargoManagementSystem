@@ -4,9 +4,11 @@ import { useState } from "react";
 
 export type ChartPoint = { label: string; value: number };
 
+// Two-slot categorical palette (blue = primary series, amber = "due"/warning
+// series), CVD-validated against both the light and dark chart surfaces.
 export const CHART_COLORS = {
-  indigo: "#6366f1",
-  orange: "#ea580c",
+  blue: "#3b82f6",
+  amber: "#d97706",
 };
 
 const W = 320;
@@ -87,7 +89,7 @@ function GridAndLabels({ points }: { points: ChartPoint[] }) {
 
 export function AreaChart({
   points,
-  color = CHART_COLORS.indigo,
+  color = CHART_COLORS.blue,
   format,
 }: {
   points: ChartPoint[];
@@ -161,7 +163,7 @@ export function AreaChart({
 
 export function BarChart({
   points,
-  color = CHART_COLORS.orange,
+  color = CHART_COLORS.amber,
   format,
 }: {
   points: ChartPoint[];
@@ -263,7 +265,7 @@ export function Donut({
                 cy={size / 2}
                 r={r}
                 fill="none"
-                stroke={CHART_COLORS.indigo}
+                stroke={CHART_COLORS.blue}
                 strokeWidth={15}
                 strokeLinecap="round"
                 strokeDasharray={`${paidLen} ${c - paidLen}`}
@@ -277,7 +279,7 @@ export function Donut({
                 cy={size / 2}
                 r={r}
                 fill="none"
-                stroke={CHART_COLORS.orange}
+                stroke={CHART_COLORS.amber}
                 strokeWidth={15}
                 strokeLinecap="round"
                 strokeDasharray={`${dueLen} ${c - dueLen}`}
@@ -298,7 +300,7 @@ export function Donut({
           <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <span
               className="h-2.5 w-2.5 rounded-full"
-              style={{ background: CHART_COLORS.indigo }}
+              style={{ background: CHART_COLORS.blue }}
             />
             Paid
           </span>
@@ -308,7 +310,7 @@ export function Donut({
           <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <span
               className="h-2.5 w-2.5 rounded-full"
-              style={{ background: CHART_COLORS.orange }}
+              style={{ background: CHART_COLORS.amber }}
             />
             Due
           </span>

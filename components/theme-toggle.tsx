@@ -54,7 +54,7 @@ export function ThemeTogglePill({ className = "" }: { className?: string }) {
         className={`${segment} ${
           dark
             ? "text-slate-400 hover:text-slate-200"
-            : "bg-white text-orange-500 shadow"
+            : "bg-white text-amber-500 shadow"
         }`}
       >
         <SunIcon />

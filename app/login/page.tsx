@@ -29,7 +29,7 @@ const REMEMBER_KEY = "cargobook:email";
 // Glass input styling shared by both fields: frosted fill, soft border, and
 // room on the left for the leading icon.
 const glassInput =
-  "glass-field w-full min-w-0 rounded-xl border border-white/60 bg-white/45 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-orange-400 dark:focus:ring-orange-500/30";
+  "glass-field w-full min-w-0 rounded-xl border border-white/60 bg-white/45 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-500/30";
 
 const featureItems = [
   { label: "Shipments", icon: <BoxIcon /> },
@@ -134,24 +134,14 @@ export default function LoginPage() {
   return (
     <main
       ref={rootRef}
-      className="relative flex min-h-dvh flex-1 flex-col overflow-hidden bg-slate-950"
+      className="app-bg relative flex min-h-dvh flex-1 flex-col overflow-hidden"
     >
-      {/* Full-bleed background photo (public/login-bg.webp). */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url(/login-bg.webp)" }}
-        aria-hidden
-      />
-      {/* Ambient WebGL layer — floating cargo containers. */}
+      {/* Ambient WebGL layer — floating pastel cargo containers over the
+          gradient backdrop. */}
       <ThreeBackground />
-      {/* Brand-tinted scrims tie the layers to the card and keep text legible.
-          They lighten in light mode so the glass card reads bright and airy. */}
+      {/* A gentle scrim keeps the hero copy legible over the drifting shapes. */}
       <div
-        className="absolute inset-0 bg-gradient-to-r from-white/75 via-white/30 to-white/15 dark:from-slate-950/85 dark:via-slate-950/45 dark:to-slate-950/70"
-        aria-hidden
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent dark:from-slate-950/60 dark:to-slate-950/20"
+        className="absolute inset-0 bg-gradient-to-r from-white/40 via-transparent to-transparent dark:from-slate-950/60 dark:via-slate-950/20 dark:to-transparent"
         aria-hidden
       />
 
@@ -196,7 +186,7 @@ export default function LoginPage() {
           <ThemeTogglePill className="absolute right-5 top-5" />
 
           <div className="mb-8 text-center">
-            <LogoOrb className="mx-auto -mt-2 mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(249,115,22,0.35)]" />
+            <LogoOrb className="mx-auto -mt-2 mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(59,130,246,0.4)]" />
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Welcome back
             </h1>
@@ -260,7 +250,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-orange-600 accent-orange-600 focus:ring-orange-500 dark:border-slate-600"
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600 focus:ring-blue-500 dark:border-slate-600"
                 />
                 Remember me
               </label>
@@ -268,7 +258,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={forgotPassword}
                 disabled={busy}
-                className="font-medium text-orange-600 hover:text-orange-700 hover:underline disabled:opacity-50 dark:text-orange-400"
+                className="font-medium text-blue-600 hover:text-blue-700 hover:underline disabled:opacity-50 dark:text-blue-400"
               >
                 Forgot password?
               </button>
@@ -282,7 +272,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-xl bg-gradient-to-b from-orange-500 to-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/40 transition hover:from-orange-600 hover:to-orange-700 disabled:opacity-50"
+              className="w-full rounded-full bg-gradient-to-b from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition hover:from-blue-600 hover:to-blue-700 disabled:opacity-50"
             >
               {busy ? "Signing in…" : "Sign in"}
             </button>

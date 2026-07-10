@@ -199,7 +199,7 @@ export default function ExpensesPage() {
           {expenses.map((exp) => (
             <div
               key={exp.id}
-              className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+              className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
             >
               <div className="flex items-center justify-between gap-2">
                 <span>{modeLabel(exp.transport_mode)}</span>
@@ -210,7 +210,7 @@ export default function ExpensesPage() {
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                 <Link
                   href={`/shipments/${exp.shipment_id}`}
-                  className="font-medium text-indigo-600 dark:text-indigo-400"
+                  className="font-medium text-blue-600 dark:text-blue-400"
                 >
                   {shipmentRef(exp.shipment_id)}
                 </Link>
@@ -227,7 +227,7 @@ export default function ExpensesPage() {
           ))}
         </div>
         <table className="mt-1 hidden w-full md:table">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Date</Th>
               <Th>Shipment</Th>
@@ -237,17 +237,17 @@ export default function ExpensesPage() {
               <Th />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {expenses.map((exp) => (
               <tr
                 key={exp.id}
-                className="hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                className="hover:bg-white/60 dark:hover:bg-white/[0.08]"
               >
                 <Td className="whitespace-nowrap">{fmtDate(exp.expense_date)}</Td>
                 <Td className="whitespace-nowrap">
                   <Link
                     href={`/shipments/${exp.shipment_id}`}
-                    className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {shipmentRef(exp.shipment_id)}
                   </Link>
@@ -288,10 +288,10 @@ export default function ExpensesPage() {
               <Link
                 key={s.id}
                 href={`/shipments/${s.id}`}
-                className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
+                className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                  <span className="font-medium text-blue-600 dark:text-blue-400">
                     {shipmentRef(s.id)}
                   </span>
                   <span
@@ -314,7 +314,7 @@ export default function ExpensesPage() {
           })}
         </div>
         <table className="mt-1 hidden w-full md:table">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Ref</Th>
               <Th>Description</Th>
@@ -323,19 +323,19 @@ export default function ExpensesPage() {
               <Th>Net profit</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {shipments.map((s) => {
               const cost = expensesByShipment.get(s.id) ?? 0;
               const profit = Number(s.total) - cost;
               return (
                 <tr
                   key={s.id}
-                  className="hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                  className="hover:bg-white/60 dark:hover:bg-white/[0.08]"
                 >
                   <Td className="whitespace-nowrap">
                     <Link
                       href={`/shipments/${s.id}`}
-                      className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                      className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {shipmentRef(s.id)}
                     </Link>

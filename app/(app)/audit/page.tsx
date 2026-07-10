@@ -57,7 +57,7 @@ function Actor({ entry }: { entry: AuditEntry }) {
         <Badge
           className={
             entry.user_role === "agent"
-              ? "bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300"
+              ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
               : "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300"
           }
         >
@@ -111,7 +111,7 @@ export default function AuditPage() {
           {filtered.map((e) => (
             <div
               key={e.id}
-              className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+              className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
             >
               <div className="flex items-center justify-between gap-2">
                 <Actor entry={e} />
@@ -123,7 +123,7 @@ export default function AuditPage() {
                 {e.shipment_id ? (
                   <Link
                     href={`/shipments/${e.shipment_id}`}
-                    className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {shipmentRef(e.shipment_id)}
                   </Link>
@@ -140,7 +140,7 @@ export default function AuditPage() {
           ))}
         </div>
         <table className="hidden w-full md:table">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>When</Th>
               <Th>Who</Th>
@@ -149,11 +149,11 @@ export default function AuditPage() {
               <Th>Changes</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {filtered.map((e) => (
               <tr
                 key={e.id}
-                className="align-top hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                className="align-top hover:bg-white/60 dark:hover:bg-white/[0.08]"
               >
                 <Td className="whitespace-nowrap">{fmtDateTime(e.created_at)}</Td>
                 <Td>
@@ -168,7 +168,7 @@ export default function AuditPage() {
                   {e.shipment_id ? (
                     <Link
                       href={`/shipments/${e.shipment_id}`}
-                      className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                      className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {shipmentRef(e.shipment_id)}
                     </Link>

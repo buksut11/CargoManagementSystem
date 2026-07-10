@@ -139,7 +139,7 @@ export default function InvoiceDetailPage() {
           <div className="flex gap-2">
             <Link
               href={`/invoices/${invoice.id}/print`}
-              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
               🖨 Print
             </Link>
@@ -184,7 +184,7 @@ export default function InvoiceDetailPage() {
                 <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Balance</div>
                 <div
                   className={`mt-0.5 font-bold ${
-                    balance > 0 ? "text-orange-600 dark:text-orange-400" : "text-emerald-600 dark:text-emerald-400"
+                    balance > 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
                   }`}
                 >
                   {fmtMoney(balance)}
@@ -204,10 +204,10 @@ export default function InvoiceDetailPage() {
                 <Link
                   key={s.id}
                   href={`/shipments/${s.id}`}
-                  className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
+                  className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-orange-700 dark:text-orange-400">
+                    <span className="font-medium text-amber-600 dark:text-amber-400">
                       {shipmentRef(s.id)}
                     </span>
                     <span className="text-sm font-semibold">
@@ -223,7 +223,7 @@ export default function InvoiceDetailPage() {
               ))}
             </div>
             <table className="hidden w-full md:table">
-              <thead className="border-b border-slate-200 dark:border-slate-700">
+              <thead className="border-b border-slate-200/60 dark:border-white/10">
                 <tr>
                   <Th>Shipment</Th>
                   <Th>Description</Th>
@@ -232,13 +232,13 @@ export default function InvoiceDetailPage() {
                   <Th>Amount</Th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+              <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
                 {shipments.map((s) => (
                   <tr key={s.id}>
                     <Td>
                       <Link
                         href={`/shipments/${s.id}`}
-                        className="font-medium text-orange-700 dark:text-orange-400 hover:underline"
+                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         {shipmentRef(s.id)}
                       </Link>
@@ -272,7 +272,7 @@ export default function InvoiceDetailPage() {
               {payments.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
                 >
                   <div>
                     <div className="text-sm font-semibold">
@@ -298,7 +298,7 @@ export default function InvoiceDetailPage() {
               )}
             </div>
             <table className="mt-2 hidden w-full md:table">
-              <thead className="border-b border-slate-200 dark:border-slate-700">
+              <thead className="border-b border-slate-200/60 dark:border-white/10">
                 <tr>
                   <Th>Date</Th>
                   <Th>Amount</Th>
@@ -306,7 +306,7 @@ export default function InvoiceDetailPage() {
                   <Th />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+              <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
                 {payments.map((p) => (
                   <tr key={p.id}>
                     <Td>{fmtDate(p.paid_date)}</Td>
@@ -374,7 +374,7 @@ export default function InvoiceDetailPage() {
                 <button
                   type="button"
                   onClick={() => setAmount(balance.toFixed(2))}
-                  className="w-full text-center text-xs text-orange-700 dark:text-orange-400 hover:underline"
+                  className="w-full text-center text-xs text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   Fill remaining balance ({fmtMoney(balance)})
                 </button>

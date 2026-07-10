@@ -155,7 +155,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             </Select>
             <Link
               href="/destinations"
-              className="shrink-0 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+              className="shrink-0 rounded-full border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.05] px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/[0.08]"
             >
               Manage
             </Link>
@@ -312,7 +312,7 @@ function AttachmentSlot({
       />
 
       {url ? (
-        <figure className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/50">
+        <figure className="group relative overflow-hidden rounded-xl border border-slate-200/60 dark:border-white/10 bg-slate-100 dark:bg-slate-900/50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={url}
@@ -343,11 +343,11 @@ function AttachmentSlot({
       ) : (
         <label
           htmlFor={inputId}
-          className={`flex h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/30 px-6 py-8 text-center transition-colors hover:border-orange-400 hover:bg-orange-50/50 dark:hover:border-orange-500 dark:hover:bg-orange-500/5 ${
+          className={`flex h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300/80 dark:border-white/15 bg-white/35 dark:bg-white/[0.04] px-6 py-8 text-center transition-colors hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-500 dark:hover:bg-blue-500/5 ${
             uploading ? "pointer-events-none opacity-60" : ""
           }`}
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
             <svg
               aria-hidden
               viewBox="0 0 24 24"

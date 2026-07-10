@@ -149,7 +149,7 @@ export default function ShipmentsPage() {
           isAdmin ? (
             <Link
               href="/shipments/new"
-              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
               + New shipment
             </Link>
@@ -181,7 +181,7 @@ export default function ShipmentsPage() {
           <button
             onClick={exportCsv}
             disabled={filtered.length === 0}
-            className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 disabled:opacity-50"
+            className="rounded-full border border-white/60 dark:border-white/10 bg-white/55 dark:bg-white/[0.07] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
           >
             ⬇ Export CSV
           </button>
@@ -193,10 +193,10 @@ export default function ShipmentsPage() {
             <Link
               key={s.id}
               href={`/shipments/${s.id}`}
-              className="block rounded-xl border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/40"
+              className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                <span className="font-medium text-blue-600 dark:text-blue-400">
                   {shipmentRef(s.id)}
                 </span>
                 <Badge className={STATUS_CLASS[s.status]}>
@@ -224,7 +224,7 @@ export default function ShipmentsPage() {
           ))}
         </div>
         <table className="hidden w-full md:table">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+          <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Ref</Th>
               <Th>Description</Th>
@@ -238,13 +238,13 @@ export default function ShipmentsPage() {
               <Th>Date</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
             {filtered.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+              <tr key={s.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                 <Td className="whitespace-nowrap">
                   <Link
                     href={`/shipments/${s.id}`}
-                    className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                    className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     {shipmentRef(s.id)}
                   </Link>
@@ -268,7 +268,7 @@ export default function ShipmentsPage() {
                     {s.invoice_id ? (
                       <Link
                         href={`/invoices/${s.invoice_id}`}
-                        className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         {invoiceRef(s.invoice_id)}
                       </Link>

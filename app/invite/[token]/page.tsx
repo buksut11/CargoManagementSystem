@@ -62,23 +62,23 @@ export default function InvitePage({
   }
 
   return (
-    <main className="flex min-h-dvh flex-1 items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
+    <main className="app-bg flex min-h-dvh flex-1 items-center justify-center px-4">
+      <div className="glass-panel w-full max-w-md rounded-3xl p-8 sm:p-10">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30">
             <BoxIcon />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Join on CargoBook
           </h1>
         </div>
 
         {info === null && (
-          <p className="text-center text-sm text-slate-400">Checking your invitation…</p>
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400">Checking your invitation…</p>
         )}
 
         {info && info.valid === false && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-center text-sm text-red-300">
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
             {info.reason === "used"
               ? "This invitation has already been used."
               : info.reason === "expired"
@@ -91,8 +91,9 @@ export default function InvitePage({
 
         {info && info.valid && (
           <form onSubmit={accept} className="space-y-4">
-            <p className="text-center text-sm text-slate-400">
-              You’ve been invited to <strong className="text-white">{info.orgName}</strong> as{" "}
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+              You’ve been invited to{" "}
+              <strong className="text-slate-900 dark:text-white">{info.orgName}</strong> as{" "}
               <span className="capitalize">{info.role}</span>.
             </p>
             <Field label="Email">
