@@ -13,6 +13,10 @@ export type Organization = {
   id: string;
   name: string;
   slug: string | null;
+  logo_url: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
   plan: string;
   subscription_status: string | null;
   stripe_customer_id: string | null;
@@ -69,6 +73,7 @@ export type Shipment = {
 
 export type Invoice = {
   id: number;
+  organization_id: string | null;
   bill_to: string;
   phone: string | null;
   address: string | null;
