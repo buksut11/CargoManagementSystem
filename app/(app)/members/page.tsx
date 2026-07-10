@@ -219,7 +219,7 @@ export default function MembersPage() {
                   <input
                     readOnly
                     value={lastLink}
-                    className="min-w-0 flex-1 truncate rounded-lg border border-white/60 bg-white/60 px-2 py-1.5 text-slate-700 backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"
+                    className="min-w-0 flex-1 truncate rounded-lg border border-white/60 bg-white/40 px-2 py-1.5 text-slate-700 backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"
                   />
                   <button
                     type="button"

@@ -91,17 +91,17 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
       </h2>
 
       <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-        <div className="rounded-xl bg-white/50 p-3 dark:bg-white/[0.06]">
+        <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
           <div className="text-xs text-slate-500 dark:text-slate-400">Income</div>
           <div className="mt-0.5 text-sm font-bold">{fmtMoney(income)}</div>
         </div>
-        <div className="rounded-xl bg-white/50 p-3 dark:bg-white/[0.06]">
+        <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
           <div className="text-xs text-slate-500 dark:text-slate-400">Expenses</div>
           <div className="mt-0.5 text-sm font-bold text-red-600 dark:text-red-400">
             −{fmtMoney(totalExpenses)}
           </div>
         </div>
-        <div className="rounded-xl bg-white/50 p-3 dark:bg-white/[0.06]">
+        <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
           <div className="text-xs text-slate-500 dark:text-slate-400">Net profit</div>
           <div
             className={`mt-0.5 text-sm font-bold ${

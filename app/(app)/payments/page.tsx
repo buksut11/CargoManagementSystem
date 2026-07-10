@@ -54,7 +54,7 @@ export default function PaymentsPage() {
             <button
               onClick={exportCsv}
               disabled={payments.length === 0}
-              className="rounded-full border border-white/60 dark:border-white/10 bg-white/55 dark:bg-white/[0.07] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
+              className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
             >
               ⬇ Export CSV
             </button>

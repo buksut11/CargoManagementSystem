@@ -46,9 +46,9 @@ export function Button({
     primary:
       "bg-blue-600 text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700",
     secondary:
-      "border border-white/60 dark:border-white/10 bg-white/55 dark:bg-white/[0.07] text-slate-700 dark:text-slate-200 backdrop-blur hover:bg-white/80 dark:hover:bg-white/[0.12]",
+      "border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] text-slate-700 dark:text-slate-200 backdrop-blur hover:bg-white/60 dark:hover:bg-white/[0.1]",
     danger:
-      "border border-red-200/70 dark:border-red-500/30 bg-white/55 dark:bg-white/[0.07] text-red-600 dark:text-red-400 backdrop-blur hover:bg-red-50/80 dark:hover:bg-red-500/15",
+      "border border-red-200/70 dark:border-red-500/30 bg-white/35 dark:bg-white/[0.05] text-red-600 dark:text-red-400 backdrop-blur hover:bg-red-50/80 dark:hover:bg-red-500/15",
   }[variant];
   return (
     <button
@@ -79,7 +79,7 @@ export function Field({
 }
 
 const inputClass =
-  "w-full min-w-0 rounded-xl border border-white/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.06] px-3 py-2 text-sm backdrop-blur outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:border-blue-400 dark:focus:ring-blue-500/30";
+  "w-full min-w-0 rounded-xl border border-white/70 dark:border-white/10 bg-white/40 dark:bg-white/[0.05] px-3 py-2 text-sm backdrop-blur outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:border-blue-400 dark:focus:ring-blue-500/30";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={inputClass} {...props} />;
@@ -180,7 +180,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="rounded-full border border-white/60 bg-white/55 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/80 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12]"
+            className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12]"
           >
             {cancelLabel}
           </button>

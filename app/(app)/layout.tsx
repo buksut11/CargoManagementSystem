@@ -121,7 +121,7 @@ function SidebarContent({
             onClick={onNavigate}
             className={`group ${itemBase} ${
               active
-                ? "bg-white/80 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
+                ? "bg-white/60 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
                 : itemIdle
             }`}
           >
@@ -290,7 +290,7 @@ export default function AppLayout({
     <RoleProvider role={resolved.uiRole}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
-        <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-white/50 bg-white/35 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 md:flex">
+        <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-white/50 bg-white/25 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/30 md:flex">
           <SidebarContent
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
@@ -308,7 +308,7 @@ export default function AppLayout({
               onClick={() => setMenuOpen(false)}
               aria-hidden
             />
-            <aside className="absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/70 px-4 py-5 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/80">
+            <aside className="absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/55 px-4 py-5 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
               <button
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close menu"
@@ -330,7 +330,7 @@ export default function AppLayout({
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar with hamburger */}
-          <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-white/50 bg-white/50 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 md:hidden">
+          <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-white/50 bg-white/35 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/50 md:hidden">
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"

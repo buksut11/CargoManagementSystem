@@ -194,7 +194,7 @@ export default function SettingsPage() {
               />
               <label
                 htmlFor="org-logo-input"
-                className={`cursor-pointer rounded-full border border-white/60 bg-white/55 px-3 py-1.5 text-sm text-slate-700 backdrop-blur hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12] ${
+                className={`cursor-pointer rounded-full border border-white/60 bg-white/35 px-3 py-1.5 text-sm text-slate-700 backdrop-blur hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12] ${
                   logoBusy ? "pointer-events-none opacity-60" : ""
                 }`}
               >
