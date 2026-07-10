@@ -149,12 +149,10 @@ input[type="date"]::-webkit-date-and-time-value {
   );
   mask-image: radial-gradient(72% 72% at 50% 50%, black 40%, transparent 96%);
 }
+/* Dark mode: the blur layer's edge reads as a faint border against the dark
+   photo, and the white headline is already legible there — drop it entirely. */
 .dark .hero-blur::before {
-  background: radial-gradient(
-    65% 60% at 45% 45%,
-    rgba(2, 6, 23, 0.2),
-    rgba(2, 6, 23, 0)
-  );
+  display: none;
 }
 
 /* Matching glass for the input fields: lighter blur so text stays sharp,
