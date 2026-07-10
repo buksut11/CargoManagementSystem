@@ -61,7 +61,6 @@ export type Shipment = {
   ship_date: string | null;
   notes: string | null;
   attachment_url: string | null;
-  attachment_url_2: string | null;
   invoice_id: number | null;
   created_at: string;
   destinations?: Pick<Destination, "id" | "name" | "country"> | null;

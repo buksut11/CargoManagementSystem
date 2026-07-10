@@ -39,9 +39,6 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   const [attachmentUrl, setAttachmentUrl] = useState(
     shipment?.attachment_url ?? "",
   );
-  const [attachmentUrl2, setAttachmentUrl2] = useState(
-    shipment?.attachment_url_2 ?? "",
-  );
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -110,7 +107,6 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
       ship_date: shipDate || null,
       notes: notes.trim() || null,
       attachment_url: attachmentUrl || null,
-      attachment_url_2: attachmentUrl2 || null,
     };
     const { error } = shipment
       ? await supabase.from("shipments").update(row).eq("id", shipment.id)
@@ -246,33 +242,22 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
         */}
         <div className="min-w-0">
           <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-            Attachment images{" "}
+            Attachment image{" "}
             <span className="font-normal text-slate-400 dark:text-slate-500">
               (optional)
             </span>
           </span>
 
-          {/* Two independent image slots. They stack on mobile and sit side by
-              side from the sm breakpoint up, so the layout stays responsive. */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <AttachmentSlot
-              inputId="attachment-file-1"
-              url={attachmentUrl}
-              uploading={uploading}
-              onUpload={(e) => uploadImage(e, setAttachmentUrl)}
-              onRemove={() => setAttachmentUrl("")}
-            />
-            <AttachmentSlot
-              inputId="attachment-file-2"
-              url={attachmentUrl2}
-              uploading={uploading}
-              onUpload={(e) => uploadImage(e, setAttachmentUrl2)}
-              onRemove={() => setAttachmentUrl2("")}
-            />
-          </div>
+          <AttachmentSlot
+            inputId="attachment-file"
+            url={attachmentUrl}
+            uploading={uploading}
+            onUpload={(e) => uploadImage(e, setAttachmentUrl)}
+            onRemove={() => setAttachmentUrl("")}
+          />
 
           <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            Agents can view them but not change them.
+            Agents can view it but not change it.
           </p>
         </div>
         <ErrorNote message={error} />
@@ -298,10 +283,9 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   );
 }
 
-// A single attachment slot: either a preview of the uploaded image (with
-// Replace / Remove controls) or a dashed drop-zone to upload one. Kept as a
-// standalone component so the form can render two identical slots without
-// duplicating markup. min-w-0 lets it shrink inside the responsive grid.
+// The attachment slot: either a preview of the uploaded image (with Replace /
+// Remove controls) or a dashed drop-zone to upload one. min-w-0 lets it shrink
+// inside its container.
 function AttachmentSlot({
   inputId,
   url,
