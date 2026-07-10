@@ -95,8 +95,8 @@ export default function PrintShipmentPage() {
       </div>
 
       <div className="border border-slate-300 p-10">
-        {/* Organization branding — full width so a long name has room */}
-        <div className="flex items-start gap-4">
+        {/* Organization branding — centered */}
+        <div className="flex flex-col items-center text-center">
           {org?.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -105,22 +105,23 @@ export default function PrintShipmentPage() {
               className="h-16 w-16 shrink-0 object-contain"
             />
           )}
-          <div className="min-w-0">
-            <div className="text-2xl font-bold leading-tight">
-              {org?.name ?? "📦 CargoBook"}
-            </div>
-            <div className="mt-1 text-sm text-slate-500">Shipment receipt</div>
-            {org?.address && (
-              <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
-                {org.address}
-              </div>
-            )}
-            {(org?.phone || org?.email) && (
-              <div className="mt-0.5 text-xs text-slate-600">
-                {[org.phone, org.email].filter(Boolean).join(" · ")}
-              </div>
-            )}
+          <div className="mt-2 text-2xl font-bold leading-tight">
+            {org?.name ?? "📦 CargoBook"}
           </div>
+          {org?.address && (
+            <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
+              {org.address}
+            </div>
+          )}
+          {(org?.phone || org?.email) && (
+            <div className="mt-0.5 text-xs text-slate-600">
+              {[org.phone, org.email].filter(Boolean).join(" · ")}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 text-center text-lg font-bold uppercase tracking-wide text-slate-800">
+          Shipment receipt
         </div>
 
         <div className="mt-6 flex justify-end text-right">
