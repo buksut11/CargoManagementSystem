@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -265,6 +265,14 @@ export default function AppLayout({
     router.replace("/login");
   }
 
+  // Let the Settings page reflect a logo change in the sidebar without a reload.
+  const setLogoUrl = useCallback((url: string | null) => {
+    setResolved((prev) =>
+      prev ? { ...prev, org: { ...prev.org, logoUrl: url } } : prev,
+    );
+  }, []);
+  const orgActions = useMemo(() => ({ setLogoUrl }), [setLogoUrl]);
+
   if (noOrg) {
     return <NoOrgScreen onSignOut={signOut} />;
   }
@@ -278,7 +286,7 @@ export default function AppLayout({
   }
 
   return (
-    <OrgProvider value={resolved.org}>
+    <OrgProvider value={resolved.org} actions={orgActions}>
     <RoleProvider role={resolved.uiRole}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
