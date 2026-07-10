@@ -134,14 +134,24 @@ export default function LoginPage() {
   return (
     <main
       ref={rootRef}
-      className="app-bg relative flex min-h-dvh flex-1 flex-col overflow-hidden"
+      className="relative flex min-h-dvh flex-1 flex-col overflow-hidden bg-slate-950"
     >
-      {/* Ambient WebGL layer — floating pastel cargo containers over the
-          gradient backdrop. */}
-      <ThreeBackground />
-      {/* A gentle scrim keeps the hero copy legible over the drifting shapes. */}
+      {/* Full-bleed background photo (public/login-bg.webp). */}
       <div
-        className="absolute inset-0 bg-gradient-to-r from-white/40 via-transparent to-transparent dark:from-slate-950/60 dark:via-slate-950/20 dark:to-transparent"
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/login-bg.webp)" }}
+        aria-hidden
+      />
+      {/* Ambient WebGL layer — floating pastel cargo containers. */}
+      <ThreeBackground />
+      {/* Brand-tinted scrims tie the photo to the card and keep text legible.
+          They lighten in light mode so the glass card reads bright and airy. */}
+      <div
+        className="absolute inset-0 bg-gradient-to-r from-white/75 via-white/30 to-white/15 dark:from-slate-950/85 dark:via-slate-950/45 dark:to-slate-950/70"
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent dark:from-slate-950/60 dark:to-slate-950/20"
         aria-hidden
       />
 
