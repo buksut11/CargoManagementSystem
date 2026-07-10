@@ -85,25 +85,25 @@ function SidebarContent({
   const nav = navForRole(orgRole);
   return (
     <>
-      <div className="mb-5 flex items-center gap-3 px-1">
-        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10">
+      <div className="mb-5 flex items-center gap-2.5 px-1">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/icc-logo.svg"
             alt="ICC"
-            width={44}
-            height={44}
+            width={40}
+            height={40}
             className="h-full w-full object-cover"
           />
         </div>
         <div className="min-w-0 flex-1">
           <div
-            className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 dark:text-white"
+            className="line-clamp-2 break-words text-[13px] font-bold leading-tight text-slate-900 dark:text-white"
             title={orgName}
           >
             {orgName}
           </div>
-          <div className="text-xs capitalize text-slate-500 dark:text-slate-400">
+          <div className="truncate text-xs capitalize text-slate-500 dark:text-slate-400">
             CargoBook · {orgRole}
           </div>
         </div>
