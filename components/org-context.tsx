@@ -9,6 +9,7 @@ import type { OrgRole } from "@/lib/types";
 export type OrgContextValue = {
   orgId: string;
   orgName: string;
+  logoUrl: string | null;
   role: OrgRole;
 };
 

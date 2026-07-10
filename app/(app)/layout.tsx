@@ -72,12 +72,14 @@ const itemIdle =
 function SidebarContent({
   orgRole,
   orgName,
+  orgLogoUrl,
   pathname,
   onNavigate,
   onSignOut,
 }: {
   orgRole: OrgRole;
   orgName: string;
+  orgLogoUrl: string | null;
   pathname: string;
   onNavigate?: () => void;
   onSignOut: () => void;
@@ -86,14 +88,14 @@ function SidebarContent({
   return (
     <>
       <div className="mb-5 flex items-center gap-2.5 px-1">
-        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-black/5 dark:bg-slate-700 dark:ring-white/10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/icc-logo.svg"
-            alt="ICC"
+            src={orgLogoUrl || "/icc-logo.svg"}
+            alt={orgLogoUrl ? `${orgName} logo` : "ICC"}
             width={40}
             height={40}
-            className="h-full w-full object-cover"
+            className={`h-full w-full ${orgLogoUrl ? "object-contain" : "object-cover"}`}
           />
         </div>
         <div className="min-w-0 flex-1">
@@ -169,7 +171,7 @@ export default function AppLayout({
       // Resolve the organizations this user belongs to, via their memberships.
       const { data: rows, error } = await supabase
         .from("memberships")
-        .select("org_id, role, organizations(name)")
+        .select("org_id, role, organizations(name, logo_url)")
         .order("created_at", { ascending: true });
       if (!active) return;
 
@@ -185,7 +187,7 @@ export default function AppLayout({
         const uiRole: UserRole = profile?.role === "agent" ? "agent" : "admin";
         setResolved({
           uiRole,
-          org: { orgId: "", orgName: "CargoBook", role: uiRole },
+          org: { orgId: "", orgName: "CargoBook", logoUrl: null, role: uiRole },
         });
         return;
       }
@@ -200,11 +202,19 @@ export default function AppLayout({
         (m: {
           org_id: string;
           role: OrgRole;
-          organizations: { name?: string } | { name?: string }[] | null;
+          organizations:
+            | { name?: string; logo_url?: string | null }
+            | { name?: string; logo_url?: string | null }[]
+            | null;
         }) => {
           const rel = m.organizations;
-          const name = Array.isArray(rel) ? rel[0]?.name : rel?.name;
-          return { id: m.org_id, name: name ?? "Organization", role: m.role };
+          const org = Array.isArray(rel) ? rel[0] : rel;
+          return {
+            id: m.org_id,
+            name: org?.name ?? "Organization",
+            logoUrl: org?.logo_url ?? null,
+            role: m.role,
+          };
         },
       );
 
@@ -221,6 +231,7 @@ export default function AppLayout({
         org: {
           orgId: activeOrg.id,
           orgName: activeOrg.name,
+          logoUrl: activeOrg.logoUrl,
           role: activeOrg.role,
         },
       });
@@ -275,6 +286,7 @@ export default function AppLayout({
           <SidebarContent
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
+            orgLogoUrl={resolved.org.logoUrl}
             pathname={pathname}
             onSignOut={signOut}
           />
@@ -299,6 +311,7 @@ export default function AppLayout({
               <SidebarContent
                 orgRole={resolved.org.role}
                 orgName={resolved.org.orgName}
+                orgLogoUrl={resolved.org.logoUrl}
                 pathname={pathname}
                 onNavigate={() => setMenuOpen(false)}
                 onSignOut={signOut}
