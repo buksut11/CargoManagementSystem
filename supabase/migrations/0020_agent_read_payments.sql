@@ -3,8 +3,8 @@
 -- policy is `for all`, so agents couldn't read them and the app had no way to
 -- show a payment badge to an agent). This adds a members-read policy so any
 -- member of the organization can read its payments; writing them stays
--- admin-only. The agent UI only surfaces a Paid/Partial/Unpaid badge, not the
--- individual amounts.
+-- admin-only. The agent UI surfaces a Paid/Partial/Unpaid badge along with the
+-- invoice total, amount paid and outstanding balance.
 -- Run this in your Supabase project: Dashboard → SQL Editor → paste → Run.
 
 create policy "members read payments" on public.payments
