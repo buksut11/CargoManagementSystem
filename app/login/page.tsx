@@ -160,7 +160,7 @@ export default function LoginPage() {
         <section
           data-animate
           style={{ opacity: 0 }}
-          className="glass-hero hidden max-w-md flex-col gap-6 rounded-[1.75rem] p-8 text-slate-900 lg:flex dark:text-white"
+          className="hero-blur hidden max-w-md flex-col gap-6 text-slate-900 lg:flex dark:text-white"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900/10 ring-1 ring-slate-900/20 backdrop-blur dark:bg-white/15 dark:ring-white/25">
