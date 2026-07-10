@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Invoice, Payment, Shipment } from "@/lib/types";
+import type { Invoice, Organization, Payment, Shipment } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
@@ -19,6 +19,10 @@ export default function PrintInvoicePage() {
   const invoiceId = Number(id);
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [org, setOrg] = useState<Pick<
+    Organization,
+    "name" | "logo_url" | "address" | "phone" | "email"
+  > | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
 
@@ -42,9 +46,19 @@ export default function PrintInvoicePage() {
           .eq("invoice_id", invoiceId)
           .order("paid_date"),
       ]);
-      setInvoice((i.data as Invoice) ?? null);
+      const inv = (i.data as Invoice) ?? null;
+      setInvoice(inv);
       setShipments((s.data as Shipment[]) ?? []);
       setPayments((p.data as Payment[]) ?? []);
+      // The issuing organization's details brand the invoice header.
+      if (inv?.organization_id) {
+        const { data: o } = await supabase
+          .from("organizations")
+          .select("name, logo_url, address, phone, email")
+          .eq("id", inv.organization_id)
+          .single();
+        setOrg(o ?? null);
+      }
     }
     load();
   }, [invoiceId, router]);
@@ -79,9 +93,31 @@ export default function PrintInvoicePage() {
 
       <div className="border border-slate-300 p-10">
         <div className="flex items-start justify-between">
-          <div>
-            <div className="text-2xl font-bold">📦 CargoBook</div>
-            <div className="mt-1 text-sm text-slate-500">Cargo invoice</div>
+          <div className="flex items-start gap-4">
+            {org?.logo_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={org.logo_url}
+                alt={`${org.name} logo`}
+                className="h-16 w-16 shrink-0 object-contain"
+              />
+            )}
+            <div>
+              <div className="text-2xl font-bold">
+                {org?.name ?? "📦 CargoBook"}
+              </div>
+              <div className="mt-1 text-sm text-slate-500">Cargo invoice</div>
+              {org?.address && (
+                <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
+                  {org.address}
+                </div>
+              )}
+              {(org?.phone || org?.email) && (
+                <div className="mt-0.5 text-xs text-slate-600">
+                  {[org.phone, org.email].filter(Boolean).join(" · ")}
+                </div>
+              )}
+            </div>
           </div>
           <div className="text-right">
             <div className="text-xl font-bold">{invoiceRef(invoice.id)}</div>
