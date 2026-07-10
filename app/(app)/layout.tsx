@@ -119,13 +119,13 @@ function SidebarContent({
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className={`group ${itemBase} ${
+            className={`${itemBase} ${
               active
                 ? "bg-white/60 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
                 : itemIdle
             }`}
           >
-            <span className="shrink-0 transform-gpu transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
+            <span className="shrink-0">
               <Icon />
             </span>
             <span>{item.label}</span>
