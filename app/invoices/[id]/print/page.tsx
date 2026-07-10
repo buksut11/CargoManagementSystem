@@ -106,7 +106,6 @@ export default function PrintInvoicePage() {
             <div className="text-2xl font-bold leading-tight">
               {org?.name ?? "📦 CargoBook"}
             </div>
-            <div className="mt-1 text-sm text-slate-500">Cargo invoice</div>
             {org?.address && (
               <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
                 {org.address}
@@ -118,6 +117,10 @@ export default function PrintInvoicePage() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mt-4 text-center text-lg font-bold uppercase tracking-wide text-slate-800">
+          Cargo invoice
         </div>
 
         {/* Customer details on the left, invoice number/date on the right */}
