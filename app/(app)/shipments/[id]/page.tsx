@@ -41,17 +41,22 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [payState, setPayState] = useState<PaymentState | null>(null);
+  const [payment, setPayment] = useState<{
+    total: number;
+    paid: number;
+    state: PaymentState;
+  } | null>(null);
 
-  // Work out whether this shipment's invoice is paid / partial / unpaid. An
-  // invoice can carry several shipments, so sum every shipment on it against
-  // the payments recorded for it (agents may read payments — migration 0020).
+  // Work out whether this shipment's invoice is paid / partial / unpaid, plus
+  // the total, amount paid and outstanding balance. An invoice can carry
+  // several shipments, so sum every shipment on it against the payments
+  // recorded for it (agents may read payments — migration 0020).
   useEffect(() => {
     const invoiceId = shipment.invoice_id;
     let cancelled = false;
     async function load() {
       if (invoiceId == null) {
-        if (!cancelled) setPayState(null);
+        if (!cancelled) setPayment(null);
         return;
       }
       const [s, p] = await Promise.all([
@@ -67,7 +72,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
         (sum, r) => sum + Number(r.amount),
         0,
       );
-      setPayState(paymentState(total, paid));
+      setPayment({ total, paid, state: paymentState(total, paid) });
     }
     load();
     return () => {
@@ -101,14 +106,39 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
       "Payment",
       shipment.invoice_id == null ? (
         <span className="text-slate-400">Not invoiced</span>
-      ) : payState ? (
-        <Badge className={PAYMENT_CLASS[payState]}>{PAYMENT_LABEL[payState]}</Badge>
+      ) : payment ? (
+        <Badge className={PAYMENT_CLASS[payment.state]}>
+          {PAYMENT_LABEL[payment.state]}
+        </Badge>
       ) : (
         <span className="text-slate-400">—</span>
       ),
     ],
-    ["Ship date", fmtDate(shipment.ship_date)],
   ];
+
+  // Invoice totals shown to the agent when the shipment is invoiced: the full
+  // invoice total, how much has been paid and the outstanding balance.
+  if (shipment.invoice_id != null && payment) {
+    rows.push(
+      ["Invoice total", fmtMoney(payment.total)],
+      ["Paid", fmtMoney(payment.paid)],
+      [
+        "Balance",
+        <span
+          key="balance"
+          className={
+            payment.total - payment.paid > 0
+              ? "font-medium text-amber-600 dark:text-amber-400"
+              : "font-medium text-emerald-600 dark:text-emerald-400"
+          }
+        >
+          {fmtMoney(Math.max(payment.total - payment.paid, 0))}
+        </span>,
+      ],
+    );
+  }
+
+  rows.push(["Ship date", fmtDate(shipment.ship_date)]);
 
   return (
     <div>
