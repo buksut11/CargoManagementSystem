@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useOrg } from "@/components/org-context";
+import { useOrg, useSetOrgLogo } from "@/components/org-context";
 import { getPlan, isPaid } from "@/lib/plans";
 import {
   Button,
@@ -17,6 +17,7 @@ import {
 export default function SettingsPage() {
   const org = useOrg();
   const orgId = org?.orgId ?? "";
+  const setSidebarLogo = useSetOrgLogo();
   const [name, setName] = useState(org?.orgName ?? "");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
@@ -112,6 +113,7 @@ export default function SettingsPage() {
       return;
     }
     setLogoUrl(data.publicUrl);
+    setSidebarLogo(data.publicUrl);
   }
 
   async function removeLogo() {
@@ -127,6 +129,7 @@ export default function SettingsPage() {
       return;
     }
     setLogoUrl("");
+    setSidebarLogo(null);
   }
 
   async function startCheckout() {
