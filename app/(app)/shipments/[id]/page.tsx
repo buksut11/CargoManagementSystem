@@ -96,10 +96,12 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     ["Address", shipment.invoices?.address || "—"],
     ["Destination", shipment.destinations?.name ?? "—"],
     ["Weight", fmtKg(Number(shipment.weight_kg))],
-    ["Total price", fmtMoney(Number(shipment.total))],
   ];
 
   if (shipment.invoice_id == null) {
+    // Not on an invoice, so there's no invoice total — show the shipment's own
+    // price and a note instead.
+    rows.push(["Total price", fmtMoney(Number(shipment.total))]);
     rows.push([
       "Payment",
       <span key="not-invoiced" className="text-slate-400">
