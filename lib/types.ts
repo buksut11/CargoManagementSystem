@@ -56,6 +56,7 @@ export type Destination = {
 
 export type Shipment = {
   id: number;
+  organization_id: string | null;
   description: string;
   destination_id: number | null;
   weight_kg: number;
