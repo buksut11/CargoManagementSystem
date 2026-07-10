@@ -9,10 +9,6 @@ import {
   fmtKg,
   fmtMoney,
   invoiceRef,
-  PAYMENT_CLASS,
-  PAYMENT_LABEL,
-  paymentState,
-  type PaymentState,
   shipmentRef,
   STATUS_CLASS,
   STATUS_LABEL,
@@ -44,13 +40,12 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
   const [payment, setPayment] = useState<{
     total: number;
     paid: number;
-    state: PaymentState;
   } | null>(null);
 
-  // Work out whether this shipment's invoice is paid / partial / unpaid, plus
-  // the total, amount paid and outstanding balance. An invoice can carry
-  // several shipments, so sum every shipment on it against the payments
-  // recorded for it (agents may read payments — migration 0020).
+  // Sum the invoice's total, amount paid and outstanding balance so agents can
+  // see the full payment picture. An invoice can carry several shipments, so
+  // sum every shipment on it against the payments recorded for it (agents may
+  // read payments — migration 0020).
   useEffect(() => {
     const invoiceId = shipment.invoice_id;
     let cancelled = false;
@@ -72,7 +67,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
         (sum, r) => sum + Number(r.amount),
         0,
       );
-      setPayment({ total, paid, state: paymentState(total, paid) });
+      setPayment({ total, paid });
     }
     load();
     return () => {
@@ -102,19 +97,16 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     ["Destination", shipment.destinations?.name ?? "—"],
     ["Weight", fmtKg(Number(shipment.weight_kg))],
     ["Total price", fmtMoney(Number(shipment.total))],
-    [
-      "Payment",
-      shipment.invoice_id == null ? (
-        <span className="text-slate-400">Not invoiced</span>
-      ) : payment ? (
-        <Badge className={PAYMENT_CLASS[payment.state]}>
-          {PAYMENT_LABEL[payment.state]}
-        </Badge>
-      ) : (
-        <span className="text-slate-400">—</span>
-      ),
-    ],
   ];
+
+  if (shipment.invoice_id == null) {
+    rows.push([
+      "Payment",
+      <span key="not-invoiced" className="text-slate-400">
+        Not invoiced
+      </span>,
+    ]);
+  }
 
   // Invoice totals shown to the agent when the shipment is invoiced: the full
   // invoice total, how much has been paid and the outstanding balance.
