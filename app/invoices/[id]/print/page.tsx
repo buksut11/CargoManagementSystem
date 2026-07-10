@@ -92,32 +92,60 @@ export default function PrintInvoicePage() {
       </div>
 
       <div className="border border-slate-300 p-10">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            {org?.logo_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={org.logo_url}
-                alt={`${org.name} logo`}
-                className="h-16 w-16 shrink-0 object-contain"
-              />
-            )}
-            <div>
-              <div className="text-2xl font-bold">
-                {org?.name ?? "📦 CargoBook"}
-              </div>
-              <div className="mt-1 text-sm text-slate-500">Cargo invoice</div>
-              {org?.address && (
-                <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
-                  {org.address}
-                </div>
-              )}
-              {(org?.phone || org?.email) && (
-                <div className="mt-0.5 text-xs text-slate-600">
-                  {[org.phone, org.email].filter(Boolean).join(" · ")}
-                </div>
-              )}
+        {/* Organization branding — full width so a long name has room */}
+        <div className="flex items-start gap-4">
+          {org?.logo_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={org.logo_url}
+              alt={`${org.name} logo`}
+              className="h-16 w-16 shrink-0 object-contain"
+            />
+          )}
+          <div className="min-w-0">
+            <div className="text-2xl font-bold leading-tight">
+              {org?.name ?? "📦 CargoBook"}
             </div>
+            <div className="mt-1 text-sm text-slate-500">Cargo invoice</div>
+            {org?.address && (
+              <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
+                {org.address}
+              </div>
+            )}
+            {(org?.phone || org?.email) && (
+              <div className="mt-0.5 text-xs text-slate-600">
+                {[org.phone, org.email].filter(Boolean).join(" · ")}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Customer details on the left, invoice number/date on the right */}
+        <div className="mt-8 flex flex-wrap items-start justify-between gap-6">
+          <div className="min-w-0">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Bill to
+            </div>
+            <dl className="mt-2 space-y-1 text-sm">
+              <div className="flex gap-3">
+                <dt className="w-16 shrink-0 text-slate-500">Name</dt>
+                <dd className="font-medium">{invoice.bill_to || "—"}</dd>
+              </div>
+              {invoice.phone && (
+                <div className="flex gap-3">
+                  <dt className="w-16 shrink-0 text-slate-500">Phone</dt>
+                  <dd className="text-slate-700">{invoice.phone}</dd>
+                </div>
+              )}
+              {invoice.address && (
+                <div className="flex gap-3">
+                  <dt className="w-16 shrink-0 text-slate-500">Address</dt>
+                  <dd className="whitespace-pre-line text-slate-700">
+                    {invoice.address}
+                  </dd>
+                </div>
+              )}
+            </dl>
           </div>
           <div className="text-right">
             <div className="text-xl font-bold">{invoiceRef(invoice.id)}</div>
@@ -125,23 +153,6 @@ export default function PrintInvoicePage() {
               Issued {fmtDate(invoice.issued_date)}
             </div>
           </div>
-        </div>
-
-        <div className="mt-8">
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Bill to
-          </div>
-          <div className="mt-1 text-lg font-medium">
-            {invoice.bill_to || "—"}
-          </div>
-          {invoice.phone && (
-            <div className="mt-0.5 text-sm text-slate-600">{invoice.phone}</div>
-          )}
-          {invoice.address && (
-            <div className="mt-0.5 text-sm text-slate-600">
-              {invoice.address}
-            </div>
-          )}
         </div>
 
         <table className="mt-8 w-full border-collapse text-sm">
