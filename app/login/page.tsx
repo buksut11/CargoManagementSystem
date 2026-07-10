@@ -29,7 +29,7 @@ const REMEMBER_KEY = "cargobook:email";
 // Glass input styling shared by both fields: frosted fill, soft border, and
 // room on the left for the leading icon.
 const glassInput =
-  "glass-field w-full min-w-0 rounded-xl border border-white/60 bg-white/30 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-500/30";
+  "glass-field w-full min-w-0 rounded-xl border border-white/60 bg-white/50 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-500/30";
 
 const featureItems = [
   { label: "Shipments", icon: <BoxIcon /> },
@@ -255,7 +255,7 @@ export default function LoginPage() {
               </span>
             </Field>
             <div className="flex items-center justify-between text-sm">
-              <label className="flex cursor-pointer items-center gap-2 text-slate-600 dark:text-slate-300">
+              <label className="flex cursor-pointer items-center gap-2 text-slate-700 dark:text-slate-300">
                 <input
                   type="checkbox"
                   checked={remember}
@@ -268,7 +268,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={forgotPassword}
                 disabled={busy}
-                className="font-medium text-blue-600 hover:text-blue-700 hover:underline disabled:opacity-50 dark:text-blue-400"
+                className="font-medium text-blue-700 hover:text-blue-800 hover:underline disabled:opacity-50 dark:text-blue-400"
               >
                 Forgot password?
               </button>
