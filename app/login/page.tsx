@@ -213,7 +213,7 @@ export default function LoginPage() {
           <form onSubmit={signIn} className="space-y-4">
             <Field label="Email">
               <span className="relative block">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 [&_svg]:h-4.5 [&_svg]:w-4.5">
+                <span className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-600 dark:text-slate-500 [&_svg]:h-4.5 [&_svg]:w-4.5">
                   <MailIcon />
                 </span>
                 <input
@@ -231,7 +231,7 @@ export default function LoginPage() {
             </Field>
             <Field label="Password">
               <span className="relative block">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 [&_svg]:h-4.5 [&_svg]:w-4.5">
+                <span className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-600 dark:text-slate-500 [&_svg]:h-4.5 [&_svg]:w-4.5">
                   <LockIcon />
                 </span>
                 <input
@@ -248,7 +248,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 [&_svg]:h-4.5 [&_svg]:w-4.5"
+                  className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-slate-600 transition-colors hover:text-slate-800 dark:text-slate-500 dark:hover:text-slate-300 [&_svg]:h-4.5 [&_svg]:w-4.5"
                 >
                   {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                 </button>
