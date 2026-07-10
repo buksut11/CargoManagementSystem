@@ -74,6 +74,37 @@ export const MoonIcon = () => (
   </Base>
 );
 
+export const MailIcon = () => (
+  <Base>
+    <rect x={3} y={5} width={18} height={14} rx={2} />
+    <path d="M3 7l9 6 9-6" />
+  </Base>
+);
+
+export const LockIcon = () => (
+  <Base>
+    <rect x={5} y={11} width={14} height={10} rx={2} />
+    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    <circle cx={12} cy={16} r={1} />
+  </Base>
+);
+
+export const EyeIcon = () => (
+  <Base>
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+    <circle cx={12} cy={12} r={3} />
+  </Base>
+);
+
+export const EyeOffIcon = () => (
+  <Base>
+    <path d="M10.6 5.3A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.5 17.5 0 0 1-2.7 3.6" />
+    <path d="M6.4 6.4A16.8 16.8 0 0 0 2 12s3.5 7 10 7c1.6 0 3-.4 4.3-1" />
+    <path d="M9.9 9.9a3 3 0 1 0 4.2 4.2" />
+    <path d="M3 3l18 18" />
+  </Base>
+);
+
 export const WalletIcon = () => (
   <Base>
     <path d="M3 7a2 2 0 0 1 2-2h13v3" />
