@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { cacheBranding } from "@/lib/branding";
 import type { OrgRole, UserRole } from "@/lib/types";
 import { RoleProvider } from "@/components/role-context";
 import { OrgProvider, type OrgContextValue } from "@/components/org-context";
@@ -225,6 +226,9 @@ export default function AppLayout({
         // localStorage unavailable — fall through to the first org.
       }
       const activeOrg = orgs.find((o) => o.id === storedId) ?? orgs[0];
+      // Remember this org's branding so the login screen shows it on the
+      // user's next visit (see lib/branding.ts).
+      cacheBranding({ name: activeOrg.name, logoUrl: activeOrg.logoUrl });
       const uiRole: UserRole = activeOrg.role === "agent" ? "agent" : "admin";
       setResolved({
         uiRole,
@@ -267,9 +271,11 @@ export default function AppLayout({
 
   // Let the Settings page reflect a logo change in the sidebar without a reload.
   const setLogoUrl = useCallback((url: string | null) => {
-    setResolved((prev) =>
-      prev ? { ...prev, org: { ...prev.org, logoUrl: url } } : prev,
-    );
+    setResolved((prev) => {
+      if (!prev) return prev;
+      cacheBranding({ name: prev.org.orgName, logoUrl: url });
+      return { ...prev, org: { ...prev.org, logoUrl: url } };
+    });
   }, []);
   const orgActions = useMemo(() => ({ setLogoUrl }), [setLogoUrl]);
 
