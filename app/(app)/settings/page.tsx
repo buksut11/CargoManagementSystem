@@ -177,7 +177,7 @@ export default function SettingsPage() {
                 <img
                   src={logoUrl}
                   alt="Organization logo"
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <span className="text-xs text-slate-400">No logo</span>
