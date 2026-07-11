@@ -70,7 +70,7 @@ function Chevron({ left = false }: { left?: boolean }) {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4"
+      className="h-3.5 w-3.5"
       aria-hidden
     >
       <path d={left ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"} />
@@ -79,7 +79,7 @@ function Chevron({ left = false }: { left?: boolean }) {
 }
 
 const navButtonClass =
-  "flex h-8 w-8 items-center justify-center rounded-full border border-white/60 bg-white/35 text-slate-600 backdrop-blur transition-colors hover:bg-white/70 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300 dark:hover:bg-white/[0.14]";
+  "flex h-7 w-7 items-center justify-center rounded-full border border-white/60 bg-white/40 text-slate-600 transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300 dark:hover:bg-white/[0.14]";
 
 export function DatePicker({
   value,
@@ -104,9 +104,9 @@ export function DatePicker({
 
   function openPopover() {
     const rect = rootRef.current?.getBoundingClientRect();
-    // The popover is ~380px tall; flip above the field when it would
+    // The popover is ~320px tall; flip above the field when it would
     // otherwise run off the bottom of the viewport.
-    if (rect) setDropUp(window.innerHeight - rect.bottom < 400 && rect.top > 400);
+    if (rect) setDropUp(window.innerHeight - rect.bottom < 340 && rect.top > 340);
     const base = parseISO(value) ?? todayYmd();
     setViewY(base.y);
     setViewM(base.m);
@@ -199,11 +199,11 @@ export function DatePicker({
         <div
           role="dialog"
           aria-label="Choose date"
-          className={`glass-panel animate-pop-in absolute left-0 z-50 w-72 rounded-2xl p-3 ${
+          className={`glass-popover animate-pop-in absolute left-0 z-50 w-60 rounded-2xl p-2.5 ${
             dropUp ? "bottom-full mb-2" : "top-full mt-2"
           }`}
         >
-          <div className="mb-2 flex items-center justify-between gap-2">
+          <div className="mb-1 flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => (view === "days" ? shiftMonth(-1) : setViewY(viewY - 1))}
@@ -215,7 +215,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={() => setView(view === "days" ? "months" : "days")}
-              className="rounded-full px-3 py-1.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-white/60 dark:text-slate-100 dark:hover:bg-white/[0.1]"
+              className="rounded-full px-3 py-1 text-sm font-semibold text-slate-800 transition-colors hover:bg-white/60 dark:text-slate-100 dark:hover:bg-white/[0.1]"
             >
               {view === "days" ? `${MONTHS[viewM]} ${viewY}` : viewY}
             </button>
@@ -235,7 +235,7 @@ export function DatePicker({
                 {WEEKDAYS.map((w) => (
                   <span
                     key={w}
-                    className="flex h-8 items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"
+                    className="flex h-6 items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"
                   >
                     {w}
                   </span>
@@ -250,7 +250,7 @@ export function DatePicker({
                       key={`${c.y}-${c.m}-${c.d}`}
                       type="button"
                       onClick={() => pick(c.y, c.m, c.d)}
-                      className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition-colors ${
+                      className={`mx-auto flex h-7.5 w-7.5 items-center justify-center rounded-full text-[13px] transition-colors ${
                         isSelected
                           ? "bg-blue-600 font-semibold text-white shadow-lg shadow-blue-500/40"
                           : `hover:bg-white/60 dark:hover:bg-white/[0.1] ${
@@ -269,7 +269,7 @@ export function DatePicker({
               </div>
             </>
           ) : (
-            <div className="grid grid-cols-3 gap-1.5 py-1">
+            <div className="grid grid-cols-3 gap-1 py-1">
               {MONTHS.map((name, i) => {
                 const isCurrent = selected != null && selected.y === viewY && selected.m === i;
                 return (
@@ -280,7 +280,7 @@ export function DatePicker({
                       setViewM(i);
                       setView("days");
                     }}
-                    className={`rounded-xl py-2.5 text-sm transition-colors ${
+                    className={`rounded-lg py-2 text-[13px] transition-colors ${
                       isCurrent
                         ? "bg-blue-600 font-semibold text-white shadow-lg shadow-blue-500/40"
                         : "text-slate-700 hover:bg-white/60 dark:text-slate-200 dark:hover:bg-white/[0.1]"
@@ -293,7 +293,7 @@ export function DatePicker({
             </div>
           )}
 
-          <div className="mt-2 flex items-center justify-between border-t border-white/50 pt-2 dark:border-white/10">
+          <div className="mt-1.5 flex items-center justify-between border-t border-slate-900/10 pt-1.5 dark:border-white/10">
             {!required && value ? (
               <button
                 type="button"
@@ -301,7 +301,7 @@ export function DatePicker({
                   onChange("");
                   setOpen(false);
                 }}
-                className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/[0.1] dark:hover:text-slate-200"
+                className="rounded-full px-2.5 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/[0.1] dark:hover:text-slate-200"
               >
                 Clear
               </button>
@@ -311,7 +311,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={() => pick(today.y, today.m, today.d)}
-              className="rounded-full px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/10 dark:text-blue-400"
+              className="rounded-full px-2.5 py-1 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/10 dark:text-blue-400"
             >
               Today
             </button>
