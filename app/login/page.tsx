@@ -245,7 +245,7 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Sign in to continue to {branding?.name ?? "CargoBook"}
+              Sign in to continue to CargoBook
             </p>
           </div>
           {!isConfigured && (
