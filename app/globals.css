@@ -129,16 +129,25 @@ input:-webkit-autofill:focus {
   color: #f1f5f9; /* slate-100 */
 }
 
-/* iOS Safari gives date inputs a fixed intrinsic width that overflows grid
-   columns and centers their value; normalize them to behave like text inputs. */
-input[type="date"] {
-  min-width: 0;
-  min-height: 2.375rem;
-  -webkit-appearance: none;
-  appearance: none;
+/* Entrance for floating popovers (custom date picker): a quick frosted
+   "pop" that matches the glass panels sliding over the backdrop. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-input[type="date"]::-webkit-date-and-time-value {
-  text-align: left;
+.animate-pop-in {
+  animation: pop-in 0.16s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in {
+    animation: none;
+  }
 }
 
 /* Thick frosted glass for the login card. The look comes from four layers:

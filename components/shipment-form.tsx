@@ -16,6 +16,7 @@ import {
   Select,
   Textarea,
 } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   const router = useRouter();
@@ -209,11 +210,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             />
           </Field>
           <Field label="Ship date">
-            <Input
-              type="date"
-              value={shipDate}
-              onChange={(e) => setShipDate(e.target.value)}
-            />
+            <DatePicker value={shipDate} onChange={setShipDate} />
           </Field>
         </div>
         <Field label="Status">

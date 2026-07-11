@@ -14,6 +14,7 @@ import {
   PageHeader,
   Textarea,
 } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 export default function NewInvoicePage() {
   const router = useRouter();
@@ -112,12 +113,7 @@ export default function NewInvoicePage() {
                 />
               </Field>
               <Field label="Issue date">
-                <Input
-                  type="date"
-                  value={issuedDate}
-                  onChange={(e) => setIssuedDate(e.target.value)}
-                  required
-                />
+                <DatePicker value={issuedDate} onChange={setIssuedDate} required />
               </Field>
             </div>
             <Field label="Address (optional)">

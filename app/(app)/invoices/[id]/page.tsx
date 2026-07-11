@@ -24,6 +24,7 @@ import {
   Td,
   Th,
 } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -352,12 +353,7 @@ export default function InvoiceDetailPage() {
                 />
               </Field>
               <Field label="Date">
-                <Input
-                  type="date"
-                  value={paidDate}
-                  onChange={(e) => setPaidDate(e.target.value)}
-                  required
-                />
+                <DatePicker value={paidDate} onChange={setPaidDate} required />
               </Field>
               <Field label="Method (optional)">
                 <Input

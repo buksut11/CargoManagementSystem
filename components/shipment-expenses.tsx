@@ -13,6 +13,7 @@ import {
   Input,
 } from "@/components/ui";
 import { TransportSelect } from "@/components/transport-select";
+import { DatePicker } from "@/components/date-picker";
 
 // Delivery costs for one shipment, plus the resulting net profit
 // (income from the customer − delivery expenses).
@@ -154,11 +155,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Date (optional)">
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <DatePicker value={date} onChange={setDate} />
           </Field>
           <Field label="Note (optional)">
             <Input
