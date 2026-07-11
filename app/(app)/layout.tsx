@@ -310,33 +310,43 @@ export default function AppLayout({
           />
         </aside>
 
-        {/* Mobile drawer */}
-        {menuOpen && (
-          <div className="fixed inset-0 z-40 md:hidden">
-            <div
-              className="absolute inset-0 bg-black/40"
+        {/* Mobile drawer — kept mounted so it can slide in and out. When closed
+            it is pushed off-screen and made click-through. */}
+        <div
+          className={`fixed inset-0 z-40 md:hidden ${
+            menuOpen ? "" : "pointer-events-none"
+          }`}
+          aria-hidden={!menuOpen}
+        >
+          <div
+            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+              menuOpen ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={() => setMenuOpen(false)}
+            aria-hidden
+          />
+          <aside
+            className={`no-scrollbar absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/55 px-4 py-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-slate-900/70 ${
+              menuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <button
               onClick={() => setMenuOpen(false)}
-              aria-hidden
+              aria-label="Close menu"
+              className="absolute right-3 top-4 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
+            >
+              <CloseIcon />
+            </button>
+            <SidebarContent
+              orgRole={resolved.org.role}
+              orgName={resolved.org.orgName}
+              orgLogoUrl={resolved.org.logoUrl}
+              pathname={pathname}
+              onNavigate={() => setMenuOpen(false)}
+              onSignOut={signOut}
             />
-            <aside className="absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/55 px-4 py-5 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
-              <button
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-                className="absolute right-3 top-4 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
-              >
-                <CloseIcon />
-              </button>
-              <SidebarContent
-                orgRole={resolved.org.role}
-                orgName={resolved.org.orgName}
-                orgLogoUrl={resolved.org.logoUrl}
-                pathname={pathname}
-                onNavigate={() => setMenuOpen(false)}
-                onSignOut={signOut}
-              />
-            </aside>
-          </div>
-        )}
+          </aside>
+        </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar with hamburger */}
