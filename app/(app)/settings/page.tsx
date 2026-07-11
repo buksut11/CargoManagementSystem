@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useOrg, useSetOrgLogo } from "@/components/org-context";
 import { getPlan, isPaid } from "@/lib/plans";
+import { resizeImageFile } from "@/lib/image";
 import {
   Button,
   Card,
@@ -90,13 +91,16 @@ export default function SettingsPage() {
     }
     setLogoBusy(true);
     setError(null);
+    // Shrink to a max-300px thumbnail before upload (see lib/image.ts); the
+    // logo only ever renders at ~40px, so this keeps Storage tiny.
+    const resized = await resizeImageFile(file);
     // Path is prefixed with the organization id so storage RLS can scope
     // writes per-tenant: {org_id}/logo-{timestamp}.{ext}
-    const ext = file.name.split(".").pop() ?? "png";
+    const ext = resized.name.split(".").pop() ?? "webp";
     const path = `${orgId}/logo-${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("org-logos")
-      .upload(path, file, { upsert: true });
+      .upload(path, resized, { upsert: true });
     if (uploadError) {
       setLogoBusy(false);
       setError(uploadError.message);
