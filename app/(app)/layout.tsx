@@ -96,7 +96,7 @@ function SidebarContent({
             alt={orgLogoUrl ? `${orgName} logo` : "ICC"}
             width={40}
             height={40}
-            className={`h-full w-full ${orgLogoUrl ? "object-contain" : "object-cover"}`}
+            className="h-full w-full object-cover"
           />
         </div>
         <div className="min-w-0 flex-1">
