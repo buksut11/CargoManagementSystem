@@ -37,9 +37,16 @@ export default function InvitePage({
     e.preventDefault();
     setBusy(true);
     setError(null);
+    // Forward the current session token if the invitee is already signed in,
+    // so the server can confirm they own an existing account with this email.
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
     const res = await fetch("/api/invitations/accept", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
       body: JSON.stringify({ token, password }),
     });
     const data = await res.json();

@@ -3,6 +3,18 @@ import { createServiceClient } from "@/lib/supabase-server";
 
 export const runtime = "nodejs";
 
+// Escape values interpolated into the invitation email's HTML body so an
+// org name like `<a href="…">` can't inject markup (phishing) into a message
+// sent from our own domain.
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // POST /api/invitations { orgId, email, role } → creates an invite and, if an
 // email provider (Resend) is configured, emails the link. Always returns the
 // link so it can also be copied/shared manually.
@@ -72,6 +84,11 @@ export async function POST(request: Request) {
     .eq("id", orgId)
     .single();
   const orgName = (orgRow?.name as string) ?? "a CargoBook organization";
+  // Collapse any newlines before using the name in the subject header, and
+  // escape it for the HTML body. `role` and `link` are already safe (a fixed
+  // allowlist and a hex token), but escaping the name is what matters here.
+  const orgNameSubject = orgName.replace(/[\r\n]+/g, " ").trim();
+  const orgNameHtml = escapeHtml(orgName);
 
   let emailed = false;
   const resendKey = process.env.RESEND_API_KEY;
@@ -86,8 +103,8 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         from,
         to: email,
-        subject: `You've been invited to ${orgName} on CargoBook`,
-        html: `<p>You've been invited to join <strong>${orgName}</strong> on CargoBook as ${role}.</p>
+        subject: `You've been invited to ${orgNameSubject} on CargoBook`,
+        html: `<p>You've been invited to join <strong>${orgNameHtml}</strong> on CargoBook as ${escapeHtml(role)}.</p>
 <p><a href="${link}">Click here to accept and set your password</a>.</p>
 <p>Or paste this link into your browser:<br>${link}</p>
 <p>This invite expires in 7 days.</p>`,

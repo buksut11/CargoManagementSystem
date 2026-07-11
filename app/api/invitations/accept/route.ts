@@ -94,7 +94,7 @@ export async function POST(request: Request) {
 
   const email = invite.email.toLowerCase();
 
-  // Create the account, or find it if the email already has one.
+  // Create the account for a brand-new invitee.
   let userId: string | null = null;
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email,
@@ -104,13 +104,28 @@ export async function POST(request: Request) {
   if (created?.user) {
     userId = created.user.id;
   } else if (createErr) {
-    // Already registered → locate the existing user and add them to the org.
-    const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    userId = list?.users.find((u) => u.email?.toLowerCase() === email)?.id ?? null;
+    // The email already has an account. We must NOT silently attach it to this
+    // org — the person redeeming the link may not be its owner. Require proof
+    // of ownership: the caller must be signed in as that exact account (the
+    // client forwards their access token when a session exists).
+    const authToken = (request.headers.get("authorization") ?? "").replace(
+      /^Bearer\s+/i,
+      "",
+    );
+    if (authToken) {
+      const { data: authData } = await admin.auth.getUser(authToken);
+      const authUser = authData.user;
+      if (authUser && authUser.email?.toLowerCase() === email) {
+        userId = authUser.id;
+      }
+    }
     if (!userId) {
       return NextResponse.json(
-        { error: "Could not create or find this account. Try signing in instead." },
-        { status: 400 },
+        {
+          error:
+            "An account with this email already exists. Please sign in with it first, then open this invite link again to join.",
+        },
+        { status: 409 },
       );
     }
   }
