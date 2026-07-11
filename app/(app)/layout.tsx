@@ -89,14 +89,18 @@ function SidebarContent({
   return (
     <>
       <div className="mb-5 flex items-center gap-2.5 px-1">
-        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-black/5 dark:bg-slate-700 dark:ring-white/10">
+        <div
+          className={`h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10 ${
+            orgLogoUrl ? "" : "bg-white dark:bg-slate-700"
+          }`}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={orgLogoUrl || "/icc-logo.svg"}
             alt={orgLogoUrl ? `${orgName} logo` : "ICC"}
             width={40}
             height={40}
-            className="h-full w-full object-cover"
+            className={`h-full w-full ${orgLogoUrl ? "object-contain" : "object-cover"}`}
           />
         </div>
         <div className="min-w-0 flex-1">

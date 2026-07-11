@@ -171,13 +171,17 @@ export default function SettingsPage() {
           </p>
 
           <div className="mb-4 flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200/60 bg-white dark:border-white/10 dark:bg-slate-800">
+            <div
+              className={`flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200/60 dark:border-white/10 ${
+                logoUrl ? "" : "bg-white dark:bg-slate-800"
+              }`}
+            >
               {logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={logoUrl}
                   alt="Organization logo"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               ) : (
                 <span className="text-xs text-slate-400">No logo</span>
