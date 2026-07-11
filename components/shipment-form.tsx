@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useSignedAttachment } from "@/lib/storage";
+import { resizeImageFile } from "@/lib/image";
 import { useOrg } from "@/components/org-context";
 import type { Destination, Shipment, ShipmentStatus } from "@/lib/types";
 import {
@@ -78,14 +79,16 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     }
     setUploading(true);
     setError(null);
-    // Upload the original image untouched — no re-encoding or rotation.
+    // Shrink to a max-300px thumbnail before upload (see lib/image.ts) so the
+    // original multi-megabyte photo never reaches Storage.
+    const resized = await resizeImageFile(file);
     // Path is prefixed with the organization id so storage RLS can scope
     // writes per-tenant: {org_id}/{shipment}/{timestamp}.{ext}
-    const ext = file.name.split(".").pop() ?? "jpg";
+    const ext = resized.name.split(".").pop() ?? "webp";
     const path = `${org?.orgId ?? "unknown"}/${shipment?.id ?? "new"}/${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("shipment-attachments")
-      .upload(path, file, { upsert: true });
+      .upload(path, resized, { upsert: true });
     if (uploadError) {
       setUploading(false);
       setError(uploadError.message);
