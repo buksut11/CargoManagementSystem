@@ -79,9 +79,9 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     }
     setUploading(true);
     setError(null);
-    // Shrink to a max-300px thumbnail before upload (see lib/image.ts) so the
+    // Shrink to a max-400px image before upload (see lib/image.ts) so the
     // original multi-megabyte photo never reaches Storage.
-    const resized = await resizeImageFile(file);
+    const resized = await resizeImageFile(file, 400);
     // Path is prefixed with the organization id so storage RLS can scope
     // writes per-tenant: {org_id}/{shipment}/{timestamp}.{ext}
     const ext = resized.name.split(".").pop() ?? "webp";
