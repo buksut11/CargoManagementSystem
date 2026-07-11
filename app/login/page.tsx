@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { supabase, isConfigured } from "@/lib/supabase";
+import {
+  cacheBranding,
+  readCachedBranding,
+  type LoginBranding,
+} from "@/lib/branding";
 import { ErrorNote, Field } from "@/components/ui";
 import {
   BoxIcon,
@@ -47,6 +52,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [branding, setBranding] = useState<LoginBranding | null>(null);
 
   // Prefill the email if it was remembered on a previous visit.
   useEffect(() => {
@@ -59,6 +65,31 @@ export default function LoginPage() {
     } catch {
       // localStorage unavailable — no prefill.
     }
+  }, []);
+
+  // Resolve which organization's branding to show. The cache (written by the
+  // app layout on each visit) covers returning users instantly; a branded
+  // login link (/login?org={slug}) wins over it once the lookup resolves, so
+  // shared links always show the right org even on a fresh browser.
+  useEffect(() => {
+    setBranding(readCachedBranding());
+    const slug = new URLSearchParams(window.location.search).get("org");
+    if (!slug || !isConfigured) return;
+    let active = true;
+    supabase
+      .rpc("login_branding", { org_slug: slug })
+      .then(({ data }: { data: { name: string; logo_url: string | null }[] | null }) => {
+        if (!active) return;
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row?.name) {
+          const next = { name: row.name, logoUrl: row.logo_url ?? null };
+          setBranding(next);
+          cacheBranding(next);
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // GSAP entrance: the hero and card cascade in on load.
@@ -196,7 +227,20 @@ export default function LoginPage() {
           <ThemeTogglePill className="absolute right-5 top-5" />
 
           <div className="mb-8 text-center">
-            <LogoOrb className="mx-auto -mt-2 mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(59,130,246,0.4)]" />
+            {branding?.logoUrl ? (
+              <span className="mx-auto mb-4 mt-1 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-black/10 dark:ring-white/15">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={branding.logoUrl}
+                  alt={`${branding.name} logo`}
+                  width={80}
+                  height={80}
+                  className="h-full w-full object-contain"
+                />
+              </span>
+            ) : (
+              <LogoOrb className="mx-auto -mt-2 mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(59,130,246,0.4)]" />
+            )}
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Welcome back
             </h1>
