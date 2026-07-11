@@ -12,6 +12,7 @@ import {
   shipmentRef,
   STATUS_LABEL,
 } from "@/lib/format";
+import { useSignedAttachment } from "@/lib/storage";
 
 export default function PrintShipmentPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +24,7 @@ export default function PrintShipmentPage() {
     Organization,
     "name" | "logo_url" | "address" | "phone" | "email"
   > | null>(null);
+  const attachmentSrc = useSignedAttachment(shipment?.attachment_url);
 
   useEffect(() => {
     async function load() {
@@ -159,14 +161,14 @@ export default function PrintShipmentPage() {
           </p>
         )}
 
-        {shipment.attachment_url && (
+        {shipment.attachment_url && attachmentSrc && (
           <div className="mt-8 border-t border-slate-200 pt-4">
             <div className="mb-2 text-sm font-semibold text-slate-500">
               Attachment
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={shipment.attachment_url}
+              src={attachmentSrc}
               alt="Shipment attachment"
               style={{ imageOrientation: "none" }}
               className="max-h-64 w-full rounded border border-slate-200 object-contain"

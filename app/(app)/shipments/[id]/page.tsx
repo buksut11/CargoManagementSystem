@@ -27,6 +27,7 @@ import {
 import { ShipmentForm } from "@/components/shipment-form";
 import { ShipmentExpenses } from "@/components/shipment-expenses";
 import { useRole } from "@/components/role-context";
+import { useSignedAttachment } from "@/lib/storage";
 import Link from "next/link";
 
 // Agents see the shipment read-only and may only change its status and notes.
@@ -41,6 +42,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     total: number;
     paid: number;
   } | null>(null);
+  const attachmentSrc = useSignedAttachment(shipment.attachment_url);
 
   // Sum the invoice's total, amount paid and outstanding balance so agents can
   // see the full payment picture. An invoice can carry several shipments, so
@@ -154,20 +156,20 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
               </div>
             ))}
           </dl>
-          {shipment.attachment_url && (
+          {shipment.attachment_url && attachmentSrc && (
             <div className="mt-4 border-t border-slate-200/60 dark:border-white/10 pt-4">
               <p className="mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                 Attachment
               </p>
               <a
-                href={shipment.attachment_url}
+                href={attachmentSrc}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block overflow-hidden rounded-lg border border-slate-200/60 bg-slate-100 dark:border-white/10 dark:bg-slate-900/50"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={shipment.attachment_url}
+                  src={attachmentSrc}
                   alt="Shipment attachment"
                   style={{ imageOrientation: "none" }}
                   className="mx-auto block h-64 w-full object-contain"

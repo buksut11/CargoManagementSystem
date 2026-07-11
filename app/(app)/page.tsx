@@ -39,16 +39,76 @@ function lastMonths(n: number) {
   return months;
 }
 
+// Shape the dashboard renders from — filled either by the database aggregation
+// (the fast path) or computed in the browser (the fallback).
+type Summary = {
+  shipmentCount: number;
+  totalKg: number;
+  invoiced: number;
+  income: number;
+  received: number;
+  spent: number;
+  kgByMonth: Record<string, number>;
+  payByMonth: Record<string, number>;
+  recent: Pick<
+    Shipment,
+    "id" | "description" | "weight_kg" | "status" | "ship_date"
+  >[];
+};
+
+// Bucket a list into { "YYYY-MM": sum } using the given month key + value.
+function bucketByMonth<T>(
+  rows: T[],
+  monthOf: (row: T) => string,
+  valueOf: (row: T) => number,
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const row of rows) {
+    const m = monthOf(row);
+    out[m] = (out[m] ?? 0) + valueOf(row);
+  }
+  return out;
+}
+
 export default function DashboardPage() {
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
+      // Fast path: the database returns just the totals, chart series and the 5
+      // most recent shipments (migration 0023).
+      const { data, error } = await supabase.rpc("dashboard_summary");
+      if (!error && data) {
+        const d = data as {
+          shipment_count: number;
+          total_kg: number;
+          invoiced: number;
+          income: number;
+          received: number;
+          spent: number;
+          kg_by_month: Record<string, number>;
+          pay_by_month: Record<string, number>;
+          recent: Summary["recent"];
+        };
+        setSummary({
+          shipmentCount: Number(d.shipment_count),
+          totalKg: Number(d.total_kg),
+          invoiced: Number(d.invoiced),
+          income: Number(d.income),
+          received: Number(d.received),
+          spent: Number(d.spent),
+          kgByMonth: d.kg_by_month ?? {},
+          payByMonth: d.pay_by_month ?? {},
+          recent: d.recent ?? [],
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Fallback (function not present yet): compute it client-side, exactly as
+      // before, so the dashboard keeps working before the migration is run.
       const [s, p, e] = await Promise.all([
-        // The dashboard doesn't render destination names, so skip that join.
         supabase
           .from("shipments")
           .select("*")
@@ -56,46 +116,61 @@ export default function DashboardPage() {
         supabase.from("payments").select("*"),
         supabase.from("expenses").select("*"),
       ]);
-      setShipments((s.data as Shipment[]) ?? []);
-      setPayments((p.data as Payment[]) ?? []);
-      setExpenses((e.data as Expense[]) ?? []);
+      const shipments = (s.data as Shipment[]) ?? [];
+      const payments = (p.data as Payment[]) ?? [];
+      const expenses = (e.data as Expense[]) ?? [];
+      setSummary({
+        shipmentCount: shipments.length,
+        totalKg: shipments.reduce((sum, r) => sum + Number(r.weight_kg), 0),
+        invoiced: shipments
+          .filter((r) => r.invoice_id !== null)
+          .reduce((sum, r) => sum + Number(r.total), 0),
+        income: shipments.reduce((sum, r) => sum + Number(r.total), 0),
+        received: payments.reduce((sum, r) => sum + Number(r.amount), 0),
+        spent: expenses.reduce((sum, r) => sum + Number(r.amount), 0),
+        kgByMonth: bucketByMonth(
+          shipments,
+          (r) => (r.ship_date ?? r.created_at.slice(0, 10)).slice(0, 7),
+          (r) => Number(r.weight_kg),
+        ),
+        payByMonth: bucketByMonth(
+          payments,
+          (r) => r.paid_date.slice(0, 7),
+          (r) => Number(r.amount),
+        ),
+        recent: shipments.slice(0, 5),
+      });
       setLoading(false);
     }
     load();
   }, []);
 
-  const totalKg = shipments.reduce((sum, s) => sum + Number(s.weight_kg), 0);
-  const invoiced = shipments
-    .filter((s) => s.invoice_id !== null)
-    .reduce((sum, s) => sum + Number(s.total), 0);
-  const received = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const totalKg = summary?.totalKg ?? 0;
+  const invoiced = summary?.invoiced ?? 0;
+  const received = summary?.received ?? 0;
   const outstanding = Math.max(0, invoiced - received);
-  const income = shipments.reduce((sum, s) => sum + Number(s.total), 0);
-  const spent = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const income = summary?.income ?? 0;
+  const spent = summary?.spent ?? 0;
   const netProfit = income - spent;
+  const shipmentCount = summary?.shipmentCount ?? 0;
+  const recent = summary?.recent ?? [];
 
   const months = lastMonths(6);
 
   const kgSeries: ChartPoint[] = months.map((m) => ({
     label: m.label,
-    value: shipments
-      .filter((s) =>
-        (s.ship_date ?? s.created_at.slice(0, 10)).startsWith(m.key),
-      )
-      .reduce((sum, s) => sum + Number(s.weight_kg), 0),
+    value: summary?.kgByMonth[m.key] ?? 0,
   }));
   const paySeries: ChartPoint[] = months.map((m) => ({
     label: m.label,
-    value: payments
-      .filter((p) => p.paid_date.startsWith(m.key))
-      .reduce((sum, p) => sum + Number(p.amount), 0),
+    value: summary?.payByMonth[m.key] ?? 0,
   }));
 
   const kgThisMonth = kgSeries[kgSeries.length - 1].value;
   const receivedThisMonth = paySeries[paySeries.length - 1].value;
 
   const stats = [
-    { label: "Shipments", value: shipments.length, format: fmtCount },
+    { label: "Shipments", value: shipmentCount, format: fmtCount },
     { label: "Total weight", value: totalKg, format: fmtKg },
     { label: "Invoiced", value: invoiced, format: fmtMoney },
     {
@@ -214,7 +289,7 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="mt-2 space-y-3 px-4 pb-4 md:hidden">
-            {shipments.slice(0, 5).map((s) => (
+            {recent.map((s) => (
               <Link
                 key={s.id}
                 href={`/shipments/${s.id}`}
@@ -247,7 +322,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
-              {shipments.slice(0, 5).map((s) => (
+              {recent.map((s) => (
                 <tr key={s.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                   <Td className="whitespace-nowrap">
                     <Link
@@ -271,7 +346,7 @@ export default function DashboardPage() {
               ))}
             </tbody>
           </table>
-          {!loading && shipments.length === 0 && (
+          {!loading && recent.length === 0 && (
             <EmptyState message="No shipments yet — add your first one from the Shipments page." />
           )}
         </Card>

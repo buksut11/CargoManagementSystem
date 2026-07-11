@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useSignedAttachment } from "@/lib/storage";
 import { useOrg } from "@/components/org-context";
 import type { Destination, Shipment, ShipmentStatus } from "@/lib/types";
 import {
@@ -42,6 +43,9 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // attachmentUrl is the canonical value saved to the row; the preview is shown
+  // through a signed URL so it still loads once the bucket is private.
+  const attachmentPreview = useSignedAttachment(attachmentUrl);
 
   useEffect(() => {
     supabase
@@ -250,7 +254,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
 
           <AttachmentSlot
             inputId="attachment-file"
-            url={attachmentUrl}
+            url={attachmentUrl ? attachmentPreview ?? "" : ""}
             uploading={uploading}
             onUpload={(e) => uploadImage(e, setAttachmentUrl)}
             onRemove={() => setAttachmentUrl("")}
