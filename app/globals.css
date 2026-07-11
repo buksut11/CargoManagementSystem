@@ -118,6 +118,17 @@ input:-webkit-autofill:focus {
   box-shadow: 0 0 0 1000px #1e293b inset, 0 0 0 2px #bfdbfe;
 }
 
+/* The native <select> popup is drawn by the OS. Its translucent control
+   background falls back to white, so in dark mode the option list rendered as
+   white-on-light and was unreadable. Give the options an explicit dark fill so
+   they match the theme (color-scheme handles browsers that honor it; this is
+   the fallback for those that don't, e.g. Chrome on Windows). */
+.dark select option,
+.dark select optgroup {
+  background-color: #1e293b; /* slate-800 */
+  color: #f1f5f9; /* slate-100 */
+}
+
 /* iOS Safari gives date inputs a fixed intrinsic width that overflows grid
    columns and centers their value; normalize them to behave like text inputs. */
 input[type="date"] {
