@@ -19,6 +19,7 @@ import {
   Td,
   Th,
 } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -176,11 +177,7 @@ export default function ExpensesPage() {
             />
           </Field>
           <Field label="Date (optional)">
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <DatePicker value={date} onChange={setDate} />
           </Field>
           <Button type="submit" disabled={busy}>
             {busy ? "Adding…" : "Add"}
