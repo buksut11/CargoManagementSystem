@@ -21,6 +21,9 @@ export type Organization = {
   subscription_status: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  // Which product modules the org has turned on ('cargo' | 'flights').
+  // Backfilled to ['cargo'] for every existing org by migration 0026.
+  modules: string[];
   created_at: string;
 };
 
@@ -113,5 +116,154 @@ export type Payment = {
   paid_date: string;
   method: string | null;
   note: string | null;
+  created_at: string;
+};
+
+// ── Flight Booking & Financial Management module ────────────────────────────
+// Passenger air-ticketing built on the same multi-tenant rails as cargo.
+
+export type FlightBookingStatus =
+  | "quote"
+  | "booked"
+  | "ticketed"
+  | "cancelled"
+  | "refunded"
+  | "void";
+
+export type TripType = "oneway" | "return" | "multicity";
+
+export type PassengerType = "adult" | "child" | "infant";
+
+export type SupplierType =
+  | "airline"
+  | "consolidator"
+  | "bsp"
+  | "gds"
+  | "other";
+
+export type RefundType = "refund" | "void" | "reissue";
+
+export type FlightCustomer = {
+  id: number;
+  organization_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  created_at: string;
+};
+
+export type FlightSupplier = {
+  id: number;
+  organization_id: string;
+  name: string;
+  type: SupplierType;
+  contact: string | null;
+  created_at: string;
+};
+
+export type FlightBooking = {
+  id: number;
+  organization_id: string;
+  booking_ref: string | null;
+  pnr: string | null;
+  customer_id: number | null;
+  supplier_id: number | null;
+  airline: string | null;
+  trip_type: TripType;
+  status: FlightBookingStatus;
+  booking_date: string;
+  travel_date: string | null;
+  source: string;
+  base_fare: number;
+  taxes: number;
+  service_fee: number;
+  markup: number;
+  commission_amount: number;
+  net_cost: number;
+  sale_total: number; // generated: base_fare + taxes + service_fee + markup
+  profit: number; // generated: sale_total - net_cost
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  flight_customers?: Pick<FlightCustomer, "id" | "name" | "phone" | "email"> | null;
+  flight_suppliers?: Pick<FlightSupplier, "id" | "name" | "type"> | null;
+};
+
+export type FlightSegment = {
+  id: number;
+  organization_id: string;
+  booking_id: number;
+  segment_no: number;
+  airline: string | null;
+  flight_number: string | null;
+  origin: string | null;
+  destination: string | null;
+  departure_at: string | null;
+  arrival_at: string | null;
+  cabin_class: string | null;
+  created_at: string;
+};
+
+export type FlightPassenger = {
+  id: number;
+  organization_id: string;
+  booking_id: number;
+  full_name: string;
+  type: PassengerType;
+  ticket_number: string | null;
+  created_at: string;
+};
+
+export type BookingPayment = {
+  id: number;
+  organization_id: string;
+  booking_id: number;
+  amount: number;
+  paid_date: string;
+  method: string | null;
+  note: string | null;
+  created_at: string;
+  flight_bookings?: Pick<FlightBooking, "id" | "booking_ref"> | null;
+};
+
+export type SupplierPayment = {
+  id: number;
+  organization_id: string;
+  booking_id: number | null;
+  supplier_id: number | null;
+  amount: number;
+  paid_date: string;
+  method: string | null;
+  note: string | null;
+  created_at: string;
+  flight_suppliers?: Pick<FlightSupplier, "id" | "name"> | null;
+  flight_bookings?: Pick<FlightBooking, "id" | "booking_ref"> | null;
+};
+
+export type BookingRefund = {
+  id: number;
+  organization_id: string;
+  booking_id: number;
+  refund_type: RefundType;
+  refund_date: string;
+  customer_refund: number;
+  supplier_refund: number;
+  penalty: number;
+  adm_amount: number;
+  note: string | null;
+  created_at: string;
+};
+
+export type FlightAuditEntry = {
+  id: number;
+  organization_id: string;
+  user_id: string | null;
+  user_email: string | null;
+  user_role: string | null;
+  action: "create" | "update" | "delete";
+  booking_id: number | null;
+  booking_ref: string | null;
+  changes: Record<string, { from: unknown; to: unknown }> | null;
   created_at: string;
 };

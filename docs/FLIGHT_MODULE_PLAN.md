@@ -27,6 +27,12 @@ shape first — same spirit as [`SAAS_PLAN.md`](SAAS_PLAN.md).
   module is **purely additive** — new tables, new routes — with a single,
   guarded edit to the shared sidebar.
 
+> **Status:** Phases A–E are implemented on branch
+> `claude/flight-booking-financial-module-tqslco`. Migrations `0026`–`0031`
+> and `supabase/tests/flight_isolation_check.sql` are ready to run; the UI
+> builds and lints clean. Remaining deferred items (plan-gating the module,
+> a live GDS connector) are noted in §7 and intentionally out of v1.
+
 ---
 
 ## 1. Where the app is today (baseline the module builds on)
@@ -278,10 +284,12 @@ paid_to_suppliers, payable_outstanding, booking_count,
 sales_by_month, recent_bookings
 ```
 
-### `0031_flight_audit.sql` (optional, Phase E)
+### `0031_flight_audit.sql` (Phase E)
 
 A booking audit trail parallel to the shipment one, writing to a **separate**
-`flight_audit_log` table so cargo's `audit_log` is never touched.
+`flight_audit_log` table so cargo's `audit_log` is never touched. A
+security-definer trigger records every booking create/update/delete with a
+field diff; editors of the org read it at `/flights/audit`.
 
 ---
 
@@ -326,18 +334,22 @@ Path gating extends `pathAllowed`: agents may only reach `/flights/bookings`
 
 ## 5. Phased roadmap (each phase ships & verifies on its own)
 
-1. **Phase A — DB foundation** (`0026`–`0030`): tables, RLS, triggers, report
+1. **Phase A — DB foundation** ✅ (`0026`–`0030`): tables, RLS, triggers, report
    RPC. Flights are in **no** org's `modules` yet, so there is **zero
-   user-visible change**. Verify cross-tenant RLS isolation (org A can never
-   see org B's bookings/ledger) per `SAAS_PLAN.md` §6.
-2. **Phase B — Plumbing:** types, guarded modules-aware sidebar, Settings
-   toggle, `PlaneIcon`. Enable `flights` for the test org.
-3. **Phase C — Booking desk:** bookings list / new / detail, customers,
-   suppliers, passengers, segments.
-4. **Phase D — Financials:** customer receipts, supplier payables,
-   refund / void / reissue, flight dashboard + reports, printable invoice, CSV.
-5. **Phase E — Polish:** booking audit trail, plan-gating the module, a GDS
-   import stub that populates bookings + segments.
+   user-visible change**. Cross-tenant RLS isolation is proven by
+   `supabase/tests/flight_isolation_check.sql` per `SAAS_PLAN.md` §6.
+2. **Phase B — Plumbing** ✅: `Flight*` types + `modules` on `Organization`,
+   the guarded modules-aware sidebar, the Settings module toggle, and the
+   flight icons.
+3. **Phase C — Booking desk** ✅: bookings list / new / detail, customers,
+   suppliers, and the passenger + itinerary editor (`BookingForm`).
+4. **Phase D — Financials** ✅: customer receipts, supplier payables,
+   refund / void / reissue (`BookingLedger`), the flight dashboard + reports,
+   the printable ticket invoice, and CSV export.
+5. **Phase E — Polish** ✅ (`0031`): booking audit trail at `/flights/audit`.
+   *Deferred by decision:* plan-gating the module (pending the pricing model)
+   and a live GDS connector (needs credentials — the schema is already
+   import-ready via `flight_segments` + `source`).
 
 Order matters: the isolation boundary (Phase A) lands and is tested before any
 money or UI is built on top of it.

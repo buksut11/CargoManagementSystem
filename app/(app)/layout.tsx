@@ -12,6 +12,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
 import {
   BoxIcon,
+  BuildingIcon,
+  ChartIcon,
   ClockIcon,
   CloseIcon,
   CoinsIcon,
@@ -20,49 +22,116 @@ import {
   LogoutIcon,
   MenuIcon,
   PinIcon,
+  PlaneIcon,
+  ReceiptIcon,
   SettingsIcon,
+  TicketIcon,
   UsersIcon,
   WalletIcon,
 } from "@/components/icons";
 
-const ADMIN_NAV = [
-  { href: "/", label: "Dashboard", icon: HomeIcon },
-  { href: "/shipments", label: "Shipments", icon: BoxIcon },
-  { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
-  { href: "/payments", label: "Payments", icon: CoinsIcon },
-  { href: "/expenses", label: "Expenses", icon: WalletIcon },
-  { href: "/destinations", label: "Destinations", icon: PinIcon },
-  { href: "/audit", label: "Audit trail", icon: ClockIcon },
-  { href: "/members", label: "Members", icon: UsersIcon },
-  { href: "/settings", label: "Settings", icon: SettingsIcon },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: () => React.ReactElement;
+  roles: OrgRole[];
+};
+
+const ALL: OrgRole[] = ["owner", "admin", "manager", "agent"];
+const EDITORS: OrgRole[] = ["owner", "admin", "manager"];
+const ADMINS: OrgRole[] = ["owner", "admin"];
+
+// Cargo module nav (unchanged for existing cargo-only organizations).
+const CARGO_NAV: NavItem[] = [
+  { href: "/", label: "Dashboard", icon: HomeIcon, roles: EDITORS },
+  { href: "/shipments", label: "Shipments", icon: BoxIcon, roles: ALL },
+  { href: "/invoices", label: "Invoices", icon: InvoiceIcon, roles: EDITORS },
+  { href: "/payments", label: "Payments", icon: CoinsIcon, roles: EDITORS },
+  { href: "/expenses", label: "Expenses", icon: WalletIcon, roles: EDITORS },
+  { href: "/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },
+  { href: "/audit", label: "Audit trail", icon: ClockIcon, roles: EDITORS },
 ];
 
-const AGENT_NAV = [{ href: "/shipments", label: "Shipments", icon: BoxIcon }];
+// Flight module nav (shown only when the org has 'flights' enabled). Agents get
+// read-only access to the booking list; everything else is editor-only.
+const FLIGHT_NAV: NavItem[] = [
+  { href: "/flights", label: "Flights", icon: PlaneIcon, roles: EDITORS },
+  { href: "/flights/bookings", label: "Bookings", icon: TicketIcon, roles: ALL },
+  { href: "/flights/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
+  { href: "/flights/suppliers", label: "Suppliers", icon: BuildingIcon, roles: EDITORS },
+  { href: "/flights/payments", label: "Receipts", icon: CoinsIcon, roles: EDITORS },
+  { href: "/flights/payables", label: "Payables", icon: ReceiptIcon, roles: EDITORS },
+  { href: "/flights/reports", label: "Reports", icon: ChartIcon, roles: EDITORS },
+  { href: "/flights/audit", label: "Activity", icon: ClockIcon, roles: EDITORS },
+];
 
-// Managers get everything operational, minus member management and settings.
-const MANAGER_NAV = ADMIN_NAV.filter(
-  (item) => item.href !== "/members" && item.href !== "/settings",
-);
+// Account-level nav, independent of which product modules are on.
+const ACCOUNT_NAV: NavItem[] = [
+  { href: "/members", label: "Members", icon: UsersIcon, roles: ADMINS },
+  { href: "/settings", label: "Settings", icon: SettingsIcon, roles: ADMINS },
+];
 
 // Remembers which organization the user last acted in (for multi-org accounts).
 const ACTIVE_ORG_KEY = "cargobook:activeOrg";
 
-function navForRole(role: OrgRole) {
-  if (role === "agent") return AGENT_NAV;
-  if (role === "manager") return MANAGER_NAV;
-  return ADMIN_NAV;
+// The nav for a role, composed from the org's enabled modules. An org with no
+// recognised module still falls back to cargo so nothing disappears.
+function navFor(role: OrgRole, modules: string[]): NavItem[] {
+  const on = modules.length ? modules : ["cargo"];
+  const items: NavItem[] = [];
+  if (on.includes("cargo")) items.push(...CARGO_NAV);
+  if (on.includes("flights")) items.push(...FLIGHT_NAV);
+  items.push(...ACCOUNT_NAV);
+  return items.filter((item) => item.roles.includes(role));
 }
 
-// Which paths each role may visit (agents: shipments only; managers: everything
-// except member management and settings).
-function pathAllowed(role: OrgRole, path: string) {
+const CARGO_PATHS = [
+  "/shipments",
+  "/invoices",
+  "/payments",
+  "/expenses",
+  "/destinations",
+  "/audit",
+];
+
+// Which paths each role may visit, gated by both role and enabled modules.
+function pathAllowed(role: OrgRole, path: string, modules: string[]) {
+  const on = modules.length ? modules : ["cargo"];
+
+  // Module gating: hide a module's pages entirely when it is turned off.
+  const isFlightPath = path === "/flights" || path.startsWith("/flights/");
+  if (isFlightPath && !on.includes("flights")) return false;
+  const isCargoPath =
+    path === "/" ||
+    CARGO_PATHS.some((p) => path === p || path.startsWith(p + "/"));
+  if (isCargoPath && !on.includes("cargo")) return false;
+
   if (role === "agent") {
-    return path === "/shipments" || /^\/shipments\/\d+$/.test(path);
+    // Read-only: cargo shipments and flight bookings only.
+    return (
+      path === "/shipments" ||
+      /^\/shipments\/\d+$/.test(path) ||
+      path === "/flights/bookings" ||
+      /^\/flights\/bookings\/\d+$/.test(path)
+    );
   }
   if (role === "manager") {
     return path !== "/members" && path !== "/settings";
   }
   return true;
+}
+
+// Where to send a user who lands somewhere they may not go.
+function homeFor(role: OrgRole, modules: string[]) {
+  const on = modules.length ? modules : ["cargo"];
+  if (role === "agent") {
+    if (on.includes("cargo")) return "/shipments";
+    if (on.includes("flights")) return "/flights/bookings";
+    return "/shipments";
+  }
+  if (on.includes("cargo")) return "/";
+  if (on.includes("flights")) return "/flights";
+  return "/";
 }
 
 const itemBase =
@@ -74,6 +143,7 @@ function SidebarContent({
   orgRole,
   orgName,
   orgLogoUrl,
+  modules,
   pathname,
   onNavigate,
   onSignOut,
@@ -81,11 +151,12 @@ function SidebarContent({
   orgRole: OrgRole;
   orgName: string;
   orgLogoUrl: string | null;
+  modules: string[];
   pathname: string;
   onNavigate?: () => void;
   onSignOut: () => void;
 }) {
-  const nav = navForRole(orgRole);
+  const nav = navFor(orgRole, modules);
   return (
     <>
       <div className="mb-5 flex items-center gap-2.5 px-1">
@@ -116,8 +187,12 @@ function SidebarContent({
         </div>
       </div>
       {nav.map((item) => {
+        // Module roots ("/" and "/flights") match exactly so a child page
+        // (e.g. /flights/bookings) highlights only its own item, not the root.
         const active =
-          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          item.href === "/" || item.href === "/flights"
+            ? pathname === item.href
+            : pathname === item.href || pathname.startsWith(item.href + "/");
         const Icon = item.icon;
         return (
           <Link
@@ -176,13 +251,14 @@ export default function AppLayout({
       // Resolve the organizations this user belongs to, via their memberships.
       const { data: rows, error } = await supabase
         .from("memberships")
-        .select("org_id, role, organizations(name, logo_url)")
+        .select("org_id, role, organizations(name, logo_url, modules)")
         .order("created_at", { ascending: true });
       if (!active) return;
 
       if (error) {
-        // Database predates the multi-tenant migrations — fall back to the
-        // global profiles.role so the app still works.
+        // Database predates the multi-tenant (or modules) migrations — fall
+        // back to the global profiles.role and cargo-only nav so the app still
+        // works exactly as before.
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -192,7 +268,13 @@ export default function AppLayout({
         const uiRole: UserRole = profile?.role === "agent" ? "agent" : "admin";
         setResolved({
           uiRole,
-          org: { orgId: "", orgName: "CargoBook", logoUrl: null, role: uiRole },
+          org: {
+            orgId: "",
+            orgName: "CargoBook",
+            logoUrl: null,
+            role: uiRole,
+            modules: ["cargo"],
+          },
         });
         return;
       }
@@ -208,8 +290,8 @@ export default function AppLayout({
           org_id: string;
           role: OrgRole;
           organizations:
-            | { name?: string; logo_url?: string | null }
-            | { name?: string; logo_url?: string | null }[]
+            | { name?: string; logo_url?: string | null; modules?: string[] | null }
+            | { name?: string; logo_url?: string | null; modules?: string[] | null }[]
             | null;
         }) => {
           const rel = m.organizations;
@@ -219,6 +301,7 @@ export default function AppLayout({
             name: org?.name ?? "Organization",
             logoUrl: org?.logo_url ?? null,
             role: m.role,
+            modules: org?.modules ?? ["cargo"],
           };
         },
       );
@@ -241,6 +324,7 @@ export default function AppLayout({
           orgName: activeOrg.name,
           logoUrl: activeOrg.logoUrl,
           role: activeOrg.role,
+          modules: activeOrg.modules,
         },
       });
     }
@@ -254,12 +338,16 @@ export default function AppLayout({
     };
   }, [router]);
 
-  // Keep each role on the pages they are allowed to see.
+  // Keep each role on the pages they are allowed to see (role + module gated).
+  const orgModules = useMemo(
+    () => resolved?.org.modules ?? ["cargo"],
+    [resolved],
+  );
   useEffect(() => {
-    if (orgRole && !pathAllowed(orgRole, pathname)) {
-      router.replace(orgRole === "agent" ? "/shipments" : "/");
+    if (orgRole && !pathAllowed(orgRole, pathname, orgModules)) {
+      router.replace(homeFor(orgRole, orgModules));
     }
-  }, [orgRole, pathname, router]);
+  }, [orgRole, orgModules, pathname, router]);
 
   // Close the mobile drawer whenever the route changes.
   const [lastPath, setLastPath] = useState(pathname);
@@ -287,7 +375,7 @@ export default function AppLayout({
     return <NoOrgScreen onSignOut={signOut} />;
   }
 
-  if (!resolved || (orgRole && !pathAllowed(orgRole, pathname))) {
+  if (!resolved || (orgRole && !pathAllowed(orgRole, pathname, orgModules))) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-slate-500 dark:text-slate-400">
         Loading…
@@ -305,6 +393,7 @@ export default function AppLayout({
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
             orgLogoUrl={resolved.org.logoUrl}
+            modules={resolved.org.modules}
             pathname={pathname}
             onSignOut={signOut}
           />
@@ -341,6 +430,7 @@ export default function AppLayout({
               orgRole={resolved.org.role}
               orgName={resolved.org.orgName}
               orgLogoUrl={resolved.org.logoUrl}
+              modules={resolved.org.modules}
               pathname={pathname}
               onNavigate={() => setMenuOpen(false)}
               onSignOut={signOut}
