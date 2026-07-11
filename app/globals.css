@@ -129,6 +129,26 @@ input:-webkit-autofill:focus {
   color: #f1f5f9; /* slate-100 */
 }
 
+/* Floating popover surface (custom date picker). Unlike .glass-panel it
+   floats over dense form content, so the fill is near-opaque — otherwise
+   the fields underneath bleed through and the calendar becomes unreadable. */
+.glass-popover {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(252, 253, 255, 0.92);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 20px 45px -18px rgba(30, 41, 90, 0.45);
+}
+.dark .glass-popover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(20, 26, 44, 0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 20px 45px -18px rgba(0, 0, 0, 0.75);
+}
+
 /* Entrance for floating popovers (custom date picker): a quick frosted
    "pop" that matches the glass panels sliding over the backdrop. */
 @keyframes pop-in {
