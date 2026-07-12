@@ -57,6 +57,20 @@
     0 16px 40px -18px rgba(0, 0, 0, 0.6);
 }
 
+/* Tailwind v4's preflight resets interactive elements to the default arrow
+   cursor. Restore the hand (pointer) cursor on every clickable control, and
+   show the disabled cursor when a button can't be pressed. */
+button,
+[role="button"],
+label[for],
+summary {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 body {
   /* Wide content (tables, charts) scrolls inside its own card — the page
      itself must never scroll sideways. `clip` keeps position:sticky working. */
