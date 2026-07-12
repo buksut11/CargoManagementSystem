@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { inputClass } from "./ui";
 
 const MONTHS = [
@@ -94,19 +95,36 @@ export function DatePicker({
   placeholder?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
+  // Viewport coordinates for the popover. It renders through a portal on
+  // <body> with position:fixed — the glass cards use backdrop-filter, which
+  // creates stacking contexts, so a popover nested inside a card would get
+  // painted OVER by the next card on the page no matter its z-index.
+  const [pos, setPos] = useState({ left: 0, top: 0, bottom: 0 });
   const [view, setView] = useState<"days" | "months">("days");
   const selected = parseISO(value);
   const today = todayYmd();
   const [viewY, setViewY] = useState(selected?.y ?? today.y);
   const [viewM, setViewM] = useState(selected?.m ?? today.m);
 
-  function openPopover() {
+  // (Re)compute where the popover goes, anchored to the field. The popover is
+  // ~320px tall and 240px wide; flip above the field when it would otherwise
+  // run off the bottom, and clamp horizontally to the viewport.
+  const updatePos = useCallback(() => {
     const rect = rootRef.current?.getBoundingClientRect();
-    // The popover is ~320px tall; flip above the field when it would
-    // otherwise run off the bottom of the viewport.
-    if (rect) setDropUp(window.innerHeight - rect.bottom < 340 && rect.top > 340);
+    if (!rect) return;
+    setDropUp(window.innerHeight - rect.bottom < 340 && rect.top > 340);
+    setPos({
+      left: Math.max(8, Math.min(rect.left, window.innerWidth - 248)),
+      top: rect.bottom + 8,
+      bottom: window.innerHeight - rect.top + 8,
+    });
+  }, []);
+
+  function openPopover() {
+    updatePos();
     const base = parseISO(value) ?? todayYmd();
     setViewY(base.y);
     setViewM(base.m);
@@ -117,7 +135,13 @@ export function DatePicker({
   useEffect(() => {
     if (!open) return;
     function onPointerDown(e: PointerEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+      const t = e.target as Node;
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(t) &&
+        popRef.current &&
+        !popRef.current.contains(t)
+      ) {
         setOpen(false);
       }
     }
@@ -126,11 +150,17 @@ export function DatePicker({
     }
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
+    // Keep the portal-rendered popover glued to the field while the page
+    // scrolls or resizes underneath it.
+    window.addEventListener("scroll", updatePos, true);
+    window.addEventListener("resize", updatePos);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", updatePos, true);
+      window.removeEventListener("resize", updatePos);
     };
-  }, [open]);
+  }, [open, updatePos]);
 
   function pick(y: number, m: number, d: number) {
     onChange(toISO(y, m, d));
@@ -195,13 +225,18 @@ export function DatePicker({
         />
       )}
 
-      {open && (
+      {open &&
+        createPortal(
         <div
+          ref={popRef}
           role="dialog"
           aria-label="Choose date"
-          className={`glass-popover animate-pop-in absolute left-0 z-50 w-60 rounded-2xl p-2.5 ${
-            dropUp ? "bottom-full mb-2" : "top-full mt-2"
-          }`}
+          style={
+            dropUp
+              ? { left: pos.left, bottom: pos.bottom }
+              : { left: pos.left, top: pos.top }
+          }
+          className="glass-popover animate-pop-in fixed z-50 w-60 rounded-2xl p-2.5"
         >
           <div className="mb-1 flex items-center justify-between gap-2">
             <button
@@ -316,7 +351,8 @@ export function DatePicker({
               Today
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
