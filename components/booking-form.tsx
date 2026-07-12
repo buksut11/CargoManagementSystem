@@ -67,7 +67,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
   const [supplierId, setSupplierId] = useState<string>(
     booking?.supplier_id ? String(booking.supplier_id) : "",
   );
-  const [airline, setAirline] = useState(booking?.airline ?? "");
   const [tripType, setTripType] = useState<TripType>(
     booking?.trip_type ?? "oneway",
   );
@@ -158,7 +157,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       pnr: pnr.trim() || null,
       customer_id: customerId ? Number(customerId) : null,
       supplier_id: supplierId ? Number(supplierId) : null,
-      airline: airline.trim() || null,
+      airline: null,
       trip_type: tripType,
       status,
       booking_date: bookingDate,
@@ -287,13 +286,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                 </option>
               ))}
             </Select>
-          </Field>
-          <Field label="Airline">
-            <Input
-              value={airline}
-              onChange={(e) => setAirline(e.target.value)}
-              placeholder="e.g. Turkish Airlines"
-            />
           </Field>
           <Field label="Trip type">
             <Select
