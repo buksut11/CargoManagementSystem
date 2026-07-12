@@ -21,6 +21,7 @@ import {
   Field,
   Input,
   PageHeader,
+  rowDeleteClass,
   Td,
   Th,
 } from "@/components/ui";
@@ -286,7 +287,7 @@ export default function InvoiceDetailPage() {
                   </div>
                   <button
                     onClick={() => setPendingPayment(p)}
-                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                    className={rowDeleteClass}
                   >
                     Delete
                   </button>
@@ -318,7 +319,7 @@ export default function InvoiceDetailPage() {
                     <Td className="text-right">
                       <button
                         onClick={() => setPendingPayment(p)}
-                        className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                        className={rowDeleteClass}
                       >
                         Delete
                       </button>

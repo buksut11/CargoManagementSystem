@@ -11,6 +11,7 @@ import {
   ErrorNote,
   Field,
   Input,
+  rowDeleteClass,
 } from "@/components/ui";
 import { TransportSelect } from "@/components/transport-select";
 import { DatePicker } from "@/components/date-picker";
@@ -128,7 +129,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
               <button
                 type="button"
                 onClick={() => setPending(exp)}
-                className="text-xs text-red-600 hover:underline dark:text-red-400"
+                className={rowDeleteClass}
               >
                 Delete
               </button>

@@ -11,6 +11,7 @@ import {
   ErrorNote,
   Input,
   PageHeader,
+  rowDeleteClass,
   Td,
   Th,
 } from "@/components/ui";
@@ -129,10 +130,7 @@ export default function DestinationsPage() {
                 <Td className="font-medium">{d.name}</Td>
                 <Td>{d.country ?? "—"}</Td>
                 <Td className="text-right">
-                  <button
-                    onClick={() => setPending(d)}
-                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
-                  >
+                  <button onClick={() => setPending(d)} className={rowDeleteClass}>
                     Delete
                   </button>
                 </Td>
