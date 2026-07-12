@@ -203,7 +203,7 @@ export default function ExpensesPage() {
             All expenses
           </h2>
         </div>
-        <div className="mt-2 space-y-3 p-3 md:hidden">
+        <div className="mt-2 space-y-3 p-3 lg:hidden">
           {expenses.map((exp) => (
             <div
               key={exp.id}
@@ -234,7 +234,7 @@ export default function ExpensesPage() {
             </div>
           ))}
         </div>
-        <table className="mt-1 hidden w-full md:table">
+        <table className="mt-1 hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Date</Th>
@@ -290,7 +290,7 @@ export default function ExpensesPage() {
             Profit per shipment
           </h2>
         </div>
-        <div className="mt-2 space-y-3 p-3 md:hidden">
+        <div className="mt-2 space-y-3 p-3 lg:hidden">
           {shipments.map((s) => {
             const cost = expensesByShipment.get(s.id) ?? 0;
             const profit = Number(s.total) - cost;
@@ -323,7 +323,7 @@ export default function ExpensesPage() {
             );
           })}
         </div>
-        <table className="mt-1 hidden w-full md:table">
+        <table className="mt-1 hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Ref</Th>

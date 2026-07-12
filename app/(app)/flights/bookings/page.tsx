@@ -154,7 +154,7 @@ export default function BookingsPage() {
 
       <Card className="table-scroll">
         {/* Mobile cards */}
-        <div className="space-y-3 p-3 md:hidden">
+        <div className="space-y-3 p-3 lg:hidden">
           {filtered.map((b) => (
             <Link
               key={b.id}
@@ -187,7 +187,7 @@ export default function BookingsPage() {
         </div>
 
         {/* Desktop table */}
-        <table className="hidden w-full md:table">
+        <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Ref</Th>

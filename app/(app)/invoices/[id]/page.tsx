@@ -204,7 +204,7 @@ export default function InvoiceDetailPage() {
           </Card>
 
           <Card className="table-scroll">
-            <div className="space-y-3 p-3 md:hidden">
+            <div className="space-y-3 p-3 lg:hidden">
               {shipments.map((s) => (
                 <Link
                   key={s.id}
@@ -227,7 +227,7 @@ export default function InvoiceDetailPage() {
                 </Link>
               ))}
             </div>
-            <table className="hidden w-full md:table">
+            <table className="hidden w-full lg:table">
               <thead className="border-b border-slate-200/60 dark:border-white/10">
                 <tr>
                   <Th>Shipment</Th>
@@ -278,7 +278,7 @@ export default function InvoiceDetailPage() {
                 </Badge>
               )}
             </div>
-            <div className="mt-2 space-y-3 p-3 md:hidden">
+            <div className="mt-2 space-y-3 p-3 lg:hidden">
               {payments.map((p) => (
                 <div
                   key={p.id}
@@ -307,7 +307,7 @@ export default function InvoiceDetailPage() {
                 </p>
               )}
             </div>
-            <table className="mt-2 hidden w-full md:table">
+            <table className="mt-2 hidden w-full lg:table">
               <thead className="border-b border-slate-200/60 dark:border-white/10">
                 <tr>
                   <Th>Date</Th>

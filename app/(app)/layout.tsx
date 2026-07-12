@@ -492,7 +492,7 @@ export default function AppLayout({
             </span>
           </header>
 
-          <main className="min-w-0 flex-1 px-4 py-5 md:px-8 md:py-8">
+          <main className="min-w-0 flex-1 px-5 py-6 md:px-8 md:py-8">
             <div className="mx-auto w-full max-w-6xl">
               <PageTransition>{children}</PageTransition>
             </div>

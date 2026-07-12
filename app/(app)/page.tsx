@@ -317,7 +317,7 @@ export default function DashboardPage() {
               View all →
             </Link>
           </div>
-          <div className="mt-2 space-y-3 px-4 pb-4 md:hidden">
+          <div className="mt-2 space-y-3 px-4 pb-4 lg:hidden">
             {recent.map((s) => (
               <Link
                 key={s.id}
@@ -340,7 +340,7 @@ export default function DashboardPage() {
               </Link>
             ))}
           </div>
-          <table className="mt-1 hidden w-full md:table">
+          <table className="mt-1 hidden w-full lg:table">
             <thead>
               <tr>
                 <Th>Ref</Th>
