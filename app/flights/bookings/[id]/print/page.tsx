@@ -161,7 +161,7 @@ export default function PrintBookingPage() {
                 <th className="py-2 pr-2">Flight</th>
                 <th className="py-2 pr-2">Route</th>
                 <th className="py-2 pr-2">Departs</th>
-                <th className="py-2">Cabin</th>
+                <th className="py-2">Classes</th>
               </tr>
             </thead>
             <tbody>

@@ -178,7 +178,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
         <div className="space-y-5">
           <Card className="p-5">
             <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Itinerary
+              Flights
             </h2>
             {segments.length === 0 ? (
               <p className="text-sm text-slate-400">No segments.</p>

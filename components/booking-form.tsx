@@ -407,8 +407,8 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       {/* Itinerary */}
       <RepeatSection
         icon={<PlaneIcon />}
-        title="Itinerary"
-        subtitle="Flights, dates and cabin — the first departure sets the travel date"
+        title="Flights"
+        subtitle="Flights, dates and classes — the first departure sets the travel date"
         singular="Flight"
         rows={segments}
         onAdd={() => setSegments((r) => [...r, { ...emptySeg }])}
@@ -466,7 +466,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                   )
                 }
               >
-                <option value="">— Cabin —</option>
+                <option value="">— Classes —</option>
                 <option value="Economy">Economy</option>
                 <option value="Business">Business</option>
                 {s.cabin_class &&
