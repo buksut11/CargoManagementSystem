@@ -439,13 +439,21 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                   }
                   placeholder="Arrival"
                 />
-                <Input
+                <Select
                   value={s.cabin_class}
                   onChange={(e) =>
                     setSegments((r) => r.map((x, j) => (j === i ? { ...x, cabin_class: e.target.value } : x)))
                   }
-                  placeholder="Cabin (e.g. Economy)"
-                />
+                >
+                  <option value="">— Cabin —</option>
+                  <option value="Economy">Economy</option>
+                  <option value="Business">Business</option>
+                  {s.cabin_class &&
+                    s.cabin_class !== "Economy" &&
+                    s.cabin_class !== "Business" && (
+                      <option value={s.cabin_class}>{s.cabin_class}</option>
+                    )}
+                </Select>
               </div>
             </div>
           )}
