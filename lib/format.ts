@@ -123,8 +123,7 @@ export const FLIGHT_STATUS_CLASS: Record<FlightBookingStatus, string> = {
 
 export const TRIP_TYPE_LABEL: Record<TripType, string> = {
   oneway: "One-way",
-  return: "Return",
-  multicity: "Multi-city",
+  return: "Round-Trip",
 };
 
 export const SUPPLIER_TYPE_LABEL: Record<string, string> = {

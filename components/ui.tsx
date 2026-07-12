@@ -1,10 +1,23 @@
+"use client";
+
+import {
+  Children,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type {
   ButtonHTMLAttributes,
+  ChangeEvent,
   InputHTMLAttributes,
+  OptionHTMLAttributes,
   ReactNode,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
+import { createPortal } from "react-dom";
 
 export function Card({
   children,
@@ -85,8 +98,253 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={inputClass} {...props} />;
 }
 
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className={inputClass} {...props} />;
+// ── Custom glass dropdown ───────────────────────────────────────────────────
+// Drop-in replacement for the old native <select>: same API (`value`,
+// `onChange(e)` and <option> children), but the open list is a frosted glass
+// popover matching the rest of the app instead of the OS-native menu. Rendered
+// through a portal on <body> — the glass cards create stacking contexts
+// (backdrop-filter), so an in-card popover would be painted over by later
+// cards, exactly like the date picker.
+
+type SelectOption = { value: string; label: string; disabled: boolean };
+
+// Plain text of an <option>'s children (labels are strings or string arrays).
+function optionText(node: ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(optionText).join("");
+  if (isValidElement(node)) {
+    return optionText((node.props as { children?: ReactNode }).children);
+  }
+  return "";
+}
+
+function collectOptions(children: ReactNode): SelectOption[] {
+  const out: SelectOption[] = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+    if (child.type === "option") {
+      const p = child.props as OptionHTMLAttributes<HTMLOptionElement>;
+      const label = optionText(p.children);
+      out.push({
+        value: p.value != null ? String(p.value) : label,
+        label,
+        disabled: !!p.disabled,
+      });
+    } else {
+      // Fragments / optgroup / conditional wrappers — recurse into them.
+      const inner = (child.props as { children?: ReactNode }).children;
+      if (inner) out.push(...collectOptions(inner));
+    }
+  });
+  return out;
+}
+
+export function Select({
+  value,
+  onChange,
+  required,
+  disabled,
+  children,
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
+  const [pos, setPos] = useState({ left: 0, top: 0, bottom: 0, width: 0 });
+  const [highlight, setHighlight] = useState(-1);
+
+  const options = collectOptions(children);
+  const current = value != null ? String(value) : "";
+  const selectedIdx = options.findIndex((o) => o.value === current);
+  // Like a native select, fall back to showing the first option.
+  const label =
+    selectedIdx >= 0 ? options[selectedIdx].label : (options[0]?.label ?? "");
+
+  const updatePos = useCallback(() => {
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setDropUp(window.innerHeight - rect.bottom < 288 && rect.top > 288);
+    setPos({
+      left: Math.max(4, Math.min(rect.left, window.innerWidth - rect.width - 4)),
+      top: rect.bottom + 6,
+      bottom: window.innerHeight - rect.top + 6,
+      width: rect.width,
+    });
+  }, []);
+
+  function openList() {
+    if (disabled) return;
+    updatePos();
+    setHighlight(selectedIdx >= 0 ? selectedIdx : 0);
+    setOpen(true);
+  }
+
+  function pick(v: string) {
+    setOpen(false);
+    // Callers read e.target.value exactly as they did with the native select.
+    onChange?.({ target: { value: v } } as ChangeEvent<HTMLSelectElement>);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      const t = e.target as Node;
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(t) &&
+        popRef.current &&
+        !popRef.current.contains(t)
+      ) {
+        setOpen(false);
+      }
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlight((h) => {
+          const dir = e.key === "ArrowDown" ? 1 : -1;
+          let next = h;
+          for (let i = 0; i < options.length; i++) {
+            next = (next + dir + options.length) % options.length;
+            if (!options[next].disabled) break;
+          }
+          return next;
+        });
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        setHighlight((h) => {
+          const opt = options[h];
+          if (opt && !opt.disabled) pick(opt.value);
+          return h;
+        });
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("scroll", updatePos, true);
+    window.addEventListener("resize", updatePos);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", updatePos, true);
+      window.removeEventListener("resize", updatePos);
+    };
+    // options is rebuilt each render from children; the listeners only need
+    // resubscribing when the popover opens or closes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, updatePos]);
+
+  // Keep the keyboard highlight visible while arrowing through a long list.
+  useEffect(() => {
+    if (!open || highlight < 0) return;
+    popRef.current
+      ?.querySelector(`[data-idx="${highlight}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [open, highlight]);
+
+  return (
+    <div ref={rootRef} className="relative min-w-0">
+      <button
+        type="button"
+        onClick={() => (open ? setOpen(false) : openList())}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={`${inputClass} flex items-center justify-between gap-2 text-left disabled:opacity-50`}
+      >
+        <span className="truncate text-slate-900 dark:text-slate-100">
+          {label || " "}
+        </span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform dark:text-slate-500 ${
+            open ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {/* Keeps native "please fill out this field" validation working. */}
+      {required && (
+        <input
+          type="text"
+          value={current}
+          onChange={() => {}}
+          onFocus={openList}
+          required
+          tabIndex={-1}
+          aria-hidden
+          className="sr-only"
+        />
+      )}
+
+      {open &&
+        createPortal(
+          <div
+            ref={popRef}
+            role="listbox"
+            style={{
+              left: pos.left,
+              width: pos.width,
+              ...(dropUp ? { bottom: pos.bottom } : { top: pos.top }),
+            }}
+            className="glass-popover animate-pop-in fixed z-50 max-h-64 overflow-y-auto rounded-xl p-1.5"
+          >
+            {options.map((o, i) => {
+              const isSelected = o.value === current;
+              return (
+                <button
+                  key={`${o.value}-${i}`}
+                  type="button"
+                  data-idx={i}
+                  role="option"
+                  aria-selected={isSelected}
+                  disabled={o.disabled}
+                  onClick={() => pick(o.value)}
+                  onMouseEnter={() => setHighlight(i)}
+                  className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors disabled:opacity-40 ${
+                    isSelected
+                      ? "font-semibold text-blue-700 dark:text-blue-300"
+                      : "text-slate-700 dark:text-slate-200"
+                  } ${
+                    highlight === i
+                      ? "bg-white/70 dark:bg-white/[0.12]"
+                      : "hover:bg-white/60 dark:hover:bg-white/[0.08]"
+                  }`}
+                >
+                  <span className="truncate">{o.label}</span>
+                  {isSelected && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-hidden
+                    >
+                      <path d="M5 13l4 4 10-10" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
 }
 
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {

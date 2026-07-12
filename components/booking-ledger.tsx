@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import { fmtDate, fmtMoney } from "@/lib/format";
 import { Button, Card, ErrorNote, Input, Select } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -58,7 +59,9 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
   const refunded = refunds.reduce((sum, r) => sum + Number(r.customer_refund), 0);
   const saleTotal = Number(booking.sale_total);
   const netCost = Number(booking.net_cost);
-  const receivable = Math.max(0, saleTotal - received);
+  // A customer refund is a credit against the balance, so it lowers what is
+  // still receivable just like a payment does.
+  const receivable = Math.max(0, saleTotal - received - refunded);
   const payable = Math.max(0, netCost - paidSupplier);
 
   return (
@@ -77,7 +80,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
           />
           <div className="my-2 border-t border-slate-200/60 dark:border-white/10" />
           <Row label="Net cost" value={fmtMoney(netCost)} />
-          <Row label="Paid to supplier" value={fmtMoney(paidSupplier)} />
+          <Row label="Paid to airline" value={fmtMoney(paidSupplier)} />
           <Row
             label="Payable"
             value={fmtMoney(payable)}
@@ -132,7 +135,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
       />
 
       <LedgerSection<SupplierPayment>
-        title="Supplier payments"
+        title="Airline payments"
         rows={supplierPays}
         rowLabel={(p) => (
           <>
@@ -284,12 +287,7 @@ function LedgerSection<T extends { id: number }>({
               placeholder="Amount"
               required
             />
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+            <DatePicker value={date} onChange={setDate} required />
           </div>
           <Input
             value={method}
@@ -347,12 +345,8 @@ function RefundSection({
   onDelete: (id: number) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<RefundType>("refund");
   const [date, setDate] = useState(today());
   const [customerRefund, setCustomerRefund] = useState("");
-  const [supplierRefund, setSupplierRefund] = useState("");
-  const [penalty, setPenalty] = useState("");
-  const [adm, setAdm] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const n = (v: string) => (v === "" ? 0 : parseFloat(v) || 0);
@@ -361,23 +355,19 @@ function RefundSection({
     e.preventDefault();
     setBusy(true);
     const ok = await onAdd({
-      refund_type: type,
+      refund_type: "refund",
       refund_date: date,
       customer_refund: n(customerRefund),
-      supplier_refund: n(supplierRefund),
-      penalty: n(penalty),
-      adm_amount: n(adm),
+      supplier_refund: 0,
+      penalty: 0,
+      adm_amount: 0,
       note: note.trim() || null,
     });
     setBusy(false);
     if (ok) {
       setCustomerRefund("");
-      setSupplierRefund("");
-      setPenalty("");
-      setAdm("");
       setNote("");
       setDate(today());
-      setType("refund");
       setOpen(false);
     }
   }
@@ -399,19 +389,12 @@ function RefundSection({
       {open && (
         <form onSubmit={submit} className="mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
-            <Select value={type} onChange={(e) => setType(e.target.value as RefundType)}>
+            <Select value="refund" disabled>
               <option value="refund">Refund</option>
-              <option value="void">Void</option>
-              <option value="reissue">Reissue</option>
             </Select>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <DatePicker value={date} onChange={setDate} required />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
-            <Input type="number" step="0.01" min="0" value={supplierRefund} onChange={(e) => setSupplierRefund(e.target.value)} placeholder="Recovered from supplier" />
-            <Input type="number" step="0.01" min="0" value={penalty} onChange={(e) => setPenalty(e.target.value)} placeholder="Penalty" />
-            <Input type="number" step="0.01" min="0" value={adm} onChange={(e) => setAdm(e.target.value)} placeholder="ADM amount" />
-          </div>
+          <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
           <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" />
           <Button type="submit" disabled={busy}>
             {busy ? "Saving…" : "Record"}

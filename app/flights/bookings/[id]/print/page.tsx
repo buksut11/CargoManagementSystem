@@ -161,7 +161,7 @@ export default function PrintBookingPage() {
                 <th className="py-2 pr-2">Flight</th>
                 <th className="py-2 pr-2">Route</th>
                 <th className="py-2 pr-2">Departs</th>
-                <th className="py-2">Cabin</th>
+                <th className="py-2">Classes</th>
               </tr>
             </thead>
             <tbody>
@@ -187,11 +187,14 @@ export default function PrintBookingPage() {
         {passengers.length > 0 && (
           <div className="mt-6 text-sm">
             <div className="mb-1 font-semibold text-slate-800">Passengers</div>
-            <ul className="list-inside list-disc text-slate-700">
+            <ul className="text-slate-700">
               {passengers.map((p) => (
-                <li key={p.id}>
-                  {p.full_name}
-                  {p.ticket_number ? ` — ${p.ticket_number}` : ""}
+                <li key={p.id} className="flex justify-between">
+                  <span>
+                    {p.full_name}
+                    <span className="text-slate-400 capitalize"> ({p.type})</span>
+                  </span>
+                  <span>{fmtMoney(Number(p.sale_amount))}</span>
                 </li>
               ))}
             </ul>
@@ -203,11 +206,6 @@ export default function PrintBookingPage() {
           <tbody>
             <FareRow label="Trip type" value={TRIP_TYPE_LABEL[booking.trip_type]} />
             <FareRow label="Status" value={FLIGHT_STATUS_LABEL[booking.status]} />
-            <FareRow label="Base fare" value={fmtMoney(Number(booking.base_fare))} />
-            <FareRow label="Taxes" value={fmtMoney(Number(booking.taxes))} />
-            {Number(booking.service_fee) > 0 && (
-              <FareRow label="Service fee" value={fmtMoney(Number(booking.service_fee))} />
-            )}
           </tbody>
         </table>
 

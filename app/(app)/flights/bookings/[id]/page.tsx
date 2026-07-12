@@ -85,8 +85,16 @@ export default function BookingDetailPage() {
               href={`/flights/bookings/${booking.id}/print`}
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              🖨 Print
+              🖨 Invoice
             </Link>
+            {booking.customer_id && (
+              <Link
+                href={`/flights/customers/${booking.customer_id}/statement`}
+                className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.1]"
+              >
+                📄 Statement
+              </Link>
+            )}
             <Button variant="danger" onClick={() => setConfirmOpen(true)}>
               Delete
             </Button>
@@ -136,7 +144,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
   const rows: [string, React.ReactNode][] = [
     ["PNR", booking.pnr || "—"],
     ["Booking ref", booking.booking_ref || "—"],
-    ["Airline", booking.airline || "—"],
+    ["Airline", booking.airline || booking.flight_suppliers?.name || "—"],
     ["Customer", booking.flight_customers?.name ?? "—"],
     ["Trip type", TRIP_TYPE_LABEL[booking.trip_type]],
     ["Booking date", fmtDate(booking.booking_date)],
@@ -170,7 +178,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
         <div className="space-y-5">
           <Card className="p-5">
             <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Itinerary
+              Flights
             </h2>
             {segments.length === 0 ? (
               <p className="text-sm text-slate-400">No segments.</p>
@@ -207,11 +215,9 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
                       {p.full_name}{" "}
                       <span className="text-xs text-slate-400 capitalize">({p.type})</span>
                     </span>
-                    {p.ticket_number && (
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {p.ticket_number}
-                      </span>
-                    )}
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {fmtMoney(Number(p.sale_amount))}
+                    </span>
                   </li>
                 ))}
               </ul>

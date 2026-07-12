@@ -148,6 +148,14 @@ export const UsersIcon = () => (
   </Base>
 );
 
+export const BookIcon = () => (
+  <Base>
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />
+    <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" />
+    <path d="M9 7h7M9 11h7" />
+  </Base>
+);
+
 export const BuildingIcon = () => (
   <Base>
     <path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16" />
@@ -188,5 +196,15 @@ export const SettingsIcon = () => (
   <Base>
     <circle cx={12} cy={12} r={3} />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </Base>
+);
+
+// A grid of panels — the classic "dashboard / overview" glyph.
+export const DashboardIcon = () => (
+  <Base>
+    <rect x={3} y={3} width={7} height={9} rx={1.5} />
+    <rect x={14} y={3} width={7} height={5} rx={1.5} />
+    <rect x={14} y={12} width={7} height={9} rx={1.5} />
+    <rect x={3} y={16} width={7} height={5} rx={1.5} />
   </Base>
 );

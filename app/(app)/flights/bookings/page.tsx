@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type { FlightBooking, FlightBookingStatus } from "@/lib/types";
+import type {
+  BookingPayment,
+  BookingRefund,
+  FlightBooking,
+  FlightBookingStatus,
+} from "@/lib/types";
 import {
   bookingRef,
   fmtDate,
@@ -27,18 +32,40 @@ export default function BookingsPage() {
   const role = useRole();
   const isAgent = role === "agent";
   const [bookings, setBookings] = useState<FlightBooking[]>([]);
+  const [receivedByBooking, setReceivedByBooking] = useState<
+    Record<number, number>
+  >({});
+  const [refundedByBooking, setRefundedByBooking] = useState<
+    Record<number, number>
+  >({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
-    supabase
-      .from("flight_bookings")
-      .select("*, flight_customers(id, name), flight_suppliers(id, name)")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setBookings((data as FlightBooking[]) ?? []);
-        setLoading(false);
-      });
+    async function load() {
+      const [b, p, r] = await Promise.all([
+        supabase
+          .from("flight_bookings")
+          .select("*, flight_customers(id, name), flight_suppliers(id, name)")
+          .order("created_at", { ascending: false }),
+        supabase.from("booking_payments").select("booking_id, amount"),
+        supabase.from("booking_refunds").select("booking_id, customer_refund"),
+      ]);
+      setBookings((b.data as FlightBooking[]) ?? []);
+      const paid: Record<number, number> = {};
+      for (const row of (p.data as BookingPayment[]) ?? []) {
+        paid[row.booking_id] = (paid[row.booking_id] ?? 0) + Number(row.amount);
+      }
+      setReceivedByBooking(paid);
+      const refunded: Record<number, number> = {};
+      for (const row of (r.data as BookingRefund[]) ?? []) {
+        refunded[row.booking_id] =
+          (refunded[row.booking_id] ?? 0) + Number(row.customer_refund);
+      }
+      setRefundedByBooking(refunded);
+      setLoading(false);
+    }
+    load();
   }, []);
 
   const filtered = useMemo(
@@ -49,18 +76,32 @@ export default function BookingsPage() {
     [bookings, statusFilter],
   );
 
+  // Net money kept from the customer = payments in − refunds returned. A refund
+  // is a credit on the balance, so it also lowers what is still receivable.
+  const received = (b: FlightBooking) =>
+    (receivedByBooking[b.id] ?? 0) - (refundedByBooking[b.id] ?? 0);
+  const receivable = (b: FlightBooking) =>
+    Math.max(
+      0,
+      Number(b.sale_total) -
+        (receivedByBooking[b.id] ?? 0) -
+        (refundedByBooking[b.id] ?? 0),
+    );
+
   function exportCsv() {
     downloadCsv("flight-bookings.csv", [
-      ["Ref", "PNR", "Airline", "Customer", "Booking date", "Travel date", "Status", "Sale total", "Net cost", "Profit"],
+      ["Ref", "PNR", "Airline", "Customer", "Booking date", "Travel date", "Status", "Sale total", "Received", "Receivable", "Net cost", "Profit"],
       ...filtered.map((b) => [
         bookingRef(b.id),
         b.booking_ref ?? "",
-        b.airline ?? "",
+        b.airline ?? b.flight_suppliers?.name ?? "",
         b.flight_customers?.name ?? "",
         b.booking_date,
         b.travel_date ?? "",
         FLIGHT_STATUS_LABEL[b.status],
         Number(b.sale_total),
+        received(b),
+        receivable(b),
         Number(b.net_cost),
         Number(b.profit),
       ]),
@@ -129,12 +170,17 @@ export default function BookingsPage() {
                 </Badge>
               </div>
               <div className="mt-1 text-sm">
-                {b.airline ?? "—"}
+                {b.airline ?? b.flight_suppliers?.name ?? "—"}
                 {b.flight_customers?.name ? ` · ${b.flight_customers.name}` : ""}
               </div>
               <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
                 <span>{fmtDate(b.travel_date)}</span>
                 {!isAgent && <span>{fmtMoney(Number(b.sale_total))}</span>}
+                {!isAgent && receivable(b) > 0 && (
+                  <span className="text-amber-600 dark:text-amber-400">
+                    {fmtMoney(receivable(b))} due
+                  </span>
+                )}
               </div>
             </Link>
           ))}
@@ -151,6 +197,8 @@ export default function BookingsPage() {
               <Th>Travel</Th>
               <Th>Status</Th>
               {!isAgent && <Th>Sale total</Th>}
+              {!isAgent && <Th>Received</Th>}
+              {!isAgent && <Th>Receivable</Th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -165,7 +213,7 @@ export default function BookingsPage() {
                   </Link>
                 </Td>
                 <Td>{b.pnr ?? "—"}</Td>
-                <Td>{b.airline ?? "—"}</Td>
+                <Td>{b.airline ?? b.flight_suppliers?.name ?? "—"}</Td>
                 <Td>{b.flight_customers?.name ?? "—"}</Td>
                 <Td className="whitespace-nowrap">{fmtDate(b.travel_date)}</Td>
                 <Td>
@@ -176,6 +224,22 @@ export default function BookingsPage() {
                 {!isAgent && (
                   <Td className="whitespace-nowrap font-medium">
                     {fmtMoney(Number(b.sale_total))}
+                  </Td>
+                )}
+                {!isAgent && (
+                  <Td className="whitespace-nowrap">
+                    {fmtMoney(received(b))}
+                  </Td>
+                )}
+                {!isAgent && (
+                  <Td
+                    className={`whitespace-nowrap font-medium ${
+                      receivable(b) > 0
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-emerald-600 dark:text-emerald-400"
+                    }`}
+                  >
+                    {fmtMoney(receivable(b))}
                   </Td>
                 )}
               </tr>

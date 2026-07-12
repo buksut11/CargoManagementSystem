@@ -130,7 +130,7 @@ export type FlightBookingStatus =
   | "refunded"
   | "void";
 
-export type TripType = "oneway" | "return" | "multicity";
+export type TripType = "oneway" | "return";
 
 export type PassengerType = "adult" | "child" | "infant";
 
@@ -159,6 +159,14 @@ export type FlightSupplier = {
   name: string;
   type: SupplierType;
   contact: string | null;
+  created_at: string;
+};
+
+export type FlightDestination = {
+  id: number;
+  organization_id: string;
+  name: string;
+  code: string | null;
   created_at: string;
 };
 
@@ -212,6 +220,7 @@ export type FlightPassenger = {
   full_name: string;
   type: PassengerType;
   ticket_number: string | null;
+  sale_amount: number;
   created_at: string;
 };
 

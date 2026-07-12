@@ -11,18 +11,19 @@ import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
 import {
+  BookIcon,
   BoxIcon,
   BuildingIcon,
   ChartIcon,
   ClockIcon,
   CloseIcon,
   CoinsIcon,
+  DashboardIcon,
   HomeIcon,
   InvoiceIcon,
   LogoutIcon,
   MenuIcon,
   PinIcon,
-  PlaneIcon,
   ReceiptIcon,
   SettingsIcon,
   TicketIcon,
@@ -55,12 +56,14 @@ const CARGO_NAV: NavItem[] = [
 // Flight module nav (shown only when the org has 'flights' enabled). Agents get
 // read-only access to the booking list; everything else is editor-only.
 const FLIGHT_NAV: NavItem[] = [
-  { href: "/flights", label: "Flights", icon: PlaneIcon, roles: EDITORS },
+  { href: "/flights", label: "Flight Dashboard", icon: DashboardIcon, roles: EDITORS },
   { href: "/flights/bookings", label: "Bookings", icon: TicketIcon, roles: ALL },
   { href: "/flights/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
-  { href: "/flights/suppliers", label: "Suppliers", icon: BuildingIcon, roles: EDITORS },
+  { href: "/flights/suppliers", label: "Airlines", icon: BuildingIcon, roles: EDITORS },
+  { href: "/flights/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },
   { href: "/flights/payments", label: "Receipts", icon: CoinsIcon, roles: EDITORS },
   { href: "/flights/payables", label: "Payables", icon: ReceiptIcon, roles: EDITORS },
+  { href: "/flights/ledger", label: "Ledger", icon: BookIcon, roles: EDITORS },
   { href: "/flights/reports", label: "Reports", icon: ChartIcon, roles: EDITORS },
   { href: "/flights/audit", label: "Activity", icon: ClockIcon, roles: EDITORS },
 ];

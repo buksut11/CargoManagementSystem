@@ -11,23 +11,32 @@ type Row = { key: string; bookings: number; sales: number; profit: number };
 
 export default function FlightReportsPage() {
   const [bookings, setBookings] = useState<FlightBooking[]>([]);
-  const [received, setReceived] = useState<Record<number, number>>({});
+  const [paid, setPaid] = useState<Record<number, number>>({});
+  const [refunded, setRefunded] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [b, p] = await Promise.all([
+      const [b, p, rf] = await Promise.all([
         supabase
           .from("flight_bookings")
           .select("*, flight_customers(id, name)")
           .neq("status", "void"),
         supabase.from("booking_payments").select("booking_id, amount"),
+        supabase.from("booking_refunds").select("booking_id, customer_refund"),
       ]);
-      const recv: Record<number, number> = {};
+      const paidMap: Record<number, number> = {};
       for (const r of (p.data as { booking_id: number; amount: number }[]) ?? []) {
-        recv[r.booking_id] = (recv[r.booking_id] ?? 0) + Number(r.amount);
+        paidMap[r.booking_id] = (paidMap[r.booking_id] ?? 0) + Number(r.amount);
       }
-      setReceived(recv);
+      const refundMap: Record<number, number> = {};
+      for (const r of (rf.data as { booking_id: number; customer_refund: number }[]) ??
+        []) {
+        refundMap[r.booking_id] =
+          (refundMap[r.booking_id] ?? 0) + Number(r.customer_refund);
+      }
+      setPaid(paidMap);
+      setRefunded(refundMap);
       setBookings((b.data as FlightBooking[]) ?? []);
       setLoading(false);
     }
@@ -48,24 +57,29 @@ export default function FlightReportsPage() {
     return [...map.values()].sort((a, b) => b.sales - a.sales);
   }, [bookings]);
 
-  // Customer outstanding (receivable).
+  // Customer outstanding (receivable). Net received nets out refunds, and a
+  // refund is also a credit on the balance, so it lowers the outstanding.
   const byCustomer = useMemo(() => {
     const map = new Map<
       string,
-      { name: string; sales: number; received: number }
+      { name: string; sales: number; received: number; outstanding: number }
     >();
     for (const b of bookings) {
       const name = b.flight_customers?.name ?? "— No customer —";
-      const row = map.get(name) ?? { name, sales: 0, received: 0 };
-      row.sales += Number(b.sale_total);
-      row.received += received[b.id] ?? 0;
+      const row =
+        map.get(name) ?? { name, sales: 0, received: 0, outstanding: 0 };
+      const sale = Number(b.sale_total);
+      const p = paid[b.id] ?? 0;
+      const rf = refunded[b.id] ?? 0;
+      row.sales += sale;
+      row.received += p - rf;
+      row.outstanding += sale - p - rf;
       map.set(name, row);
     }
     return [...map.values()]
-      .map((r) => ({ ...r, outstanding: r.sales - r.received }))
       .filter((r) => r.outstanding > 0.005)
       .sort((a, b) => b.outstanding - a.outstanding);
-  }, [bookings, received]);
+  }, [bookings, paid, refunded]);
 
   const totalSales = bookings.reduce((s, b) => s + Number(b.sale_total), 0);
   const totalProfit = bookings.reduce((s, b) => s + Number(b.profit), 0);
