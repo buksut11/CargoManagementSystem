@@ -26,8 +26,6 @@ import { DatePicker } from "@/components/date-picker";
 
 type PaxRow = { full_name: string; type: PassengerType; ticket_number: string };
 type SegRow = {
-  airline: string;
-  flight_number: string;
   origin: string;
   destination: string;
   departure_at: string;
@@ -37,8 +35,6 @@ type SegRow = {
 
 const emptyPax: PaxRow = { full_name: "", type: "adult", ticket_number: "" };
 const emptySeg: SegRow = {
-  airline: "",
-  flight_number: "",
   origin: "",
   destination: "",
   departure_at: "",
@@ -64,7 +60,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
   const [suppliers, setSuppliers] = useState<FlightSupplier[]>([]);
 
-  const [bookingRef, setBookingRef] = useState(booking?.booking_ref ?? "");
   const [pnr, setPnr] = useState(booking?.pnr ?? "");
   const [customerId, setCustomerId] = useState<string>(
     booking?.customer_id ? String(booking.customer_id) : "",
@@ -80,15 +75,8 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
   const [bookingDate, setBookingDate] = useState(
     booking?.booking_date ?? new Date().toISOString().slice(0, 10),
   );
-  const [travelDate, setTravelDate] = useState(booking?.travel_date ?? "");
 
   const [baseFare, setBaseFare] = useState(String(booking?.base_fare ?? ""));
-  const [taxes, setTaxes] = useState(String(booking?.taxes ?? ""));
-  const [serviceFee, setServiceFee] = useState(String(booking?.service_fee ?? ""));
-  const [markup, setMarkup] = useState(String(booking?.markup ?? ""));
-  const [commission, setCommission] = useState(
-    String(booking?.commission_amount ?? ""),
-  );
   const [netCost, setNetCost] = useState(String(booking?.net_cost ?? ""));
   const [notes, setNotes] = useState(booking?.notes ?? "");
 
@@ -144,8 +132,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       if (seg.length)
         setSegments(
           seg.map((r) => ({
-            airline: r.airline ?? "",
-            flight_number: r.flight_number ?? "",
             origin: r.origin ?? "",
             destination: r.destination ?? "",
             departure_at: toLocalInput(r.departure_at),
@@ -160,10 +146,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
   }, [booking]);
 
   const num = (v: string) => (v === "" ? 0 : parseFloat(v) || 0);
-  const saleTotal = useMemo(
-    () => num(baseFare) + num(taxes) + num(serviceFee) + num(markup),
-    [baseFare, taxes, serviceFee, markup],
-  );
+  const saleTotal = useMemo(() => num(baseFare), [baseFare]);
   const profit = saleTotal - num(netCost);
 
   async function save(e: React.FormEvent) {
@@ -172,7 +155,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     setError(null);
 
     const row = {
-      booking_ref: bookingRef.trim() || null,
       pnr: pnr.trim() || null,
       customer_id: customerId ? Number(customerId) : null,
       supplier_id: supplierId ? Number(supplierId) : null,
@@ -180,12 +162,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       trip_type: tripType,
       status,
       booking_date: bookingDate,
-      travel_date: travelDate || null,
+      travel_date: null,
       base_fare: num(baseFare),
-      taxes: num(taxes),
-      service_fee: num(serviceFee),
-      markup: num(markup),
-      commission_amount: num(commission),
+      taxes: 0,
+      service_fee: 0,
+      markup: 0,
+      commission_amount: 0,
       net_cost: num(netCost),
       notes: notes.trim() || null,
     };
@@ -243,12 +225,10 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     }
 
     const segRows = segments
-      .filter((s) => s.origin.trim() || s.destination.trim() || s.flight_number.trim())
+      .filter((s) => s.origin.trim() || s.destination.trim())
       .map((s, i) => ({
         booking_id: bookingId,
         segment_no: i + 1,
-        airline: s.airline.trim() || null,
-        flight_number: s.flight_number.trim() || null,
         origin: s.origin.trim().toUpperCase() || null,
         destination: s.destination.trim().toUpperCase() || null,
         departure_at: fromLocalInput(s.departure_at),
@@ -275,13 +255,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     <Card className="p-5">
       <form onSubmit={save} className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Booking ref">
-            <Input
-              value={bookingRef}
-              onChange={(e) => setBookingRef(e.target.value)}
-              placeholder="Your agency reference"
-            />
-          </Field>
           <Field label="PNR">
             <Input
               value={pnr}
@@ -344,14 +317,9 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               <option value="void">Void</option>
             </Select>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Booking date">
-              <DatePicker value={bookingDate} onChange={setBookingDate} required />
-            </Field>
-            <Field label="Travel date">
-              <DatePicker value={travelDate} onChange={setTravelDate} />
-            </Field>
-          </div>
+          <Field label="Booking date">
+            <DatePicker value={bookingDate} onChange={setBookingDate} required />
+          </Field>
         </div>
 
         {/* Financials */}
@@ -359,21 +327,9 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Financials
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Base fare">
               <Input type="number" step="0.01" min="0" value={baseFare} onChange={(e) => setBaseFare(e.target.value)} placeholder="0.00" />
-            </Field>
-            <Field label="Taxes">
-              <Input type="number" step="0.01" min="0" value={taxes} onChange={(e) => setTaxes(e.target.value)} placeholder="0.00" />
-            </Field>
-            <Field label="Service fee">
-              <Input type="number" step="0.01" min="0" value={serviceFee} onChange={(e) => setServiceFee(e.target.value)} placeholder="0.00" />
-            </Field>
-            <Field label="Markup">
-              <Input type="number" step="0.01" min="0" value={markup} onChange={(e) => setMarkup(e.target.value)} placeholder="0.00" />
-            </Field>
-            <Field label="Commission" hint="From supplier, informational — reduce the net cost you enter accordingly.">
-              <Input type="number" step="0.01" min="0" value={commission} onChange={(e) => setCommission(e.target.value)} placeholder="0.00" />
             </Field>
             <Field label="Net cost (to supplier)">
               <Input type="number" step="0.01" min="0" value={netCost} onChange={(e) => setNetCost(e.target.value)} placeholder="0.00" />
@@ -453,21 +409,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           onRemove={(i) => setSegments((r) => r.filter((_, j) => j !== i))}
           render={(s, i) => (
             <div className="space-y-2">
-              <div className="grid gap-2 sm:grid-cols-4">
-                <Input
-                  value={s.airline}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, airline: e.target.value } : x)))
-                  }
-                  placeholder="Airline"
-                />
-                <Input
-                  value={s.flight_number}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, flight_number: e.target.value } : x)))
-                  }
-                  placeholder="Flight #"
-                />
+              <div className="grid gap-2 sm:grid-cols-2">
                 <Input
                   value={s.origin}
                   onChange={(e) =>
