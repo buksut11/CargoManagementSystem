@@ -357,3 +357,219 @@ export function DatePicker({
     </div>
   );
 }
+
+function ClockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500"
+      aria-hidden
+    >
+      <circle cx={12} cy={12} r={9} />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+const ITEM_H = 32; // px, matches the h-8 option buttons below
+
+/* A glass hour/minute picker matching the DatePicker, replacing the OS-native
+   <input type="time"> so the popover looks like the rest of the app. Value
+   shape is "HH:mm" (24h) or "" — same as a native time input. */
+export function TimePicker({
+  value,
+  onChange,
+  disabled = false,
+  placeholder = "Time",
+  ariaLabel,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  ariaLabel?: string;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const hourColRef = useRef<HTMLDivElement>(null);
+  const minColRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
+  const [pos, setPos] = useState({ left: 0, top: 0, bottom: 0 });
+
+  const valid = /^(\d{2}):(\d{2})$/.test(value);
+  const hh = valid ? value.slice(0, 2) : "";
+  const mm = valid ? value.slice(3, 5) : "";
+
+  const updatePos = useCallback(() => {
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setDropUp(window.innerHeight - rect.bottom < 260 && rect.top > 260);
+    setPos({
+      left: Math.max(8, Math.min(rect.left, window.innerWidth - 168)),
+      top: rect.bottom + 8,
+      bottom: window.innerHeight - rect.top + 8,
+    });
+  }, []);
+
+  function openPopover() {
+    if (disabled) return;
+    updatePos();
+    setOpen(true);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      const t = e.target as Node;
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(t) &&
+        popRef.current &&
+        !popRef.current.contains(t)
+      ) {
+        setOpen(false);
+      }
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("scroll", updatePos, true);
+    window.addEventListener("resize", updatePos);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", updatePos, true);
+      window.removeEventListener("resize", updatePos);
+    };
+  }, [open, updatePos]);
+
+  // Centre the current hour/minute in each column when the popover opens,
+  // without scrolling the page (the columns are the only things that move).
+  useEffect(() => {
+    if (!open) return;
+    const id = requestAnimationFrame(() => {
+      const centre = (el: HTMLDivElement | null, i: number) => {
+        if (el) el.scrollTop = i * ITEM_H - el.clientHeight / 2 + ITEM_H / 2;
+      };
+      centre(hourColRef.current, hh ? Number(hh) : 0);
+      centre(minColRef.current, mm ? Number(mm) : 0);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [open, hh, mm]);
+
+  const label = valid ? `${hh}:${mm}` : placeholder;
+
+  return (
+    <div ref={rootRef} className="relative min-w-0">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => (open ? setOpen(false) : openPopover())}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={ariaLabel}
+        className={`${inputClass} flex items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50`}
+      >
+        <span
+          className={
+            valid
+              ? "truncate text-slate-900 dark:text-slate-100"
+              : "truncate text-slate-400 dark:text-slate-500"
+          }
+        >
+          {label}
+        </span>
+        <ClockIcon />
+      </button>
+
+      {open &&
+        createPortal(
+          <div
+            ref={popRef}
+            role="dialog"
+            aria-label="Choose time"
+            style={
+              dropUp
+                ? { left: pos.left, bottom: pos.bottom }
+                : { left: pos.left, top: pos.top }
+            }
+            className="glass-popover animate-pop-in fixed z-50 w-40 rounded-2xl p-2"
+          >
+            <div className="mb-1 grid grid-cols-2 gap-1">
+              {["Hour", "Min"].map((h) => (
+                <span
+                  key={h}
+                  className="flex h-5 items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"
+                >
+                  {h}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+              <TimeColumn
+                colRef={hourColRef}
+                items={HOURS}
+                selected={hh}
+                onPick={(h) => onChange(`${h}:${mm || "00"}`)}
+              />
+              <TimeColumn
+                colRef={minColRef}
+                items={MINUTES}
+                selected={mm}
+                onPick={(m) => onChange(`${hh || "00"}:${m}`)}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}
+
+function TimeColumn({
+  colRef,
+  items,
+  selected,
+  onPick,
+}: {
+  colRef: React.RefObject<HTMLDivElement | null>;
+  items: string[];
+  selected: string;
+  onPick: (v: string) => void;
+}) {
+  return (
+    <div
+      ref={colRef}
+      className="h-40 overflow-y-auto scroll-smooth rounded-xl [scrollbar-width:thin]"
+    >
+      {items.map((v) => {
+        const isSelected = v === selected;
+        return (
+          <button
+            key={v}
+            type="button"
+            data-selected={isSelected}
+            onClick={() => onPick(v)}
+            className={`flex h-8 w-full items-center justify-center rounded-lg text-[13px] transition-colors ${
+              isSelected
+                ? "bg-blue-600 font-semibold text-white shadow-lg shadow-blue-500/40"
+                : "text-slate-700 hover:bg-white/60 dark:text-slate-200 dark:hover:bg-white/[0.1]"
+            }`}
+          >
+            {v}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

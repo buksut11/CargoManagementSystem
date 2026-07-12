@@ -22,7 +22,7 @@ import {
   Select,
   Textarea,
 } from "@/components/ui";
-import { DatePicker } from "@/components/date-picker";
+import { DatePicker, TimePicker } from "@/components/date-picker";
 import {
   BookIcon,
   CoinsIcon,
@@ -643,12 +643,12 @@ function DateTimeInput({
         onChange={(d) => onChange(d ? `${d}T${time || "00:00"}` : "")}
         placeholder={placeholder}
       />
-      <Input
-        type="time"
+      <TimePicker
         value={time}
-        onChange={(e) => onChange(`${date}T${e.target.value || "00:00"}`)}
+        onChange={(t) => onChange(`${date}T${t || "00:00"}`)}
         disabled={!date}
-        aria-label={`${placeholder} time`}
+        placeholder="Time"
+        ariaLabel={`${placeholder} time`}
       />
     </div>
   );
