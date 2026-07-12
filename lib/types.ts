@@ -162,6 +162,14 @@ export type FlightSupplier = {
   created_at: string;
 };
 
+export type FlightDestination = {
+  id: number;
+  organization_id: string;
+  name: string;
+  code: string | null;
+  created_at: string;
+};
+
 export type FlightBooking = {
   id: number;
   organization_id: string;
