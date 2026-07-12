@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import type {
   FlightBooking,
   FlightCustomer,
+  FlightDestination,
   FlightPassenger,
   FlightSegment,
   FlightSupplier,
@@ -59,6 +60,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
 
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
   const [suppliers, setSuppliers] = useState<FlightSupplier[]>([]);
+  const [destinations, setDestinations] = useState<FlightDestination[]>([]);
 
   const [pnr, setPnr] = useState(booking?.pnr ?? "");
   const [customerId, setCustomerId] = useState<string>(
@@ -90,10 +92,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     Promise.all([
       supabase.from("flight_customers").select("*").order("name"),
       supabase.from("flight_suppliers").select("*").order("name"),
-    ]).then(([c, s]) => {
+      supabase.from("flight_destinations").select("*").order("name"),
+    ]).then(([c, s, d]) => {
       if (!active) return;
       setCustomers((c.data as FlightCustomer[]) ?? []);
       setSuppliers((s.data as FlightSupplier[]) ?? []);
+      setDestinations((d.data as FlightDestination[]) ?? []);
     });
     return () => {
       active = false;
@@ -233,8 +237,8 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       .map((s, i) => ({
         booking_id: bookingId,
         segment_no: i + 1,
-        origin: s.origin.trim().toUpperCase() || null,
-        destination: s.destination.trim().toUpperCase() || null,
+        origin: s.origin.trim() || null,
+        destination: s.destination.trim() || null,
         departure_at: fromLocalInput(s.departure_at),
         arrival_at: fromLocalInput(s.arrival_at),
         cabin_class: s.cabin_class.trim() || null,
@@ -400,28 +404,28 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
 
         {/* Segments */}
         <RepeatSection
-          title="Itinerary"
+          title="Destinations"
           rows={segments}
           onAdd={() => setSegments((r) => [...r, { ...emptySeg }])}
           onRemove={(i) => setSegments((r) => r.filter((_, j) => j !== i))}
           render={(s, i) => (
             <div className="space-y-2">
               <div className="grid gap-2 sm:grid-cols-2">
-                <Input
+                <DestinationSelect
                   value={s.origin}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, origin: e.target.value } : x)))
+                  destinations={destinations}
+                  onChange={(v) =>
+                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, origin: v } : x)))
                   }
-                  placeholder="From (IATA)"
-                  maxLength={4}
+                  placeholder="From"
                 />
-                <Input
+                <DestinationSelect
                   value={s.destination}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, destination: e.target.value } : x)))
+                  destinations={destinations}
+                  onChange={(v) =>
+                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, destination: v } : x)))
                   }
-                  placeholder="To (IATA)"
-                  maxLength={4}
+                  placeholder="To"
                 />
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -505,6 +509,34 @@ function DateTimeInput({
         aria-label={`${placeholder} time`}
       />
     </div>
+  );
+}
+
+// A From / To picker backed by the org's saved destinations. If the stored
+// value isn't in the list (e.g. an older booking that used a raw code), it is
+// still shown as a selectable option so editing never loses it.
+function DestinationSelect({
+  value,
+  destinations,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  destinations: FlightDestination[];
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  const missing = value && !destinations.some((d) => d.name === value);
+  return (
+    <Select value={value} onChange={(e) => onChange(e.target.value)}>
+      <option value="">{`— ${placeholder} —`}</option>
+      {destinations.map((d) => (
+        <option key={d.id} value={d.name}>
+          {d.code ? `${d.name} (${d.code})` : d.name}
+        </option>
+      ))}
+      {missing && <option value={value}>{value}</option>}
+    </Select>
   );
 }
 
