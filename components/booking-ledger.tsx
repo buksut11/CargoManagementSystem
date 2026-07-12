@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import { fmtDate, fmtMoney } from "@/lib/format";
 import { Button, Card, ErrorNote, Input, Select } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -284,12 +285,7 @@ function LedgerSection<T extends { id: number }>({
               placeholder="Amount"
               required
             />
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+            <DatePicker value={date} onChange={setDate} required />
           </div>
           <Input
             value={method}
@@ -404,7 +400,7 @@ function RefundSection({
               <option value="void">Void</option>
               <option value="reissue">Reissue</option>
             </Select>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <DatePicker value={date} onChange={setDate} required />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />

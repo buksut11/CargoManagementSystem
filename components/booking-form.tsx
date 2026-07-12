@@ -22,6 +22,7 @@ import {
   Select,
   Textarea,
 } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 
 type PaxRow = { full_name: string; type: PassengerType; ticket_number: string };
 type SegRow = {
@@ -345,19 +346,10 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Booking date">
-              <Input
-                type="date"
-                value={bookingDate}
-                onChange={(e) => setBookingDate(e.target.value)}
-                required
-              />
+              <DatePicker value={bookingDate} onChange={setBookingDate} required />
             </Field>
             <Field label="Travel date">
-              <Input
-                type="date"
-                value={travelDate}
-                onChange={(e) => setTravelDate(e.target.value)}
-              />
+              <DatePicker value={travelDate} onChange={setTravelDate} />
             </Field>
           </div>
         </div>
@@ -493,20 +485,20 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                   maxLength={4}
                 />
               </div>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <Input
-                  type="datetime-local"
+              <div className="grid gap-2 sm:grid-cols-2">
+                <DateTimeInput
                   value={s.departure_at}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, departure_at: e.target.value } : x)))
+                  onChange={(v) =>
+                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, departure_at: v } : x)))
                   }
+                  placeholder="Departure"
                 />
-                <Input
-                  type="datetime-local"
+                <DateTimeInput
                   value={s.arrival_at}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, arrival_at: e.target.value } : x)))
+                  onChange={(v) =>
+                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, arrival_at: v } : x)))
                   }
+                  placeholder="Arrival"
                 />
                 <Input
                   value={s.cabin_class}
@@ -543,6 +535,37 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
         </div>
       </form>
     </Card>
+  );
+}
+
+// The app's glass DatePicker plus a time field, replacing the OS-native
+// datetime-local control. Value shape stays "YYYY-MM-DDTHH:mm" (or "").
+function DateTimeInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  const date = value.slice(0, 10);
+  const time = value.slice(11, 16);
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
+      <DatePicker
+        value={date}
+        onChange={(d) => onChange(d ? `${d}T${time || "00:00"}` : "")}
+        placeholder={placeholder}
+      />
+      <Input
+        type="time"
+        value={time}
+        onChange={(e) => onChange(`${date}T${e.target.value || "00:00"}`)}
+        disabled={!date}
+        aria-label={`${placeholder} time`}
+      />
+    </div>
   );
 }
 
