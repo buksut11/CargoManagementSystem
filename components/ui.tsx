@@ -370,10 +370,13 @@ export function Select({
             role="listbox"
             style={{
               left: pos.left,
-              width: pos.width,
+              // Grow to fit the longest option instead of clipping it, but stay
+              // at least as wide as the trigger and never past the viewport edge.
+              minWidth: pos.width,
+              maxWidth: `calc(100vw - ${pos.left + 8}px)`,
               ...(dropUp ? { bottom: pos.bottom } : { top: pos.top }),
             }}
-            className="glass-popover animate-pop-in fixed z-50 max-h-64 overflow-y-auto rounded-xl p-1.5"
+            className="glass-popover animate-pop-in fixed z-50 max-h-64 w-max overflow-y-auto rounded-xl p-1.5"
           >
             {options.map((o, i) => {
               const isSelected = o.value === current;
