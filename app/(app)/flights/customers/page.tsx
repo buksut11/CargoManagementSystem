@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { FlightCustomer } from "@/lib/types";
@@ -26,10 +26,31 @@ export default function FlightCustomersPage() {
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [pending, setPending] = useState<FlightCustomer | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  function resetForm() {
+    setEditingId(null);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setAddress("");
+    setError(null);
+  }
+
+  function startEdit(c: FlightCustomer) {
+    setEditingId(c.id);
+    setName(c.name);
+    setEmail(c.email ?? "");
+    setPhone(c.phone ?? "");
+    setAddress(c.address ?? "");
+    setError(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   useEffect(() => {
     let active = true;
@@ -47,25 +68,25 @@ export default function FlightCustomersPage() {
     };
   }, [version]);
 
-  async function add(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await supabase.from("flight_customers").insert({
+    const payload = {
       name: name.trim(),
       email: email.trim() || null,
       phone: phone.trim() || null,
       address: address.trim() || null,
-    });
+    };
+    const { error } = editingId
+      ? await supabase.from("flight_customers").update(payload).eq("id", editingId)
+      : await supabase.from("flight_customers").insert(payload);
     setBusy(false);
     if (error) {
       setError(error.message);
       return;
     }
-    setName("");
-    setEmail("");
-    setPhone("");
-    setAddress("");
+    resetForm();
     reload();
   }
 
@@ -87,7 +108,11 @@ export default function FlightCustomersPage() {
       <PageHeader title="Customers" />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <Card className="p-4">
-          <form onSubmit={add} className="space-y-3">
+          <div ref={formRef} className="scroll-mt-6" />
+          <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {editingId ? "Edit customer" : "New customer"}
+          </div>
+          <form onSubmit={save} className="space-y-3">
             <Field label="Name">
               <Input
                 value={name}
@@ -112,9 +137,16 @@ export default function FlightCustomersPage() {
                 onChange={(e) => setAddress(e.target.value)}
               />
             </Field>
-            <Button type="submit" disabled={busy}>
-              {busy ? "Adding…" : "Add customer"}
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={busy}>
+                {busy ? "Saving…" : editingId ? "Save changes" : "Add customer"}
+              </Button>
+              {editingId && (
+                <Button type="button" variant="secondary" onClick={resetForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
             <ErrorNote message={error} />
           </form>
         </Card>
@@ -142,6 +174,12 @@ export default function FlightCustomersPage() {
                       >
                         Statement
                       </Link>
+                      <button
+                        onClick={() => startEdit(c)}
+                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => setPending(c)}
                         className="text-sm text-red-600 hover:underline dark:text-red-400"

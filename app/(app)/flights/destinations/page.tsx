@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { FlightDestination } from "@/lib/types";
 import {
@@ -23,10 +23,27 @@ export default function FlightDestinationsPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [pending, setPending] = useState<FlightDestination | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  function resetForm() {
+    setEditingId(null);
+    setName("");
+    setCode("");
+    setError(null);
+  }
+
+  function startEdit(d: FlightDestination) {
+    setEditingId(d.id);
+    setName(d.name);
+    setCode(d.code ?? "");
+    setError(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   useEffect(() => {
     let active = true;
@@ -44,14 +61,20 @@ export default function FlightDestinationsPage() {
     };
   }, [version]);
 
-  async function add(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await supabase.from("flight_destinations").insert({
+    const payload = {
       name: name.trim(),
       code: code.trim().toUpperCase() || null,
-    });
+    };
+    const { error } = editingId
+      ? await supabase
+          .from("flight_destinations")
+          .update(payload)
+          .eq("id", editingId)
+      : await supabase.from("flight_destinations").insert(payload);
     setBusy(false);
     if (error) {
       setError(
@@ -61,8 +84,7 @@ export default function FlightDestinationsPage() {
       );
       return;
     }
-    setName("");
-    setCode("");
+    resetForm();
     reload();
   }
 
@@ -84,7 +106,11 @@ export default function FlightDestinationsPage() {
       <PageHeader title="Destinations" />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <Card className="p-4">
-          <form onSubmit={add} className="space-y-3">
+          <div ref={formRef} className="scroll-mt-6" />
+          <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {editingId ? "Edit destination" : "New destination"}
+          </div>
+          <form onSubmit={save} className="space-y-3">
             <Field label="Name">
               <Input
                 value={name}
@@ -101,9 +127,16 @@ export default function FlightDestinationsPage() {
                 maxLength={4}
               />
             </Field>
-            <Button type="submit" disabled={busy}>
-              {busy ? "Adding…" : "Add destination"}
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={busy}>
+                {busy ? "Saving…" : editingId ? "Save changes" : "Add destination"}
+              </Button>
+              {editingId && (
+                <Button type="button" variant="secondary" onClick={resetForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
             <ErrorNote message={error} />
           </form>
         </Card>
@@ -122,12 +155,20 @@ export default function FlightDestinationsPage() {
                   <Td className="font-medium">{d.name}</Td>
                   <Td>{d.code ?? "—"}</Td>
                   <Td className="text-right">
-                    <button
-                      onClick={() => setPending(d)}
-                      className="text-sm text-red-600 hover:underline dark:text-red-400"
-                    >
-                      Delete
-                    </button>
+                    <span className="inline-flex items-center gap-3">
+                      <button
+                        onClick={() => startEdit(d)}
+                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setPending(d)}
+                        className="text-sm text-red-600 hover:underline dark:text-red-400"
+                      >
+                        Delete
+                      </button>
+                    </span>
                   </Td>
                 </tr>
               ))}

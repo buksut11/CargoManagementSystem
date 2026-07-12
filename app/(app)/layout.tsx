@@ -18,12 +18,12 @@ import {
   ClockIcon,
   CloseIcon,
   CoinsIcon,
+  DashboardIcon,
   HomeIcon,
   InvoiceIcon,
   LogoutIcon,
   MenuIcon,
   PinIcon,
-  PlaneIcon,
   ReceiptIcon,
   SettingsIcon,
   TicketIcon,
@@ -56,7 +56,7 @@ const CARGO_NAV: NavItem[] = [
 // Flight module nav (shown only when the org has 'flights' enabled). Agents get
 // read-only access to the booking list; everything else is editor-only.
 const FLIGHT_NAV: NavItem[] = [
-  { href: "/flights", label: "Flights", icon: PlaneIcon, roles: EDITORS },
+  { href: "/flights", label: "Flight Dashboard", icon: DashboardIcon, roles: EDITORS },
   { href: "/flights/bookings", label: "Bookings", icon: TicketIcon, roles: ALL },
   { href: "/flights/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
   { href: "/flights/suppliers", label: "Airlines", icon: BuildingIcon, roles: EDITORS },
