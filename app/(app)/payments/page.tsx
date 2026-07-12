@@ -61,7 +61,7 @@ export default function PaymentsPage() {
           </div>
         }
       />
-      <Card className="overflow-x-auto">
+      <Card className="table-scroll">
         <div className="space-y-3 p-3 md:hidden">
           {payments.map((p) => (
             <Link

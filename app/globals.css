@@ -265,6 +265,42 @@ input:-webkit-autofill:focus {
   display: none; /* WebKit */
 }
 
+/* Horizontal scroll for wide tables. A table with many columns can't shrink to
+   fit a phone or tablet, so it scrolls sideways inside its card — but the OS's
+   default scrollbar is a thick opaque bar that sits across the card's rounded
+   bottom edge (see the Bookings screenshot). This slims it to a subtle, rounded,
+   theme-tinted track that only appears while the table actually overflows, and
+   leaves the corners alone. `overscroll-x-contain` stops a sideways swipe from
+   also scrolling the page underneath. */
+.table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
+}
+.table-scroll::-webkit-scrollbar {
+  height: 7px;
+}
+.table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.table-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgba(100, 116, 139, 0.35);
+}
+.table-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.55);
+}
+.dark .table-scroll {
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+.dark .table-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+}
+.dark .table-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+
 @media print {
   .no-print {
     display: none !important;
