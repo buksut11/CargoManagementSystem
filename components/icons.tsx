@@ -148,6 +148,42 @@ export const UsersIcon = () => (
   </Base>
 );
 
+export const BuildingIcon = () => (
+  <Base>
+    <path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16" />
+    <path d="M15 9h4a1 1 0 0 1 1 1v11" />
+    <path d="M8 8h3M8 12h3M8 16h3" />
+    <path d="M2 21h20" />
+  </Base>
+);
+
+export const PlaneIcon = () => (
+  <Base>
+    <path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a1 1 0 0 0-.9 1.7L9 11l-2 2H4l-1 1 3 1.5L7.5 20l1-1v-3l2-2 3.6 5.1a1 1 0 0 0 1.7-.9z" />
+  </Base>
+);
+
+export const TicketIcon = () => (
+  <Base>
+    <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z" />
+    <path d="M13 6v12" strokeDasharray="2 2" />
+  </Base>
+);
+
+export const ChartIcon = () => (
+  <Base>
+    <path d="M3 3v18h18" />
+    <path d="M7 15l3-4 3 2 4-6" />
+  </Base>
+);
+
+export const ReceiptIcon = () => (
+  <Base>
+    <path d="M5 2v20l2-1.2L9 22l2-1.2L13 22l2-1.2L17 22l2-1.2V2l-2 1.2L15 2l-2 1.2L11 2 9 3.2 7 2 5 3.2z" />
+    <path d="M8 8h8M8 12h8" />
+  </Base>
+);
+
 export const SettingsIcon = () => (
   <Base>
     <circle cx={12} cy={12} r={3} />

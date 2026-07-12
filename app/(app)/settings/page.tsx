@@ -26,6 +26,8 @@ export default function SettingsPage() {
   const [logoUrl, setLogoUrl] = useState("");
   const [plan, setPlan] = useState<string>("free");
   const [subStatus, setSubStatus] = useState<string | null>(null);
+  const [modules, setModules] = useState<string[]>(["cargo"]);
+  const [savingModules, setSavingModules] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingDetails, setSavingDetails] = useState(false);
   const [detailsSaved, setDetailsSaved] = useState(false);
@@ -38,7 +40,9 @@ export default function SettingsPage() {
     if (!orgId) return;
     supabase
       .from("organizations")
-      .select("name, plan, subscription_status, address, phone, email, logo_url")
+      .select(
+        "name, plan, subscription_status, address, phone, email, logo_url, modules",
+      )
       .eq("id", orgId)
       .single()
       .then(({ data }) => {
@@ -50,6 +54,11 @@ export default function SettingsPage() {
         setLogoUrl(data.logo_url ?? "");
         setPlan(data.plan ?? "free");
         setSubStatus(data.subscription_status ?? null);
+        setModules(
+          Array.isArray(data.modules) && data.modules.length
+            ? data.modules
+            : ["cargo"],
+        );
         setLoading(false);
       });
     return () => {
@@ -158,8 +167,39 @@ export default function SettingsPage() {
     window.location.href = data.url;
   }
 
+  // Turn a product module on/off for this organization. At least one module
+  // must stay enabled. The page reloads on success so the sidebar reflects the
+  // change (nav is resolved once in the app layout).
+  async function setModuleEnabled(mod: string, enabled: boolean) {
+    const next = enabled
+      ? Array.from(new Set([...modules, mod]))
+      : modules.filter((m) => m !== mod);
+    if (next.length === 0) {
+      setError("Keep at least one module enabled.");
+      return;
+    }
+    setSavingModules(true);
+    setError(null);
+    const { error: upErr } = await supabase
+      .from("organizations")
+      .update({ modules: next })
+      .eq("id", orgId);
+    if (upErr) {
+      setSavingModules(false);
+      setError(upErr.message);
+      return;
+    }
+    setModules(next);
+    // Reflect the new nav immediately.
+    window.location.reload();
+  }
+
   const current = getPlan(plan);
   const paid = isPaid(subStatus);
+  const MODULE_INFO: { id: string; name: string; desc: string }[] = [
+    { id: "cargo", name: "Cargo", desc: "Shipments, invoices, expenses & delivery tracking." },
+    { id: "flights", name: "Flights", desc: "Air-ticket bookings, receivables, payables & refunds." },
+  ];
 
   return (
     <div>
@@ -323,6 +363,55 @@ export default function SettingsPage() {
               </p>
             </>
           )}
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Modules
+          </h2>
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+            Turn product areas on or off for this organization. The sidebar
+            updates when you toggle one.
+          </p>
+          <div className="space-y-2">
+            {MODULE_INFO.map((m) => {
+              const enabled = modules.includes(m.id);
+              return (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {m.name}
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      {m.desc}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={enabled}
+                    aria-label={`${enabled ? "Disable" : "Enable"} ${m.name}`}
+                    disabled={savingModules}
+                    onClick={() => setModuleEnabled(m.id, !enabled)}
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+                      enabled
+                        ? "bg-blue-600"
+                        : "bg-slate-300 dark:bg-slate-600"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                        enabled ? "translate-x-[22px]" : "translate-x-0.5"
+                      }`}
+                    />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </Card>
       </div>
     </div>

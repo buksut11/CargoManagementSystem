@@ -11,6 +11,8 @@ export type OrgContextValue = {
   orgName: string;
   logoUrl: string | null;
   role: OrgRole;
+  // Enabled product modules for the active org ('cargo' | 'flights').
+  modules: string[];
 };
 
 const OrgContext = createContext<OrgContextValue | null>(null);

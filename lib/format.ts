@@ -1,4 +1,9 @@
-import type { ShipmentStatus, TransportMode } from "./types";
+import type {
+  FlightBookingStatus,
+  ShipmentStatus,
+  TransportMode,
+  TripType,
+} from "./types";
 
 // Change this if you bill in a different currency.
 export const CURRENCY = "USD";
@@ -89,4 +94,43 @@ export const PAYMENT_CLASS: Record<PaymentState, string> = {
   paid: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
   partial: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300",
   unpaid: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
+};
+
+// ── Flight module formatting ────────────────────────────────────────────────
+
+export function bookingRef(id: number): string {
+  return `FLT-${String(id).padStart(4, "0")}`;
+}
+
+export const FLIGHT_STATUS_LABEL: Record<FlightBookingStatus, string> = {
+  quote: "Quote",
+  booked: "Booked",
+  ticketed: "Ticketed",
+  cancelled: "Cancelled",
+  refunded: "Refunded",
+  void: "Void",
+};
+
+export const FLIGHT_STATUS_CLASS: Record<FlightBookingStatus, string> = {
+  quote: "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300",
+  booked: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300",
+  ticketed:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
+  cancelled: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
+  refunded: "bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-300",
+  void: "bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300",
+};
+
+export const TRIP_TYPE_LABEL: Record<TripType, string> = {
+  oneway: "One-way",
+  return: "Return",
+  multicity: "Multi-city",
+};
+
+export const SUPPLIER_TYPE_LABEL: Record<string, string> = {
+  airline: "Airline",
+  consolidator: "Consolidator",
+  bsp: "BSP",
+  gds: "GDS",
+  other: "Other",
 };
