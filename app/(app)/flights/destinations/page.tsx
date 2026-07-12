@@ -14,9 +14,11 @@ import {
   PageHeader,
   rowActionClass,
   rowDeleteClass,
+  Section,
   Td,
   Th,
 } from "@/components/ui";
+import { PinIcon } from "@/components/icons";
 
 export default function FlightDestinationsPage() {
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
@@ -107,11 +109,12 @@ export default function FlightDestinationsPage() {
     <div>
       <PageHeader title="Destinations" />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
-        <Card className="p-4">
-          <div ref={formRef} className="scroll-mt-6" />
-          <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {editingId ? "Edit destination" : "New destination"}
-          </div>
+        <Section
+          icon={<PinIcon />}
+          title={editingId ? "Edit destination" : "New destination"}
+          subtitle="Airports or cities you fly to"
+        >
+          <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="space-y-3">
             <Field label="Name">
               <Input
@@ -141,7 +144,7 @@ export default function FlightDestinationsPage() {
             </div>
             <ErrorNote message={error} />
           </form>
-        </Card>
+        </Section>
         <Card className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">

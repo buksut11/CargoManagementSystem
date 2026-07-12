@@ -7,14 +7,15 @@ import type { Shipment } from "@/lib/types";
 import { fmtKg, fmtMoney, shipmentRef } from "@/lib/format";
 import {
   Button,
-  Card,
   ErrorNote,
   Field,
   Input,
   PageHeader,
+  Section,
   Textarea,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
+import { BoxIcon, InvoiceIcon } from "@/components/icons";
 
 export default function NewInvoicePage() {
   const router = useRouter();
@@ -91,8 +92,12 @@ export default function NewInvoicePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader title="New invoice" />
-      <form onSubmit={create} className="space-y-6">
-        <Card className="p-6">
+      <form onSubmit={create} className="space-y-4">
+        <Section
+          icon={<InvoiceIcon />}
+          title="Bill to"
+          subtitle="Who this invoice is for"
+        >
           <div className="space-y-4">
             <Field label="Bill to" hint="Name of the person or company paying.">
               <Input
@@ -131,15 +136,13 @@ export default function NewInvoicePage() {
               />
             </Field>
           </div>
-        </Card>
+        </Section>
 
-        <Card className="p-6">
-          <h2 className="mb-3 font-semibold">
-            Shipments to include{" "}
-            <span className="font-normal text-slate-500 dark:text-slate-400">
-              (uninvoiced only)
-            </span>
-          </h2>
+        <Section
+          icon={<BoxIcon />}
+          title="Shipments to include"
+          subtitle="Uninvoiced shipments only"
+        >
           {shipments.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               All shipments are already invoiced — add a new shipment first.
@@ -176,20 +179,28 @@ export default function NewInvoicePage() {
             <span className="text-slate-500 dark:text-slate-400">Invoice total:&nbsp;</span>
             <span className="font-bold">{fmtMoney(total)}</span>
           </div>
-        </Card>
+        </Section>
 
         <ErrorNote message={error} />
-        <div className="flex gap-3">
-          <Button type="submit" disabled={busy}>
-            {busy ? "Creating…" : "Create invoice"}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.push("/invoices")}
-          >
-            Cancel
-          </Button>
+        <div className="glass-panel sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
+          <span className="text-sm text-slate-500 dark:text-slate-400">
+            {selected.size} selected · Total{" "}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
+              {fmtMoney(total)}
+            </span>
+          </span>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => router.push("/invoices")}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {busy ? "Creating…" : "Create invoice"}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

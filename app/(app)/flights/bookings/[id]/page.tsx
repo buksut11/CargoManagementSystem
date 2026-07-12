@@ -21,10 +21,11 @@ import {
 import {
   Badge,
   Button,
-  Card,
   ConfirmDialog,
   PageHeader,
+  Section,
 } from "@/components/ui";
+import { PlaneIcon, TicketIcon, UsersIcon } from "@/components/icons";
 import { BookingForm } from "@/components/booking-form";
 import { BookingLedger } from "@/components/booking-ledger";
 import { useRole } from "@/components/role-context";
@@ -163,7 +164,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
         }
       />
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Card className="p-6">
+        <Section icon={<TicketIcon />} title="Booking details">
           <dl className="space-y-3">
             {rows.map(([label, value]) => (
               <div key={label} className="flex gap-3 text-sm">
@@ -174,12 +175,9 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
               </div>
             ))}
           </dl>
-        </Card>
+        </Section>
         <div className="space-y-5">
-          <Card className="p-5">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Flights
-            </h2>
+          <Section icon={<PlaneIcon />} title="Flights">
             {segments.length === 0 ? (
               <p className="text-sm text-slate-400">No segments.</p>
             ) : (
@@ -200,11 +198,8 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
                 ))}
               </ul>
             )}
-          </Card>
-          <Card className="p-5">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Passengers
-            </h2>
+          </Section>
+          <Section icon={<UsersIcon />} title="Passengers">
             {passengers.length === 0 ? (
               <p className="text-sm text-slate-400">No passengers.</p>
             ) : (
@@ -222,7 +217,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
                 ))}
               </ul>
             )}
-          </Card>
+          </Section>
         </div>
       </div>
     </div>

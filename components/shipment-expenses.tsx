@@ -6,13 +6,14 @@ import type { Expense, Shipment } from "@/lib/types";
 import { fmtDate, fmtMoney, modeLabel } from "@/lib/format";
 import {
   Button,
-  Card,
   ConfirmDialog,
   ErrorNote,
   Field,
   Input,
   rowDeleteClass,
+  Section,
 } from "@/components/ui";
+import { CoinsIcon } from "@/components/icons";
 import { TransportSelect } from "@/components/transport-select";
 import { DatePicker } from "@/components/date-picker";
 
@@ -87,12 +88,13 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
   const profit = income - totalExpenses;
 
   return (
-    <Card className="max-w-xl p-6">
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-        Delivery expenses & profit
-      </h2>
-
-      <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+    <Section
+      className="max-w-xl"
+      icon={<CoinsIcon />}
+      title="Delivery expenses & profit"
+      subtitle="Costs to deliver this shipment and the resulting net profit"
+    >
+      <div className="grid grid-cols-3 gap-3 text-center">
         <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
           <div className="text-xs text-slate-500 dark:text-slate-400">Income</div>
           <div className="mt-0.5 text-sm font-bold">{fmtMoney(income)}</div>
@@ -186,6 +188,6 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
         onConfirm={confirmRemove}
         onCancel={() => setPending(null)}
       />
-    </Card>
+    </Section>
   );
 }

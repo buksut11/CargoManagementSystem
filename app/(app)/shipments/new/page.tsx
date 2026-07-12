@@ -5,7 +5,7 @@ import { ShipmentForm } from "@/components/shipment-form";
 
 export default function NewShipmentPage() {
   return (
-    <div className="mx-auto max-w-xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader title="New shipment" />
       <ShipmentForm />
     </div>

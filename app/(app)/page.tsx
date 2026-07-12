@@ -12,7 +12,16 @@ import {
   STATUS_CLASS,
   STATUS_LABEL,
 } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import {
+  Badge,
+  Card,
+  EmptyState,
+  IconChip,
+  PageHeader,
+  Td,
+  Th,
+} from "@/components/ui";
+import { BoxIcon, ClockIcon, CoinsIcon, WalletIcon } from "@/components/icons";
 import { CountUp } from "@/components/count-up";
 import { TiltCard } from "@/components/tilt-card";
 import {
@@ -213,8 +222,13 @@ export default function DashboardPage() {
         <Card className="p-5 lg:col-span-2">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Kg shipped per month
+              <div className="flex items-center gap-2.5">
+                <IconChip>
+                  <BoxIcon />
+                </IconChip>
+                <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Kg shipped per month
+                </div>
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span
@@ -237,8 +251,13 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Payment status
+          <div className="flex items-center gap-2.5">
+            <IconChip>
+              <CoinsIcon />
+            </IconChip>
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Payment status
+            </div>
           </div>
           {invoiced > 0 ? (
             <div className="mt-3">
@@ -255,8 +274,13 @@ export default function DashboardPage() {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Card className="p-5">
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Received per month
+          <div className="flex items-center gap-2.5">
+            <IconChip>
+              <WalletIcon />
+            </IconChip>
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Received per month
+            </div>
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span
@@ -278,9 +302,14 @@ export default function DashboardPage() {
 
         <Card className="overflow-x-auto lg:col-span-2">
           <div className="flex items-center justify-between px-5 pt-4">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Recent shipments
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <IconChip>
+                <ClockIcon />
+              </IconChip>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Recent shipments
+              </h2>
+            </div>
             <Link
               href="/shipments"
               className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"

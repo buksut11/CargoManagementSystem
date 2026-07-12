@@ -14,14 +14,20 @@ import {
 } from "@/lib/backup";
 import {
   Button,
-  Card,
   ConfirmDialog,
   ErrorNote,
   Field,
   Input,
   PageHeader,
+  Section,
   Textarea,
 } from "@/components/ui";
+import {
+  BookIcon,
+  BuildingIcon,
+  CoinsIcon,
+  DashboardIcon,
+} from "@/components/icons";
 
 export default function SettingsPage() {
   const org = useOrg();
@@ -268,14 +274,11 @@ export default function SettingsPage() {
       <PageHeader title="Settings" />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
-        <Card className="p-5">
-          <h2 className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Organization
-          </h2>
-          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            The logo and details below appear on your printed invoices.
-          </p>
-
+        <Section
+          icon={<BuildingIcon />}
+          title="Organization"
+          subtitle="The logo and details below appear on your printed invoices."
+        >
           <div className="mb-4 flex items-center gap-4">
             <div
               className={`flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200/60 dark:border-white/10 ${
@@ -383,12 +386,9 @@ export default function SettingsPage() {
           <div className="mt-3">
             <ErrorNote message={error} />
           </div>
-        </Card>
+        </Section>
 
-        <Card className="p-5">
-          <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Billing
-          </h2>
+        <Section icon={<CoinsIcon />} title="Billing">
           {loading ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
           ) : (
@@ -425,16 +425,13 @@ export default function SettingsPage() {
               </p>
             </>
           )}
-        </Card>
+        </Section>
 
-        <Card className="p-5">
-          <h2 className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Modules
-          </h2>
-          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Turn product areas on or off for this organization. The sidebar
-            updates when you toggle one.
-          </p>
+        <Section
+          icon={<DashboardIcon />}
+          title="Modules"
+          subtitle="Turn product areas on or off for this organization. The sidebar updates when you toggle one."
+        >
           <div className="space-y-2">
             {MODULE_INFO.map((m) => {
               const enabled = modules.includes(m.id);
@@ -476,17 +473,13 @@ export default function SettingsPage() {
               );
             })}
           </div>
-        </Card>
+        </Section>
 
-        <Card className="p-5">
-          <h2 className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Backup &amp; restore
-          </h2>
-          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Download all of this organization&apos;s data (shipments, invoices,
-            payments, expenses, bookings, ledgers…) as a JSON file, or add the
-            contents of a backup back in.
-          </p>
+        <Section
+          icon={<BookIcon />}
+          title="Backup & restore"
+          subtitle="Download all of this organization's data (shipments, invoices, payments, expenses, bookings, ledgers…) as a JSON file, or add the contents of a backup back in."
+        >
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" onClick={makeBackup} disabled={backupBusy}>
               {backupBusy ? "Preparing…" : "⬇ Download backup"}
@@ -532,7 +525,7 @@ export default function SettingsPage() {
             Restore only adds — it never deletes existing data. Restoring the
             same backup twice will duplicate shipments, invoices and bookings.
           </p>
-        </Card>
+        </Section>
       </div>
 
       <ConfirmDialog

@@ -19,13 +19,16 @@ import {
   ConfirmDialog,
   ErrorNote,
   Field,
+  IconChip,
   Input,
   PageHeader,
   rowDeleteClass,
+  Section,
   Td,
   Th,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
+import { CoinsIcon } from "@/components/icons";
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -259,7 +262,12 @@ export default function InvoiceDetailPage() {
 
           <Card className="overflow-x-auto">
             <div className="flex items-center justify-between px-4 pt-4">
-              <h2 className="font-semibold">Payments</h2>
+              <div className="flex items-center gap-2.5">
+                <IconChip>
+                  <CoinsIcon />
+                </IconChip>
+                <h2 className="font-semibold">Payments</h2>
+              </div>
               {balance <= 0 && total > 0 ? (
                 <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
                   Paid in full
@@ -340,8 +348,11 @@ export default function InvoiceDetailPage() {
         </div>
 
         <div>
-          <Card className="p-6">
-            <h2 className="mb-4 font-semibold">Record a payment</h2>
+          <Section
+            icon={<CoinsIcon />}
+            title="Record a payment"
+            subtitle="Log what the customer has paid on this invoice"
+          >
             <form onSubmit={addPayment} className="space-y-4">
               <Field label="Amount">
                 <Input
@@ -377,7 +388,7 @@ export default function InvoiceDetailPage() {
                 </button>
               )}
             </form>
-          </Card>
+          </Section>
         </div>
       </div>
 

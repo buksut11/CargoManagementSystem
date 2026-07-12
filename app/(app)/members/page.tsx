@@ -14,10 +14,12 @@ import {
   Input,
   PageHeader,
   rowDeleteClass,
+  Section,
   Select,
   Td,
   Th,
 } from "@/components/ui";
+import { ClockIcon, MailIcon } from "@/components/icons";
 
 type Member = {
   id: string;
@@ -181,10 +183,11 @@ export default function MembersPage() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
         <div className="space-y-6">
-          <Card className="p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Invite someone
-            </h2>
+          <Section
+            icon={<MailIcon />}
+            title="Invite someone"
+            subtitle="Add a teammate to this organization"
+          >
             <form onSubmit={invite} className="space-y-3">
               <Field label="Email">
                 <Input
@@ -232,13 +235,10 @@ export default function MembersPage() {
                 </div>
               </div>
             )}
-          </Card>
+          </Section>
 
           {invites.length > 0 && (
-            <Card className="p-4">
-              <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Pending invites
-              </h2>
+            <Section icon={<ClockIcon />} title="Pending invites">
               <ul className="space-y-2">
                 {invites.map((inv) => (
                   <li
@@ -258,7 +258,7 @@ export default function MembersPage() {
                   </li>
                 ))}
               </ul>
-            </Card>
+            </Section>
           )}
         </div>
 

@@ -10,8 +10,17 @@ import type {
   SupplierPayment,
 } from "@/lib/types";
 import { fmtDate, fmtMoney } from "@/lib/format";
-import { Button, Card, ErrorNote, Input, rowDeleteClass, Select } from "@/components/ui";
+import {
+  Button,
+  ErrorNote,
+  Input,
+  rowDeleteClass,
+  Section,
+  Select,
+} from "@/components/ui";
+import { BuildingIcon, CoinsIcon, ReceiptIcon } from "@/components/icons";
 import { DatePicker } from "@/components/date-picker";
+import type { ReactNode } from "react";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -66,10 +75,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
 
   return (
     <div className="space-y-5">
-      <Card className="p-5">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Financial summary
-        </h2>
+      <Section icon={<CoinsIcon />} title="Financial summary">
         <dl className="space-y-2 text-sm">
           <Row label="Sale total" value={fmtMoney(saleTotal)} />
           <Row label="Received" value={fmtMoney(received)} />
@@ -97,11 +103,12 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             <Row label="Refunded to customer" value={fmtMoney(refunded)} />
           )}
         </dl>
-      </Card>
+      </Section>
 
       <ErrorNote message={error} />
 
       <LedgerSection<BookingPayment>
+        icon={<CoinsIcon />}
         title="Customer receipts"
         rows={payments}
         rowLabel={(p) => (
@@ -135,6 +142,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
       />
 
       <LedgerSection<SupplierPayment>
+        icon={<BuildingIcon />}
         title="Airline payments"
         rows={supplierPays}
         rowLabel={(p) => (
@@ -222,12 +230,14 @@ type AddForm = { amount: number; date: string; method: string; note: string };
 
 // A payment ledger block (customer receipts / supplier payments share this).
 function LedgerSection<T extends { id: number }>({
+  icon,
   title,
   rows,
   rowLabel,
   onAdd,
   onDelete,
 }: {
+  icon: ReactNode;
   title: string;
   rows: T[];
   rowLabel: (row: T) => React.ReactNode;
@@ -262,11 +272,10 @@ function LedgerSection<T extends { id: number }>({
   }
 
   return (
-    <Card className="p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          {title}
-        </h2>
+    <Section
+      icon={icon}
+      title={title}
+      action={
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -274,7 +283,8 @@ function LedgerSection<T extends { id: number }>({
         >
           {open ? "Close" : "+ Add"}
         </button>
-      </div>
+      }
+    >
       {open && (
         <form onSubmit={submit} className="mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
@@ -318,7 +328,7 @@ function LedgerSection<T extends { id: number }>({
           ))}
         </ul>
       )}
-    </Card>
+    </Section>
   );
 }
 
@@ -370,11 +380,10 @@ function RefundSection({
   }
 
   return (
-    <Card className="p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Refunds &amp; voids
-        </h2>
+    <Section
+      icon={<ReceiptIcon />}
+      title="Refunds & voids"
+      action={
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -382,7 +391,8 @@ function RefundSection({
         >
           {open ? "Close" : "+ Add"}
         </button>
-      </div>
+      }
+    >
       {open && (
         <form onSubmit={submit} className="mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
@@ -421,6 +431,6 @@ function RefundSection({
           ))}
         </ul>
       )}
-    </Card>
+    </Section>
   );
 }

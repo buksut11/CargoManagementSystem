@@ -19,6 +19,7 @@ import {
   ErrorNote,
   Field,
   Input,
+  Section,
   Select,
   Textarea,
 } from "@/components/ui";
@@ -557,43 +558,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
         </div>
       </div>
     </form>
-  );
-}
-
-// A titled panel with an icon chip — the building block for every form section.
-function Section({
-  icon,
-  title,
-  subtitle,
-  action,
-  children,
-}: {
-  icon: ReactNode;
-  title: string;
-  subtitle?: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="glass-panel rounded-2xl p-4 sm:p-5">
-      <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:bg-blue-400/15 dark:text-blue-300">
-          {icon}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {title}
-          </h2>
-          {subtitle && (
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-              {subtitle}
-            </p>
-          )}
-        </div>
-        {action}
-      </div>
-      {children}
-    </section>
   );
 }
 

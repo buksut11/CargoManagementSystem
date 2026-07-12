@@ -48,6 +48,73 @@ export function PageHeader({
   );
 }
 
+// A rounded icon chip — the blue-tinted square that leads every section header.
+// Exposed on its own so inline card headings (dashboards, tables) can carry the
+// same chip without wrapping their whole body in a Section.
+export function IconChip({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-600 dark:bg-blue-400/15 dark:text-blue-300 ${className}`}
+    >
+      {children}
+    </span>
+  );
+}
+
+// A titled glass panel led by a rounded icon chip — the building block that
+// gives the booking form its look. Reused app-wide so every card carries the
+// same icon + title + subtitle header. `bare` drops the panel chrome so it can
+// sit as a header inside an existing Card (e.g. above a table).
+export function Section({
+  icon,
+  title,
+  subtitle,
+  action,
+  bare = false,
+  className = "",
+  children,
+}: {
+  icon?: ReactNode;
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+  bare?: boolean;
+  className?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <section
+      className={`${bare ? "" : "glass-panel rounded-2xl p-4 sm:p-5"} ${className}`}
+    >
+      <div className={`flex items-start gap-3 ${children ? "mb-4" : ""}`}>
+        {icon && (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:bg-blue-400/15 dark:text-blue-300">
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function Button({
   variant = "primary",
   className = "",

@@ -13,14 +13,17 @@ import {
   EmptyState,
   ErrorNote,
   Field,
+  IconChip,
   Input,
   PageHeader,
   rowDeleteClass,
+  Section,
   Select,
   Td,
   Th,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
+import { ChartIcon, WalletIcon } from "@/components/icons";
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -140,10 +143,12 @@ export default function ExpensesPage() {
         ))}
       </div>
 
-      <Card className="mt-5 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Add a delivery expense
-        </h2>
+      <Section
+        className="mt-5"
+        icon={<WalletIcon />}
+        title="Add a delivery expense"
+        subtitle="Record what a delivery cost you (airplane, car, motorcycle…)"
+      >
         <form
           onSubmit={add}
           className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-6"
@@ -187,12 +192,17 @@ export default function ExpensesPage() {
         <div className="mt-3">
           <ErrorNote message={error} />
         </div>
-      </Card>
+      </Section>
 
       <Card className="mt-5 overflow-x-auto">
-        <h2 className="px-5 pt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
-          All expenses
-        </h2>
+        <div className="flex items-center gap-2.5 px-5 pt-4">
+          <IconChip>
+            <WalletIcon />
+          </IconChip>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            All expenses
+          </h2>
+        </div>
         <div className="mt-2 space-y-3 p-3 md:hidden">
           {expenses.map((exp) => (
             <div
@@ -272,9 +282,14 @@ export default function ExpensesPage() {
       </Card>
 
       <Card className="mt-5 overflow-x-auto">
-        <h2 className="px-5 pt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Profit per shipment
-        </h2>
+        <div className="flex items-center gap-2.5 px-5 pt-4">
+          <IconChip>
+            <ChartIcon />
+          </IconChip>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Profit per shipment
+          </h2>
+        </div>
         <div className="mt-2 space-y-3 p-3 md:hidden">
           {shipments.map((s) => {
             const cost = expensesByShipment.get(s.id) ?? 0;

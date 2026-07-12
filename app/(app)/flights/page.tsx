@@ -11,7 +11,8 @@ import {
   FLIGHT_STATUS_CLASS,
   FLIGHT_STATUS_LABEL,
 } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader } from "@/components/ui";
+import { Badge, Card, EmptyState, IconChip, PageHeader } from "@/components/ui";
+import { ChartIcon, TicketIcon } from "@/components/icons";
 import { CountUp } from "@/components/count-up";
 import { TiltCard } from "@/components/tilt-card";
 import { AreaChart, CHART_COLORS, type ChartPoint } from "@/components/charts";
@@ -172,8 +173,13 @@ export default function FlightDashboardPage() {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Sales per month
+          <div className="flex items-center gap-2.5">
+            <IconChip>
+              <ChartIcon />
+            </IconChip>
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Sales per month
+            </div>
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-xl font-bold" style={{ color: CHART_COLORS.blue }}>
@@ -188,9 +194,14 @@ export default function FlightDashboardPage() {
 
         <Card className="overflow-x-auto">
           <div className="flex items-center justify-between px-5 pt-4">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Recent bookings
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <IconChip>
+                <TicketIcon />
+              </IconChip>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Recent bookings
+              </h2>
+            </div>
             <Link
               href="/flights/bookings"
               className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"

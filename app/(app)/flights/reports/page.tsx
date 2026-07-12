@@ -5,7 +5,15 @@ import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
 import type { FlightBooking } from "@/lib/types";
 import { fmtMoney } from "@/lib/format";
-import { Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import {
+  Card,
+  EmptyState,
+  IconChip,
+  PageHeader,
+  Td,
+  Th,
+} from "@/components/ui";
+import { BuildingIcon, UsersIcon } from "@/components/icons";
 
 type Row = { key: string; bookings: number; sales: number; profit: number };
 
@@ -120,8 +128,13 @@ export default function FlightReportsPage() {
 
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <Card className="overflow-x-auto">
-          <div className="px-5 pt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            By airline
+          <div className="flex items-center gap-2.5 px-5 pt-4">
+            <IconChip>
+              <BuildingIcon />
+            </IconChip>
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              By airline
+            </div>
           </div>
           <table className="mt-2 w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
@@ -149,8 +162,13 @@ export default function FlightReportsPage() {
         </Card>
 
         <Card className="overflow-x-auto">
-          <div className="px-5 pt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Customer outstanding
+          <div className="flex items-center gap-2.5 px-5 pt-4">
+            <IconChip>
+              <UsersIcon />
+            </IconChip>
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Customer outstanding
+            </div>
           </div>
           <table className="mt-2 w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">

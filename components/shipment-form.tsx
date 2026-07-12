@@ -10,14 +10,16 @@ import { useOrg } from "@/components/org-context";
 import type { Destination, Shipment, ShipmentStatus } from "@/lib/types";
 import {
   Button,
-  Card,
   ErrorNote,
   Field,
   Input,
+  Section,
   Select,
   Textarea,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
+import { BookIcon, BoxIcon, CoinsIcon } from "@/components/icons";
+import { fmtMoney } from "@/lib/format";
 
 export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   const router = useRouter();
@@ -129,46 +131,61 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
   }
 
   return (
-    <Card className="max-w-xl p-5 sm:p-6">
-      <form onSubmit={save} className="space-y-4">
-        <Field label="Description">
-          <Input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g. 3 boxes of spare parts"
-            required
-            autoFocus
-          />
-        </Field>
-        <Field
-          label="Destination"
-          hint={
-            destinations.length === 0
-              ? "No destinations yet — add them on the Destinations page."
-              : undefined
-          }
-        >
-          <div className="flex gap-2">
-            <Select
-              value={destinationId}
-              onChange={(e) => setDestinationId(e.target.value)}
-            >
-              <option value="">— none —</option>
-              {destinations.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                  {d.country ? ` (${d.country})` : ""}
-                </option>
-              ))}
-            </Select>
-            <Link
-              href="/destinations"
-              className="shrink-0 rounded-full border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.05] px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/[0.08]"
-            >
-              Manage
-            </Link>
-          </div>
-        </Field>
+    <form onSubmit={save} className="space-y-4">
+      {/* Shipment details */}
+      <Section
+        icon={<BoxIcon />}
+        title="Shipment details"
+        subtitle="What is being shipped and where it's going"
+      >
+        <div className="space-y-4">
+          <Field label="Description">
+            <Input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g. 3 boxes of spare parts"
+              required
+              autoFocus
+            />
+          </Field>
+          <Field
+            label="Destination"
+            hint={
+              destinations.length === 0
+                ? "No destinations yet — add them on the Destinations page."
+                : undefined
+            }
+          >
+            <div className="flex gap-2">
+              <Select
+                value={destinationId}
+                onChange={(e) => setDestinationId(e.target.value)}
+              >
+                <option value="">— none —</option>
+                {destinations.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                    {d.country ? ` (${d.country})` : ""}
+                  </option>
+                ))}
+              </Select>
+              <Link
+                href="/destinations"
+                className="shrink-0 rounded-full border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.05] px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/[0.08]"
+              >
+                Manage
+              </Link>
+            </div>
+          </Field>
+        </div>
+      </Section>
+
+      {/* Weight & pricing */}
+      <Section
+        icon={<CoinsIcon />}
+        title="Weight & pricing"
+        subtitle="Weight, rate and the price you charge"
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Weight (kg)">
             <Input
@@ -197,7 +214,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             />
           </Field>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field
             label="Total price"
             hint={ratePerKg !== "" ? "Computed from weight × rate." : undefined}
@@ -216,74 +233,93 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             <DatePicker value={shipDate} onChange={setShipDate} />
           </Field>
         </div>
-        <Field label="Status">
-          <Select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as ShipmentStatus)}
-          >
-            <option value="pending">Pending</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-          </Select>
-        </Field>
-        <Field
-          label="Notes (optional)"
-          hint="Shown on the printed shipment receipt."
-        >
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g. fragile — handle with care"
-          />
-        </Field>
-        {/*
-          This section is deliberately NOT wrapped in the <label>-based Field
-          component. A <label> forwards clicks on any of its non-interactive
-          children (like the image preview) to its first labelable control,
-          which would activate the Remove button and clear the image. Here the
-          only element tied to the file input is the explicit upload trigger,
-          so clicking the preview does nothing unexpected.
-        */}
-        <div className="min-w-0">
-          <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-            Attachment image{" "}
-            <span className="font-normal text-slate-400 dark:text-slate-500">
-              (optional)
-            </span>
-          </span>
-
-          <AttachmentSlot
-            inputId="attachment-file"
-            url={attachmentUrl ? attachmentPreview ?? "" : ""}
-            uploading={uploading}
-            onUpload={(e) => uploadImage(e, setAttachmentUrl)}
-            onRemove={() => setAttachmentUrl("")}
-          />
-
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            Agents can view it but not change it.
-          </p>
+        <div className="mt-4">
+          <Field label="Status">
+            <Select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ShipmentStatus)}
+            >
+              <option value="pending">Pending</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+            </Select>
+          </Field>
         </div>
-        <ErrorNote message={error} />
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-          <Button
-            type="submit"
-            disabled={busy || uploading}
-            className="w-full sm:w-auto"
+      </Section>
+
+      {/* Notes & attachment */}
+      <Section
+        icon={<BookIcon />}
+        title="Notes & attachment"
+        subtitle="Internal notes and an optional parcel or receipt photo"
+      >
+        <div className="space-y-4">
+          <Field
+            label="Notes (optional)"
+            hint="Shown on the printed shipment receipt."
           >
-            {busy ? "Saving…" : shipment ? "Save changes" : "Add shipment"}
-          </Button>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. fragile — handle with care"
+            />
+          </Field>
+          {/*
+            This block is deliberately NOT wrapped in the <label>-based Field
+            component. A <label> forwards clicks on any of its non-interactive
+            children (like the image preview) to its first labelable control,
+            which would activate the Remove button and clear the image. Here the
+            only element tied to the file input is the explicit upload trigger,
+            so clicking the preview does nothing unexpected.
+          */}
+          <div className="min-w-0">
+            <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+              Attachment image{" "}
+              <span className="font-normal text-slate-400 dark:text-slate-500">
+                (optional)
+              </span>
+            </span>
+
+            <AttachmentSlot
+              inputId="attachment-file"
+              url={attachmentUrl ? attachmentPreview ?? "" : ""}
+              uploading={uploading}
+              onUpload={(e) => uploadImage(e, setAttachmentUrl)}
+              onRemove={() => setAttachmentUrl("")}
+            />
+
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+              Agents can view it but not change it.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <ErrorNote message={error} />
+
+      {/* Sticky action bar — the running total and the primary CTA stay in view
+          while the user scrolls the form, mirroring the booking form. */}
+      <div className="glass-panel sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
+        <span className="text-sm text-slate-500 dark:text-slate-400">
+          Total{" "}
+          <span className="font-semibold text-slate-900 dark:text-slate-100">
+            {fmtMoney(total === "" ? 0 : parseFloat(total) || 0)}
+          </span>
+        </span>
+        <div className="flex gap-2">
           <Button
             type="button"
             variant="secondary"
             onClick={() => router.push("/shipments")}
-            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
+          <Button type="submit" disabled={busy || uploading}>
+            {busy ? "Saving…" : shipment ? "Save changes" : "Add shipment"}
+          </Button>
         </div>
-      </form>
-    </Card>
+      </div>
+    </form>
   );
 }
 

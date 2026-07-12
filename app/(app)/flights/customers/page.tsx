@@ -15,9 +15,11 @@ import {
   PageHeader,
   rowActionClass,
   rowDeleteClass,
+  Section,
   Td,
   Th,
 } from "@/components/ui";
+import { UsersIcon } from "@/components/icons";
 
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
@@ -109,11 +111,12 @@ export default function FlightCustomersPage() {
     <div>
       <PageHeader title="Customers" />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
-        <Card className="p-4">
-          <div ref={formRef} className="scroll-mt-6" />
-          <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {editingId ? "Edit customer" : "New customer"}
-          </div>
+        <Section
+          icon={<UsersIcon />}
+          title={editingId ? "Edit customer" : "New customer"}
+          subtitle="People or agencies you sell tickets to"
+        >
+          <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="space-y-3">
             <Field label="Name">
               <Input
@@ -151,7 +154,7 @@ export default function FlightCustomersPage() {
             </div>
             <ErrorNote message={error} />
           </form>
-        </Card>
+        </Section>
         <Card className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">

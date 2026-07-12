@@ -12,9 +12,11 @@ import {
   Input,
   PageHeader,
   rowDeleteClass,
+  Section,
   Td,
   Th,
 } from "@/components/ui";
+import { PinIcon } from "@/components/icons";
 
 export default function DestinationsPage() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -84,7 +86,11 @@ export default function DestinationsPage() {
     <div>
       <PageHeader title="Destinations" />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
-      <Card className="p-4">
+      <Section
+        icon={<PinIcon />}
+        title="Add a destination"
+        subtitle="Places you ship to"
+      >
         <form onSubmit={add} className="flex flex-wrap items-end gap-3">
           <div className="min-w-40 flex-1">
             <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -114,7 +120,7 @@ export default function DestinationsPage() {
         <div className="mt-3">
           <ErrorNote message={error} />
         </div>
-      </Card>
+      </Section>
       <Card className="overflow-x-auto">
         <table className="w-full">
           <thead className="border-b border-slate-200/60 dark:border-white/10">

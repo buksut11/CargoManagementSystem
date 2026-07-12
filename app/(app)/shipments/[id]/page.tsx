@@ -16,14 +16,15 @@ import {
 import {
   Badge,
   Button,
-  Card,
   ConfirmDialog,
   ErrorNote,
   Field,
   PageHeader,
+  Section,
   Select,
   Textarea,
 } from "@/components/ui";
+import { BookIcon, BoxIcon } from "@/components/icons";
 import { ShipmentForm } from "@/components/shipment-form";
 import { ShipmentExpenses } from "@/components/shipment-expenses";
 import { useRole } from "@/components/role-context";
@@ -145,7 +146,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
         }
       />
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Card className="p-6">
+        <Section icon={<BoxIcon />} title="Shipment details">
           <dl className="space-y-3">
             {rows.map(([label, value]) => (
               <div key={label} className="flex gap-3 text-sm">
@@ -177,8 +178,8 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
               </a>
             </div>
           )}
-        </Card>
-        <Card className="p-6">
+        </Section>
+        <Section icon={<BookIcon />} title="Status & notes">
           <form onSubmit={save} className="space-y-3">
             <Field label="Update status">
               <Select
@@ -222,7 +223,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
               </Button>
             </div>
           </form>
-        </Card>
+        </Section>
       </div>
     </div>
   );
