@@ -98,6 +98,14 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={inputClass} {...props} />;
 }
 
+// Compact pill buttons for inline row actions (Edit / Delete / Statement in
+// tables and ledger lists) so they match the app's pill styling instead of
+// looking like bare text links.
+export const rowActionClass =
+  "inline-flex items-center rounded-full border border-white/60 bg-white/40 px-3 py-1 text-xs font-medium text-blue-600 backdrop-blur transition-colors hover:bg-white/70 dark:border-white/10 dark:bg-white/[0.06] dark:text-blue-400 dark:hover:bg-white/[0.12]";
+export const rowDeleteClass =
+  "inline-flex items-center rounded-full border border-red-200/70 bg-white/40 px-3 py-1 text-xs font-medium text-red-600 backdrop-blur transition-colors hover:bg-red-50/80 dark:border-red-500/30 dark:bg-white/[0.06] dark:text-red-400 dark:hover:bg-red-500/15";
+
 // ── Custom glass dropdown ───────────────────────────────────────────────────
 // Drop-in replacement for the old native <select>: same API (`value`,
 // `onChange(e)` and <option> children), but the open list is a frosted glass

@@ -13,6 +13,8 @@ import {
   Field,
   Input,
   PageHeader,
+  rowActionClass,
+  rowDeleteClass,
   Td,
   Th,
 } from "@/components/ui";
@@ -167,23 +169,17 @@ export default function FlightCustomersPage() {
                   <Td>{c.email ?? "—"}</Td>
                   <Td>{c.phone ?? "—"}</Td>
                   <Td className="text-right">
-                    <span className="inline-flex items-center gap-3">
+                    <span className="inline-flex items-center gap-2">
                       <Link
                         href={`/flights/customers/${c.id}/statement`}
-                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                        className={rowActionClass}
                       >
                         Statement
                       </Link>
-                      <button
-                        onClick={() => startEdit(c)}
-                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-                      >
+                      <button onClick={() => startEdit(c)} className={rowActionClass}>
                         Edit
                       </button>
-                      <button
-                        onClick={() => setPending(c)}
-                        className="text-sm text-red-600 hover:underline dark:text-red-400"
-                      >
+                      <button onClick={() => setPending(c)} className={rowDeleteClass}>
                         Delete
                       </button>
                     </span>

@@ -10,7 +10,7 @@ import type {
   SupplierPayment,
 } from "@/lib/types";
 import { fmtDate, fmtMoney } from "@/lib/format";
-import { Button, Card, ErrorNote, Input, Select } from "@/components/ui";
+import { Button, Card, ErrorNote, Input, rowDeleteClass, Select } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -311,10 +311,7 @@ function LedgerSection<T extends { id: number }>({
           {rows.map((row) => (
             <li key={row.id} className="flex items-center justify-between gap-3 py-2">
               <div className="flex flex-col">{rowLabel(row)}</div>
-              <button
-                onClick={() => onDelete(row.id)}
-                className="text-xs text-rose-600 hover:underline dark:text-rose-400"
-              >
+              <button onClick={() => onDelete(row.id)} className={rowDeleteClass}>
                 Delete
               </button>
             </li>
@@ -417,10 +414,7 @@ function RefundSection({
                   {Number(r.adm_amount) > 0 ? ` · ADM ${fmtMoney(Number(r.adm_amount))}` : ""}
                 </span>
               </div>
-              <button
-                onClick={() => onDelete(r.id)}
-                className="text-xs text-rose-600 hover:underline dark:text-rose-400"
-              >
+              <button onClick={() => onDelete(r.id)} className={rowDeleteClass}>
                 Delete
               </button>
             </li>

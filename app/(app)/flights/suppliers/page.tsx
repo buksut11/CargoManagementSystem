@@ -12,6 +12,8 @@ import {
   Field,
   Input,
   PageHeader,
+  rowActionClass,
+  rowDeleteClass,
   Td,
   Th,
 } from "@/components/ui";
@@ -152,17 +154,11 @@ export default function FlightSuppliersPage() {
                   <Td className="font-medium">{s.name}</Td>
                   <Td>{s.contact ?? "—"}</Td>
                   <Td className="text-right">
-                    <span className="inline-flex items-center gap-3">
-                      <button
-                        onClick={() => startEdit(s)}
-                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-                      >
+                    <span className="inline-flex items-center gap-2">
+                      <button onClick={() => startEdit(s)} className={rowActionClass}>
                         Edit
                       </button>
-                      <button
-                        onClick={() => setPending(s)}
-                        className="text-sm text-red-600 hover:underline dark:text-red-400"
-                      >
+                      <button onClick={() => setPending(s)} className={rowDeleteClass}>
                         Delete
                       </button>
                     </span>
