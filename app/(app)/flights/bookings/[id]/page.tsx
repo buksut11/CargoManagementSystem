@@ -215,11 +215,9 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
                       {p.full_name}{" "}
                       <span className="text-xs text-slate-400 capitalize">({p.type})</span>
                     </span>
-                    {p.ticket_number && (
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {p.ticket_number}
-                      </span>
-                    )}
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {fmtMoney(Number(p.sale_amount))}
+                    </span>
                   </li>
                 ))}
               </ul>
