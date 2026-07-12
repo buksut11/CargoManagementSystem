@@ -74,15 +74,33 @@ const ACCOUNT_NAV: NavItem[] = [
 // Remembers which organization the user last acted in (for multi-org accounts).
 const ACTIVE_ORG_KEY = "cargobook:activeOrg";
 
-// The nav for a role, composed from the org's enabled modules. An org with no
-// recognised module still falls back to cargo so nothing disappears.
-function navFor(role: OrgRole, modules: string[]): NavItem[] {
+// The nav for a role, composed from the org's enabled modules and grouped into
+// labelled sections so the two apps are visually separated in the sidebar. An
+// org with no recognised module still falls back to cargo so nothing
+// disappears. Section labels only show when more than one section is visible.
+type NavSection = { label: string | null; items: NavItem[] };
+
+function navFor(role: OrgRole, modules: string[]): NavSection[] {
   const on = modules.length ? modules : ["cargo"];
-  const items: NavItem[] = [];
-  if (on.includes("cargo")) items.push(...CARGO_NAV);
-  if (on.includes("flights")) items.push(...FLIGHT_NAV);
-  items.push(...ACCOUNT_NAV);
-  return items.filter((item) => item.roles.includes(role));
+  const sections: NavSection[] = [];
+  if (on.includes("cargo")) {
+    sections.push({ label: "Cargo Section", items: CARGO_NAV });
+  }
+  if (on.includes("flights")) {
+    sections.push({ label: "Flight Booking Section", items: FLIGHT_NAV });
+  }
+  sections.push({ label: null, items: ACCOUNT_NAV });
+
+  const visible = sections
+    .map((s) => ({ ...s, items: s.items.filter((i) => i.roles.includes(role)) }))
+    .filter((s) => s.items.length > 0);
+  // A single product section needs no heading (e.g. cargo-only orgs look
+  // exactly as they always did).
+  const productSections = visible.filter((s) => s.label !== null).length;
+  if (productSections < 2) {
+    for (const s of visible) s.label = null;
+  }
+  return visible;
 }
 
 const CARGO_PATHS = [
@@ -186,32 +204,45 @@ function SidebarContent({
           </div>
         </div>
       </div>
-      {nav.map((item) => {
-        // Module roots ("/" and "/flights") match exactly so a child page
-        // (e.g. /flights/bookings) highlights only its own item, not the root.
-        const active =
-          item.href === "/" || item.href === "/flights"
-            ? pathname === item.href
-            : pathname === item.href || pathname.startsWith(item.href + "/");
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={`${itemBase} ${
-              active
-                ? "bg-white/60 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
-                : itemIdle
-            }`}
-          >
-            <span className="shrink-0">
-              <Icon />
-            </span>
-            <span>{item.label}</span>
-          </Link>
-        );
-      })}
+      {nav.map((section, si) => (
+        <div key={section.label ?? `section-${si}`} className="flex flex-col gap-1.5">
+          {/* Divider + label between the apps (e.g. "Flight Booking Section"). */}
+          {si > 0 && (
+            <div className="mx-1 mt-3 border-t border-slate-300/50 dark:border-white/10" />
+          )}
+          {section.label && (
+            <div className="px-3.5 pt-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              {section.label}
+            </div>
+          )}
+          {section.items.map((item) => {
+            // Module roots ("/" and "/flights") match exactly so a child page
+            // (e.g. /flights/bookings) highlights only its own item, not the root.
+            const active =
+              item.href === "/" || item.href === "/flights"
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                className={`${itemBase} ${
+                  active
+                    ? "bg-white/60 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
+                    : itemIdle
+                }`}
+              >
+                <span className="shrink-0">
+                  <Icon />
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      ))}
       <div className="flex-1" />
       <ThemeToggle className={`${itemBase} ${itemIdle}`} labelClass="inline" />
       <button onClick={onSignOut} className={`${itemBase} ${itemIdle}`}>
@@ -388,7 +419,10 @@ export default function AppLayout({
     <RoleProvider role={resolved.uiRole}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
-        <aside className="no-print sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 border-r border-white/50 bg-white/25 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/30 md:flex">
+        {/* overflow-y-auto: with both modules enabled the nav can be taller
+            than the screen — it must scroll inside the frosted panel instead
+            of spilling past it (which painted items on the page background). */}
+        <aside className="no-print no-scrollbar sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/25 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/30 md:flex">
           <SidebarContent
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
