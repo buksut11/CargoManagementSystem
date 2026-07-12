@@ -148,6 +148,14 @@ export const UsersIcon = () => (
   </Base>
 );
 
+export const BookIcon = () => (
+  <Base>
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />
+    <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" />
+    <path d="M9 7h7M9 11h7" />
+  </Base>
+);
+
 export const BuildingIcon = () => (
   <Base>
     <path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16" />

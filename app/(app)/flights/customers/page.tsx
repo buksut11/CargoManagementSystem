@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { FlightCustomer } from "@/lib/types";
 import {
@@ -134,12 +135,20 @@ export default function FlightCustomersPage() {
                   <Td>{c.email ?? "—"}</Td>
                   <Td>{c.phone ?? "—"}</Td>
                   <Td className="text-right">
-                    <button
-                      onClick={() => setPending(c)}
-                      className="text-sm text-red-600 hover:underline dark:text-red-400"
-                    >
-                      Delete
-                    </button>
+                    <span className="inline-flex items-center gap-3">
+                      <Link
+                        href={`/flights/customers/${c.id}/statement`}
+                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        Statement
+                      </Link>
+                      <button
+                        onClick={() => setPending(c)}
+                        className="text-sm text-red-600 hover:underline dark:text-red-400"
+                      >
+                        Delete
+                      </button>
+                    </span>
                   </Td>
                 </tr>
               ))}

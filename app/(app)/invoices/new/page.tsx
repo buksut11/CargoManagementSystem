@@ -89,9 +89,9 @@ export default function NewInvoicePage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-2xl">
       <PageHeader title="New invoice" />
-      <form onSubmit={create} className="max-w-2xl space-y-6">
+      <form onSubmit={create} className="space-y-6">
         <Card className="p-6">
           <div className="space-y-4">
             <Field label="Bill to" hint="Name of the person or company paying.">
