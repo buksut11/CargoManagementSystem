@@ -372,7 +372,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
             <Field label="Markup">
               <Input type="number" step="0.01" min="0" value={markup} onChange={(e) => setMarkup(e.target.value)} placeholder="0.00" />
             </Field>
-            <Field label="Commission (from supplier)" hint="Informational — reduce the net cost you enter accordingly.">
+            <Field label="Commission" hint="From supplier, informational — reduce the net cost you enter accordingly.">
               <Input type="number" step="0.01" min="0" value={commission} onChange={(e) => setCommission(e.target.value)} placeholder="0.00" />
             </Field>
             <Field label="Net cost (to supplier)">
