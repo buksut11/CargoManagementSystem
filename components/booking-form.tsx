@@ -24,7 +24,7 @@ import {
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 
-type PaxRow = { full_name: string; type: PassengerType; ticket_number: string };
+type PaxRow = { full_name: string; type: PassengerType; sale: string };
 type SegRow = {
   origin: string;
   destination: string;
@@ -33,7 +33,7 @@ type SegRow = {
   cabin_class: string;
 };
 
-const emptyPax: PaxRow = { full_name: "", type: "adult", ticket_number: "" };
+const emptyPax: PaxRow = { full_name: "", type: "adult", sale: "" };
 const emptySeg: SegRow = {
   origin: "",
   destination: "",
@@ -75,7 +75,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     booking?.booking_date ?? new Date().toISOString().slice(0, 10),
   );
 
-  const [baseFare, setBaseFare] = useState(String(booking?.base_fare ?? ""));
   const [netCost, setNetCost] = useState(String(booking?.net_cost ?? ""));
   const [notes, setNotes] = useState(booking?.notes ?? "");
 
@@ -125,7 +124,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           pax.map((r) => ({
             full_name: r.full_name,
             type: r.type,
-            ticket_number: r.ticket_number ?? "",
+            sale: r.sale_amount ? String(r.sale_amount) : "",
           })),
         );
       if (seg.length)
@@ -145,13 +144,21 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
   }, [booking]);
 
   const num = (v: string) => (v === "" ? 0 : parseFloat(v) || 0);
-  const saleTotal = useMemo(() => num(baseFare), [baseFare]);
+  const saleTotal = useMemo(
+    () => passengers.reduce((sum, p) => sum + num(p.sale), 0),
+    [passengers],
+  );
   const profit = saleTotal - num(netCost);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+
+    // Passengers carry the sale price now; keep the booking's base_fare in sync
+    // with their total so the generated sale_total / profit columns stay correct.
+    const savedPax = passengers.filter((p) => p.full_name.trim());
+    const paxSaleTotal = savedPax.reduce((sum, p) => sum + num(p.sale), 0);
 
     const row = {
       pnr: pnr.trim() || null,
@@ -162,7 +169,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       status,
       booking_date: bookingDate,
       travel_date: null,
-      base_fare: num(baseFare),
+      base_fare: paxSaleTotal,
       taxes: 0,
       service_fee: 0,
       markup: 0,
@@ -204,14 +211,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       await supabase.from("flight_segments").delete().eq("booking_id", bookingId);
     }
 
-    const paxRows = passengers
-      .filter((p) => p.full_name.trim())
-      .map((p) => ({
-        booking_id: bookingId,
-        full_name: p.full_name.trim(),
-        type: p.type,
-        ticket_number: p.ticket_number.trim() || null,
-      }));
+    const paxRows = savedPax.map((p) => ({
+      booking_id: bookingId,
+      full_name: p.full_name.trim(),
+      type: p.type,
+      sale_amount: num(p.sale),
+    }));
     if (paxRows.length) {
       const { error: pErr } = await supabase
         .from("flight_passengers")
@@ -320,9 +325,6 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
             Financials
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Base fare">
-              <Input type="number" step="0.01" min="0" value={baseFare} onChange={(e) => setBaseFare(e.target.value)} placeholder="0.00" />
-            </Field>
             <Field label="Net cost (to supplier)">
               <Input type="number" step="0.01" min="0" value={netCost} onChange={(e) => setNetCost(e.target.value)} placeholder="0.00" />
             </Field>
@@ -356,7 +358,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           onAdd={() => setPassengers((r) => [...r, { ...emptyPax }])}
           onRemove={(i) => setPassengers((r) => r.filter((_, j) => j !== i))}
           render={(p, i) => (
-            <div className="grid gap-2 sm:grid-cols-[1fr_7rem_1fr]">
+            <div className="grid gap-2 sm:grid-cols-[1fr_7rem_9rem]">
               <Input
                 value={p.full_name}
                 onChange={(e) =>
@@ -381,13 +383,16 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                 <option value="infant">Infant</option>
               </Select>
               <Input
-                value={p.ticket_number}
+                type="number"
+                step="0.01"
+                min="0"
+                value={p.sale}
                 onChange={(e) =>
                   setPassengers((r) =>
-                    r.map((x, j) => (j === i ? { ...x, ticket_number: e.target.value } : x)),
+                    r.map((x, j) => (j === i ? { ...x, sale: e.target.value } : x)),
                   )
                 }
-                placeholder="Ticket number"
+                placeholder="Sale"
               />
             </div>
           )}

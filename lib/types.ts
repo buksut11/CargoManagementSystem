@@ -212,6 +212,7 @@ export type FlightPassenger = {
   full_name: string;
   type: PassengerType;
   ticket_number: string | null;
+  sale_amount: number;
   created_at: string;
 };
 
