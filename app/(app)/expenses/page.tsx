@@ -15,6 +15,7 @@ import {
   Field,
   Input,
   PageHeader,
+  rowDeleteClass,
   Select,
   Td,
   Th,
@@ -215,7 +216,7 @@ export default function ExpensesPage() {
                 <span>{fmtDate(exp.expense_date)}</span>
                 <button
                   onClick={() => setPending(exp)}
-                  className="ml-auto text-red-600 hover:underline dark:text-red-400"
+                  className={`ml-auto ${rowDeleteClass}`}
                 >
                   Delete
                 </button>
@@ -257,10 +258,7 @@ export default function ExpensesPage() {
                   −{fmtMoney(Number(exp.amount))}
                 </Td>
                 <Td className="text-right">
-                  <button
-                    onClick={() => setPending(exp)}
-                    className="text-sm text-red-600 hover:underline dark:text-red-400"
-                  >
+                  <button onClick={() => setPending(exp)} className={rowDeleteClass}>
                     Delete
                   </button>
                 </Td>

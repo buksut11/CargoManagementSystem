@@ -13,6 +13,7 @@ import {
   Field,
   Input,
   PageHeader,
+  rowDeleteClass,
   Select,
   Td,
   Th,
@@ -250,7 +251,7 @@ export default function MembersPage() {
                     </span>
                     <button
                       onClick={() => revokeInvite(inv.id)}
-                      className="shrink-0 text-red-600 hover:underline dark:text-red-400"
+                      className={`shrink-0 ${rowDeleteClass}`}
                     >
                       Revoke
                     </button>
@@ -298,7 +299,7 @@ export default function MembersPage() {
                       {!isOwner && !isSelf && (
                         <button
                           onClick={() => setPendingRemove(m)}
-                          className="text-sm text-red-600 hover:underline dark:text-red-400"
+                          className={rowDeleteClass}
                         >
                           Remove
                         </button>
