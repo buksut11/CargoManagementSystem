@@ -85,8 +85,16 @@ export default function BookingDetailPage() {
               href={`/flights/bookings/${booking.id}/print`}
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              🖨 Print
+              🖨 Invoice
             </Link>
+            {booking.customer_id && (
+              <Link
+                href={`/flights/customers/${booking.customer_id}/statement`}
+                className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.1]"
+              >
+                📄 Statement
+              </Link>
+            )}
             <Button variant="danger" onClick={() => setConfirmOpen(true)}>
               Delete
             </Button>

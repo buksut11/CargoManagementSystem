@@ -11,6 +11,7 @@ import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
 import {
+  BookIcon,
   BoxIcon,
   BuildingIcon,
   ChartIcon,
@@ -61,6 +62,7 @@ const FLIGHT_NAV: NavItem[] = [
   { href: "/flights/suppliers", label: "Suppliers", icon: BuildingIcon, roles: EDITORS },
   { href: "/flights/payments", label: "Receipts", icon: CoinsIcon, roles: EDITORS },
   { href: "/flights/payables", label: "Payables", icon: ReceiptIcon, roles: EDITORS },
+  { href: "/flights/ledger", label: "Ledger", icon: BookIcon, roles: EDITORS },
   { href: "/flights/reports", label: "Reports", icon: ChartIcon, roles: EDITORS },
   { href: "/flights/audit", label: "Activity", icon: ClockIcon, roles: EDITORS },
 ];

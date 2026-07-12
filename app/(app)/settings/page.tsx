@@ -6,8 +6,16 @@ import { useOrg, useSetOrgLogo } from "@/components/org-context";
 import { getPlan, isPaid } from "@/lib/plans";
 import { resizeImageFile } from "@/lib/image";
 import {
+  downloadBackup,
+  exportBackup,
+  restoreBackup,
+  type Backup,
+  type RestoreSummary,
+} from "@/lib/backup";
+import {
   Button,
   Card,
+  ConfirmDialog,
   ErrorNote,
   Field,
   Input,
@@ -29,6 +37,11 @@ export default function SettingsPage() {
   const [modules, setModules] = useState<string[]>(["cargo"]);
   const [savingModules, setSavingModules] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Backup & restore.
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [pendingRestore, setPendingRestore] = useState<Backup | null>(null);
+  const [restoreProgress, setRestoreProgress] = useState<string | null>(null);
+  const [restoreResult, setRestoreResult] = useState<RestoreSummary | null>(null);
   const [savingDetails, setSavingDetails] = useState(false);
   const [detailsSaved, setDetailsSaved] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
@@ -193,6 +206,55 @@ export default function SettingsPage() {
     // Reflect the new nav immediately.
     window.location.reload();
   }
+
+  async function makeBackup() {
+    setBackupBusy(true);
+    setError(null);
+    try {
+      downloadBackup(await exportBackup(supabase));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Backup failed.");
+    }
+    setBackupBusy(false);
+  }
+
+  // Step 1: read + validate the chosen file, then ask for confirmation.
+  async function pickRestoreFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file
+    if (!file) return;
+    setError(null);
+    setRestoreResult(null);
+    try {
+      const parsed = JSON.parse(await file.text()) as Backup;
+      if (parsed?.app !== "cargobook" || !parsed.tables) {
+        throw new Error("This file is not a CargoBook backup.");
+      }
+      setPendingRestore(parsed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not read the file.");
+    }
+  }
+
+  // Step 2: confirmed — insert the backup's data into this organization.
+  async function runRestore() {
+    if (!pendingRestore) return;
+    const backup = pendingRestore;
+    setPendingRestore(null);
+    setError(null);
+    setRestoreProgress("Starting…");
+    try {
+      const summary = await restoreBackup(supabase, backup, setRestoreProgress);
+      setRestoreResult(summary);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Restore failed.");
+    }
+    setRestoreProgress(null);
+  }
+
+  const restoredCount = restoreResult
+    ? Object.values(restoreResult.inserted).reduce((a, b) => a + b, 0)
+    : 0;
 
   const current = getPlan(plan);
   const paid = isPaid(subStatus);
@@ -415,7 +477,76 @@ export default function SettingsPage() {
             })}
           </div>
         </Card>
+
+        <Card className="p-5">
+          <h2 className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Backup &amp; restore
+          </h2>
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+            Download all of this organization&apos;s data (shipments, invoices,
+            payments, expenses, bookings, ledgers…) as a JSON file, or add the
+            contents of a backup back in.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" onClick={makeBackup} disabled={backupBusy}>
+              {backupBusy ? "Preparing…" : "⬇ Download backup"}
+            </Button>
+            <input
+              id="restore-file-input"
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={pickRestoreFile}
+              disabled={!!restoreProgress}
+            />
+            <label
+              htmlFor="restore-file-input"
+              className={`cursor-pointer rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12] ${
+                restoreProgress ? "pointer-events-none opacity-60" : ""
+              }`}
+            >
+              ⬆ Restore from backup
+            </label>
+          </div>
+          {restoreProgress && (
+            <p className="mt-3 text-sm text-blue-600 dark:text-blue-400">
+              {restoreProgress}
+            </p>
+          )}
+          {restoreResult && (
+            <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+              Restore finished — {restoredCount} records added.
+              {Object.entries(restoreResult.reused).length > 0 && (
+                <span>
+                  {" "}
+                  Existing entries were reused for:{" "}
+                  {Object.entries(restoreResult.reused)
+                    .map(([t, n]) => `${t.replace(/_/g, " ")} (${n})`)
+                    .join(", ")}
+                  .
+                </span>
+              )}
+            </div>
+          )}
+          <p className="mt-3 text-xs text-slate-400">
+            Restore only adds — it never deletes existing data. Restoring the
+            same backup twice will duplicate shipments, invoices and bookings.
+          </p>
+        </Card>
       </div>
+
+      <ConfirmDialog
+        open={!!pendingRestore}
+        title="Restore this backup?"
+        message={
+          pendingRestore
+            ? `Backup from ${pendingRestore.exported_at.slice(0, 10)}. Its shipments, invoices, bookings and payments will be ADDED to "${name || "this organization"}". Nothing is deleted, but restoring the same backup twice creates duplicates.`
+            : undefined
+        }
+        confirmLabel="Restore"
+        onConfirm={runRestore}
+        onCancel={() => setPendingRestore(null)}
+      />
     </div>
   );
 }
