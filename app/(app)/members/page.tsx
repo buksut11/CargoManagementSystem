@@ -262,7 +262,7 @@ export default function MembersPage() {
           )}
         </div>
 
-        <Card className="overflow-x-auto">
+        <Card className="table-scroll">
           <table className="w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>

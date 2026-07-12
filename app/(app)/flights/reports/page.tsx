@@ -127,7 +127,7 @@ export default function FlightReportsPage() {
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Card className="overflow-x-auto">
+        <Card className="table-scroll">
           <div className="flex items-center gap-2.5 px-5 pt-4">
             <IconChip>
               <BuildingIcon />
@@ -161,7 +161,7 @@ export default function FlightReportsPage() {
           )}
         </Card>
 
-        <Card className="overflow-x-auto">
+        <Card className="table-scroll">
           <div className="flex items-center gap-2.5 px-5 pt-4">
             <IconChip>
               <UsersIcon />

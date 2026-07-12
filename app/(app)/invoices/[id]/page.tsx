@@ -203,7 +203,7 @@ export default function InvoiceDetailPage() {
             )}
           </Card>
 
-          <Card className="overflow-x-auto">
+          <Card className="table-scroll">
             <div className="space-y-3 p-3 md:hidden">
               {shipments.map((s) => (
                 <Link
@@ -260,7 +260,7 @@ export default function InvoiceDetailPage() {
             </table>
           </Card>
 
-          <Card className="overflow-x-auto">
+          <Card className="table-scroll">
             <div className="flex items-center justify-between px-4 pt-4">
               <div className="flex items-center gap-2.5">
                 <IconChip>

@@ -152,7 +152,7 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      <Card className="overflow-x-auto">
+      <Card className="table-scroll">
         {/* Mobile cards */}
         <div className="space-y-3 p-3 md:hidden">
           {filtered.map((b) => (

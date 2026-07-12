@@ -87,7 +87,7 @@ export default function InvoicesPage() {
           </Link>
         }
       />
-      <Card className="overflow-x-auto">
+      <Card className="table-scroll">
         <div className="space-y-3 p-3 md:hidden">
           {invoices.map((inv) => {
             const t = totals(inv);

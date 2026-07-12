@@ -300,7 +300,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="overflow-x-auto lg:col-span-2">
+        <Card className="table-scroll lg:col-span-2">
           <div className="flex items-center justify-between px-5 pt-4">
             <div className="flex items-center gap-2.5">
               <IconChip>

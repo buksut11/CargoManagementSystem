@@ -192,7 +192,7 @@ export default function FlightDashboardPage() {
           </div>
         </Card>
 
-        <Card className="overflow-x-auto">
+        <Card className="table-scroll">
           <div className="flex items-center justify-between px-5 pt-4">
             <div className="flex items-center gap-2.5">
               <IconChip>

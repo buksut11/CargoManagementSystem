@@ -164,7 +164,7 @@ export default function BookingSeatsPage() {
             <ErrorNote message={error} />
           </form>
         </Section>
-        <Card className="overflow-x-auto">
+        <Card className="table-scroll">
           <table className="w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>

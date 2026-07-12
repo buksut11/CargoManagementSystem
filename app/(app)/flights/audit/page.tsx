@@ -84,7 +84,7 @@ export default function FlightAuditPage() {
   return (
     <div>
       <PageHeader title="Activity" />
-      <Card className="overflow-x-auto">
+      <Card className="table-scroll">
         <div className="space-y-3 p-3 md:hidden">
           {entries.map((e) => (
             <div

@@ -194,7 +194,7 @@ export default function ExpensesPage() {
         </div>
       </Section>
 
-      <Card className="mt-5 overflow-x-auto">
+      <Card className="mt-5 table-scroll">
         <div className="flex items-center gap-2.5 px-5 pt-4">
           <IconChip>
             <WalletIcon />
@@ -281,7 +281,7 @@ export default function ExpensesPage() {
         )}
       </Card>
 
-      <Card className="mt-5 overflow-x-auto">
+      <Card className="mt-5 table-scroll">
         <div className="flex items-center gap-2.5 px-5 pt-4">
           <IconChip>
             <ChartIcon />

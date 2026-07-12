@@ -106,7 +106,7 @@ export default function AuditPage() {
           </div>
         }
       />
-      <Card className="overflow-x-auto">
+      <Card className="table-scroll">
         <div className="space-y-3 p-3 md:hidden">
           {filtered.map((e) => (
             <div
