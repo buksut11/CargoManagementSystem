@@ -27,7 +27,7 @@ type Entry = {
 
 const KIND_LABEL: Record<Entry["kind"], string> = {
   receipt: "Receipt",
-  supplier: "Supplier",
+  supplier: "Airline",
   refund_out: "Refund",
   refund_in: "Recovery",
 };
@@ -68,7 +68,7 @@ export default function FlightLedgerPage() {
           key: `s-${row.id}`,
           date: row.paid_date,
           kind: "supplier",
-          description: `Paid ${row.flight_suppliers?.name ?? "supplier"}${
+          description: `Paid ${row.flight_suppliers?.name ?? "airline"}${
             row.method ? ` (${row.method})` : ""
           }`,
           bookingId: row.booking_id,
@@ -95,7 +95,7 @@ export default function FlightLedgerPage() {
               key: `ri-${row.id}`,
               date: row.refund_date,
               kind: "refund_in",
-              description: `Recovered from supplier (${row.refund_type})`,
+              description: `Recovered from airline (${row.refund_type})`,
               bookingId: row.booking_id,
               inAmt: Number(row.supplier_refund),
               outAmt: 0,
@@ -222,7 +222,7 @@ export default function FlightLedgerPage() {
           </tbody>
         </table>
         {!loading && entries.length === 0 && (
-          <EmptyState message="No money movements yet — receipts, supplier payments and refunds will appear here." />
+          <EmptyState message="No money movements yet — receipts, airline payments and refunds will appear here." />
         )}
       </Card>
     </div>

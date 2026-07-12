@@ -78,7 +78,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
           />
           <div className="my-2 border-t border-slate-200/60 dark:border-white/10" />
           <Row label="Net cost" value={fmtMoney(netCost)} />
-          <Row label="Paid to supplier" value={fmtMoney(paidSupplier)} />
+          <Row label="Paid to airline" value={fmtMoney(paidSupplier)} />
           <Row
             label="Payable"
             value={fmtMoney(payable)}
@@ -133,7 +133,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
       />
 
       <LedgerSection<SupplierPayment>
-        title="Supplier payments"
+        title="Airline payments"
         rows={supplierPays}
         rowLabel={(p) => (
           <>
@@ -404,7 +404,7 @@ function RefundSection({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
-            <Input type="number" step="0.01" min="0" value={supplierRefund} onChange={(e) => setSupplierRefund(e.target.value)} placeholder="Recovered from supplier" />
+            <Input type="number" step="0.01" min="0" value={supplierRefund} onChange={(e) => setSupplierRefund(e.target.value)} placeholder="Recovered from airline" />
             <Input type="number" step="0.01" min="0" value={penalty} onChange={(e) => setPenalty(e.target.value)} placeholder="Penalty" />
             <Input type="number" step="0.01" min="0" value={adm} onChange={(e) => setAdm(e.target.value)} placeholder="ADM amount" />
           </div>

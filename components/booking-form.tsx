@@ -283,7 +283,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               ))}
             </Select>
           </Field>
-          <Field label="Supplier">
+          <Field label="Airline">
             <Select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
@@ -310,12 +310,8 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           </Field>
           <Field label="Status">
             <Select value={status} onChange={(e) => setStatus(e.target.value as FlightBooking["status"])}>
-              <option value="quote">Quote</option>
               <option value="booked">Booked</option>
-              <option value="ticketed">Ticketed</option>
               <option value="cancelled">Cancelled</option>
-              <option value="refunded">Refunded</option>
-              <option value="void">Void</option>
             </Select>
           </Field>
           <Field label="Booking date">
@@ -329,7 +325,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
             Financials
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Net cost (to supplier)">
+            <Field label="Net cost (to airline)">
               <Input type="number" step="0.01" min="0" value={netCost} onChange={(e) => setNetCost(e.target.value)} placeholder="0.00" />
             </Field>
           </div>

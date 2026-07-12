@@ -221,7 +221,7 @@ export async function restoreBackup(
   summary.inserted["expenses"] = expRows.length;
 
   // ── Flights ────────────────────────────────────────────────────────────
-  onProgress("Restoring flight customers & suppliers…");
+  onProgress("Restoring flight customers & airlines…");
   const custMap = await matchOrInsert(db, "flight_customers", t("flight_customers"), summary);
   const suppMap = await matchOrInsert(db, "flight_suppliers", t("flight_suppliers"), summary);
 
