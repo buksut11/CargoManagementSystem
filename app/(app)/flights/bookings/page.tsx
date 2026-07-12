@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
 import type {
   BookingPayment,
+  BookingRefund,
   FlightBooking,
   FlightBookingStatus,
 } from "@/lib/types";
@@ -34,25 +35,34 @@ export default function BookingsPage() {
   const [receivedByBooking, setReceivedByBooking] = useState<
     Record<number, number>
   >({});
+  const [refundedByBooking, setRefundedByBooking] = useState<
+    Record<number, number>
+  >({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
     async function load() {
-      const [b, p] = await Promise.all([
+      const [b, p, r] = await Promise.all([
         supabase
           .from("flight_bookings")
           .select("*, flight_customers(id, name), flight_suppliers(id, name)")
           .order("created_at", { ascending: false }),
         supabase.from("booking_payments").select("booking_id, amount"),
+        supabase.from("booking_refunds").select("booking_id, customer_refund"),
       ]);
       setBookings((b.data as FlightBooking[]) ?? []);
-      const totals: Record<number, number> = {};
+      const paid: Record<number, number> = {};
       for (const row of (p.data as BookingPayment[]) ?? []) {
-        totals[row.booking_id] =
-          (totals[row.booking_id] ?? 0) + Number(row.amount);
+        paid[row.booking_id] = (paid[row.booking_id] ?? 0) + Number(row.amount);
       }
-      setReceivedByBooking(totals);
+      setReceivedByBooking(paid);
+      const refunded: Record<number, number> = {};
+      for (const row of (r.data as BookingRefund[]) ?? []) {
+        refunded[row.booking_id] =
+          (refunded[row.booking_id] ?? 0) + Number(row.customer_refund);
+      }
+      setRefundedByBooking(refunded);
       setLoading(false);
     }
     load();
@@ -66,9 +76,17 @@ export default function BookingsPage() {
     [bookings, statusFilter],
   );
 
-  const received = (b: FlightBooking) => receivedByBooking[b.id] ?? 0;
+  // Net money kept from the customer = payments in − refunds returned. A refund
+  // is a credit on the balance, so it also lowers what is still receivable.
+  const received = (b: FlightBooking) =>
+    (receivedByBooking[b.id] ?? 0) - (refundedByBooking[b.id] ?? 0);
   const receivable = (b: FlightBooking) =>
-    Math.max(0, Number(b.sale_total) - received(b));
+    Math.max(
+      0,
+      Number(b.sale_total) -
+        (receivedByBooking[b.id] ?? 0) -
+        (refundedByBooking[b.id] ?? 0),
+    );
 
   function exportCsv() {
     downloadCsv("flight-bookings.csv", [
