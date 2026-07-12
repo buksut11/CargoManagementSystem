@@ -59,7 +59,9 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
   const refunded = refunds.reduce((sum, r) => sum + Number(r.customer_refund), 0);
   const saleTotal = Number(booking.sale_total);
   const netCost = Number(booking.net_cost);
-  const receivable = Math.max(0, saleTotal - received);
+  // A customer refund is a credit against the balance, so it lowers what is
+  // still receivable just like a payment does.
+  const receivable = Math.max(0, saleTotal - received - refunded);
   const payable = Math.max(0, netCost - paidSupplier);
 
   return (

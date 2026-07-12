@@ -59,14 +59,17 @@ export default function FlightDashboardPage() {
       const { data, error } = await supabase.rpc("flight_dashboard_summary");
       if (!error && data) {
         const d = data as Record<string, unknown>;
+        // Money returned to customers reduces both what we've net collected and
+        // what is still owed (a refund is a credit on the customer's balance).
+        const refundsTotal = Number(d.refunds_total ?? 0);
         setSummary({
           bookingCount: Number(d.booking_count ?? 0),
           salesTotal: Number(d.sales_total ?? 0),
           costTotal: Number(d.cost_total ?? 0),
           profitTotal: Number(d.profit_total ?? 0),
-          received: Number(d.received ?? 0),
+          received: Number(d.received ?? 0) - refundsTotal,
           paidSuppliers: Number(d.paid_suppliers ?? 0),
-          receivable: Number(d.receivable ?? 0),
+          receivable: Number(d.receivable ?? 0) - refundsTotal,
           payable: Number(d.payable ?? 0),
           salesByMonth: (d.sales_by_month as Record<string, number>) ?? {},
           recent: (d.recent as RecentBooking[]) ?? [],
@@ -76,21 +79,27 @@ export default function FlightDashboardPage() {
       }
 
       // Fallback: compute client-side so the page works before the migration.
-      const [b, p, s] = await Promise.all([
+      const [b, p, s, rf] = await Promise.all([
         supabase
           .from("flight_bookings")
           .select("*")
           .order("created_at", { ascending: false }),
         supabase.from("booking_payments").select("amount"),
         supabase.from("supplier_payments").select("amount"),
+        supabase.from("booking_refunds").select("customer_refund"),
       ]);
       const bookings = ((b.data as FlightBooking[]) ?? []).filter(
         (r) => r.status !== "void",
       );
-      const received = ((p.data as { amount: number }[]) ?? []).reduce(
+      const paid = ((p.data as { amount: number }[]) ?? []).reduce(
         (sum, r) => sum + Number(r.amount),
         0,
       );
+      const refundsTotal = ((rf.data as { customer_refund: number }[]) ?? []).reduce(
+        (sum, r) => sum + Number(r.customer_refund),
+        0,
+      );
+      const received = paid - refundsTotal;
       const paidSuppliers = ((s.data as { amount: number }[]) ?? []).reduce(
         (sum, r) => sum + Number(r.amount),
         0,
@@ -109,7 +118,7 @@ export default function FlightDashboardPage() {
         profitTotal: bookings.reduce((sum, r) => sum + Number(r.profit), 0),
         received,
         paidSuppliers,
-        receivable: salesTotal - received,
+        receivable: salesTotal - paid - refundsTotal,
         payable: costTotal - paidSuppliers,
         salesByMonth,
         recent: bookings.slice(0, 5),
