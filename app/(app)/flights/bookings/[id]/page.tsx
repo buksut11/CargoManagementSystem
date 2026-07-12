@@ -144,7 +144,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
   const rows: [string, React.ReactNode][] = [
     ["PNR", booking.pnr || "—"],
     ["Booking ref", booking.booking_ref || "—"],
-    ["Airline", booking.airline || "—"],
+    ["Airline", booking.airline || booking.flight_suppliers?.name || "—"],
     ["Customer", booking.flight_customers?.name ?? "—"],
     ["Trip type", TRIP_TYPE_LABEL[booking.trip_type]],
     ["Booking date", fmtDate(booking.booking_date)],

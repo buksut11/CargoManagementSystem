@@ -55,7 +55,7 @@ export default function BookingsPage() {
       ...filtered.map((b) => [
         bookingRef(b.id),
         b.booking_ref ?? "",
-        b.airline ?? "",
+        b.airline ?? b.flight_suppliers?.name ?? "",
         b.flight_customers?.name ?? "",
         b.booking_date,
         b.travel_date ?? "",
@@ -129,7 +129,7 @@ export default function BookingsPage() {
                 </Badge>
               </div>
               <div className="mt-1 text-sm">
-                {b.airline ?? "—"}
+                {b.airline ?? b.flight_suppliers?.name ?? "—"}
                 {b.flight_customers?.name ? ` · ${b.flight_customers.name}` : ""}
               </div>
               <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
@@ -165,7 +165,7 @@ export default function BookingsPage() {
                   </Link>
                 </Td>
                 <Td>{b.pnr ?? "—"}</Td>
-                <Td>{b.airline ?? "—"}</Td>
+                <Td>{b.airline ?? b.flight_suppliers?.name ?? "—"}</Td>
                 <Td>{b.flight_customers?.name ?? "—"}</Td>
                 <Td className="whitespace-nowrap">{fmtDate(b.travel_date)}</Td>
                 <Td>

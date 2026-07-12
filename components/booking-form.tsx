@@ -164,15 +164,28 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     const savedPax = passengers.filter((p) => p.full_name.trim());
     const paxSaleTotal = savedPax.reduce((sum, p) => sum + num(p.sale), 0);
 
+    // The "Airline" dropdown is backed by suppliers; mirror the chosen supplier's
+    // name into the booking's airline column so the list/detail views can show it.
+    const airlineName =
+      suppliers.find((s) => String(s.id) === supplierId)?.name ?? null;
+
+    // Derive the travel date from the earliest segment departure so the list can
+    // show when the trip actually flies.
+    const travelDate =
+      segments
+        .map((s) => s.departure_at.slice(0, 10))
+        .filter(Boolean)
+        .sort()[0] ?? null;
+
     const row = {
       pnr: pnr.trim() || null,
       customer_id: customerId ? Number(customerId) : null,
       supplier_id: supplierId ? Number(supplierId) : null,
-      airline: null,
+      airline: airlineName,
       trip_type: tripType,
       status,
       booking_date: bookingDate,
-      travel_date: null,
+      travel_date: travelDate,
       base_fare: paxSaleTotal,
       taxes: 0,
       service_fee: 0,
