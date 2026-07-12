@@ -16,7 +16,6 @@ import type {
 import { fmtMoney, TRIP_TYPE_LABEL } from "@/lib/format";
 import {
   Button,
-  Card,
   ErrorNote,
   Field,
   Input,
@@ -24,6 +23,14 @@ import {
   Textarea,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
+import {
+  BookIcon,
+  CoinsIcon,
+  PlaneIcon,
+  TicketIcon,
+  UsersIcon,
+} from "@/components/icons";
+import type { ReactNode } from "react";
 
 type PaxRow = { full_name: string; type: PassengerType; sale: string };
 type SegRow = {
@@ -272,16 +279,29 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     router.refresh();
   }
 
+  const paxCount = passengers.filter((p) => p.full_name.trim()).length;
+
   return (
-    <Card className="p-5">
-      <form onSubmit={save} className="space-y-4">
+    <form onSubmit={save} className="space-y-4">
+      {/* Trip details */}
+      <Section
+        icon={<TicketIcon />}
+        title="Trip details"
+        subtitle="Who is flying and with which airline"
+      >
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="PNR">
-            <Input
-              value={pnr}
-              onChange={(e) => setPnr(e.target.value)}
-              placeholder="e.g. ABC123"
-            />
+          <Field label="Airline">
+            <Select
+              value={supplierId}
+              onChange={(e) => setSupplierId(e.target.value)}
+            >
+              <option value="">— Select airline —</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </Select>
           </Field>
           <Field label="Customer">
             <Select
@@ -296,18 +316,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               ))}
             </Select>
           </Field>
-          <Field label="Airline">
-            <Select
-              value={supplierId}
-              onChange={(e) => setSupplierId(e.target.value)}
-            >
-              <option value="">— None —</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </Select>
+          <Field label="PNR" hint="Airline booking reference / locator">
+            <Input
+              value={pnr}
+              onChange={(e) => setPnr(e.target.value)}
+              placeholder="e.g. ABC123"
+            />
           </Field>
           <Field label="Trip type">
             <Select
@@ -321,170 +335,215 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               ))}
             </Select>
           </Field>
+          <Field label="Booking date">
+            <DatePicker value={bookingDate} onChange={setBookingDate} required />
+          </Field>
           <Field label="Status">
-            <Select value={status} onChange={(e) => setStatus(e.target.value as FlightBooking["status"])}>
+            <Select
+              value={status}
+              onChange={(e) =>
+                setStatus(e.target.value as FlightBooking["status"])
+              }
+            >
               <option value="booked">Booked</option>
               <option value="cancelled">Cancelled</option>
             </Select>
           </Field>
-          <Field label="Booking date">
-            <DatePicker value={bookingDate} onChange={setBookingDate} required />
-          </Field>
         </div>
+      </Section>
 
-        {/* Financials */}
-        <div className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Financials
+      {/* Passengers */}
+      <RepeatSection
+        icon={<UsersIcon />}
+        title="Passengers"
+        subtitle="Add every traveller and their ticket price"
+        singular="Passenger"
+        rows={passengers}
+        onAdd={() => setPassengers((r) => [...r, { ...emptyPax }])}
+        onRemove={(i) => setPassengers((r) => r.filter((_, j) => j !== i))}
+        render={(p, i) => (
+          <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
+            <Input
+              value={p.full_name}
+              onChange={(e) =>
+                setPassengers((r) =>
+                  r.map((x, j) =>
+                    j === i ? { ...x, full_name: e.target.value } : x,
+                  ),
+                )
+              }
+              placeholder="Full name"
+            />
+            <Select
+              value={p.type}
+              onChange={(e) =>
+                setPassengers((r) =>
+                  r.map((x, j) =>
+                    j === i ? { ...x, type: e.target.value as PassengerType } : x,
+                  ),
+                )
+              }
+            >
+              <option value="adult">Adult</option>
+              <option value="child">Child</option>
+              <option value="infant">Infant</option>
+            </Select>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              value={p.sale}
+              onChange={(e) =>
+                setPassengers((r) =>
+                  r.map((x, j) => (j === i ? { ...x, sale: e.target.value } : x)),
+                )
+              }
+              placeholder="Sale price"
+            />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Net cost (to airline)">
-              <Input type="number" step="0.01" min="0" value={netCost} onChange={(e) => setNetCost(e.target.value)} placeholder="0.00" />
-            </Field>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-slate-200/60 pt-3 text-sm dark:border-white/10">
-            <span className="text-slate-500 dark:text-slate-400">
-              Sale total:{" "}
-              <span className="font-semibold text-slate-900 dark:text-slate-100">
-                {fmtMoney(saleTotal)}
-              </span>
-            </span>
-            <span className="text-slate-500 dark:text-slate-400">
-              Profit:{" "}
-              <span
-                className={`font-semibold ${
-                  profit < 0
-                    ? "text-rose-600 dark:text-rose-400"
-                    : "text-emerald-600 dark:text-emerald-400"
-                }`}
-              >
-                {fmtMoney(profit)}
-              </span>
-            </span>
-          </div>
-        </div>
+        )}
+      />
 
-        {/* Passengers */}
-        <RepeatSection
-          title="Passengers"
-          rows={passengers}
-          onAdd={() => setPassengers((r) => [...r, { ...emptyPax }])}
-          onRemove={(i) => setPassengers((r) => r.filter((_, j) => j !== i))}
-          render={(p, i) => (
-            <div className="grid gap-2 sm:grid-cols-[1fr_7rem_9rem]">
-              <Input
-                value={p.full_name}
-                onChange={(e) =>
-                  setPassengers((r) =>
-                    r.map((x, j) => (j === i ? { ...x, full_name: e.target.value } : x)),
+      {/* Itinerary */}
+      <RepeatSection
+        icon={<PlaneIcon />}
+        title="Itinerary"
+        subtitle="Flights, dates and cabin — the first departure sets the travel date"
+        singular="Flight"
+        rows={segments}
+        onAdd={() => setSegments((r) => [...r, { ...emptySeg }])}
+        onRemove={(i) => setSegments((r) => r.filter((_, j) => j !== i))}
+        render={(s, i) => (
+          <div className="space-y-2">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <DestinationSelect
+                value={s.origin}
+                destinations={destinations}
+                onChange={(v) =>
+                  setSegments((r) =>
+                    r.map((x, j) => (j === i ? { ...x, origin: v } : x)),
                   )
                 }
-                placeholder="Full name"
+                placeholder="From"
+              />
+              <DestinationSelect
+                value={s.destination}
+                destinations={destinations}
+                onChange={(v) =>
+                  setSegments((r) =>
+                    r.map((x, j) => (j === i ? { ...x, destination: v } : x)),
+                  )
+                }
+                placeholder="To"
+              />
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <DateTimeInput
+                value={s.departure_at}
+                onChange={(v) =>
+                  setSegments((r) =>
+                    r.map((x, j) => (j === i ? { ...x, departure_at: v } : x)),
+                  )
+                }
+                placeholder="Departure"
+              />
+              <DateTimeInput
+                value={s.arrival_at}
+                onChange={(v) =>
+                  setSegments((r) =>
+                    r.map((x, j) => (j === i ? { ...x, arrival_at: v } : x)),
+                  )
+                }
+                placeholder="Arrival"
               />
               <Select
-                value={p.type}
+                value={s.cabin_class}
                 onChange={(e) =>
-                  setPassengers((r) =>
+                  setSegments((r) =>
                     r.map((x, j) =>
-                      j === i ? { ...x, type: e.target.value as PassengerType } : x,
+                      j === i ? { ...x, cabin_class: e.target.value } : x,
                     ),
                   )
                 }
               >
-                <option value="adult">Adult</option>
-                <option value="child">Child</option>
-                <option value="infant">Infant</option>
+                <option value="">— Cabin —</option>
+                <option value="Economy">Economy</option>
+                <option value="Business">Business</option>
+                {s.cabin_class &&
+                  s.cabin_class !== "Economy" &&
+                  s.cabin_class !== "Business" && (
+                    <option value={s.cabin_class}>{s.cabin_class}</option>
+                  )}
               </Select>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={p.sale}
-                onChange={(e) =>
-                  setPassengers((r) =>
-                    r.map((x, j) => (j === i ? { ...x, sale: e.target.value } : x)),
-                  )
-                }
-                placeholder="Sale"
-              />
             </div>
-          )}
-        />
+          </div>
+        )}
+      />
 
-        {/* Segments */}
-        <RepeatSection
-          title="Destinations"
-          rows={segments}
-          onAdd={() => setSegments((r) => [...r, { ...emptySeg }])}
-          onRemove={(i) => setSegments((r) => r.filter((_, j) => j !== i))}
-          render={(s, i) => (
-            <div className="space-y-2">
-              <div className="grid gap-2 sm:grid-cols-2">
-                <DestinationSelect
-                  value={s.origin}
-                  destinations={destinations}
-                  onChange={(v) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, origin: v } : x)))
-                  }
-                  placeholder="From"
-                />
-                <DestinationSelect
-                  value={s.destination}
-                  destinations={destinations}
-                  onChange={(v) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, destination: v } : x)))
-                  }
-                  placeholder="To"
-                />
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <DateTimeInput
-                  value={s.departure_at}
-                  onChange={(v) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, departure_at: v } : x)))
-                  }
-                  placeholder="Departure"
-                />
-                <DateTimeInput
-                  value={s.arrival_at}
-                  onChange={(v) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, arrival_at: v } : x)))
-                  }
-                  placeholder="Arrival"
-                />
-                <Select
-                  value={s.cabin_class}
-                  onChange={(e) =>
-                    setSegments((r) => r.map((x, j) => (j === i ? { ...x, cabin_class: e.target.value } : x)))
-                  }
-                >
-                  <option value="">— Cabin —</option>
-                  <option value="Economy">Economy</option>
-                  <option value="Business">Business</option>
-                  {s.cabin_class &&
-                    s.cabin_class !== "Economy" &&
-                    s.cabin_class !== "Business" && (
-                      <option value={s.cabin_class}>{s.cabin_class}</option>
-                    )}
-                </Select>
-              </div>
-            </div>
-          )}
-        />
-
-        <Field label="Notes">
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Internal notes about this booking…"
+      {/* Pricing */}
+      <Section
+        icon={<CoinsIcon />}
+        title="Pricing"
+        subtitle="What you pay the airline versus what the customer pays you"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field
+            label="Net cost (to airline)"
+            hint="The fare and fees you owe the airline"
+          >
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              value={netCost}
+              onChange={(e) => setNetCost(e.target.value)}
+              placeholder="0.00"
+            />
+          </Field>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <Stat label="Sale total" value={fmtMoney(saleTotal)} />
+          <Stat label="Net cost" value={fmtMoney(num(netCost))} />
+          <Stat
+            label="Profit"
+            value={fmtMoney(profit)}
+            tone={profit < 0 ? "negative" : "positive"}
           />
-        </Field>
+        </div>
+      </Section>
 
-        <ErrorNote message={error} />
-        <div className="flex gap-3">
-          <Button type="submit" disabled={busy}>
-            {busy ? "Saving…" : editing ? "Save changes" : "Create booking"}
-          </Button>
+      {/* Notes */}
+      <Section icon={<BookIcon />} title="Notes" subtitle="Internal only">
+        <Textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Internal notes about this booking…"
+        />
+      </Section>
+
+      <ErrorNote message={error} />
+
+      {/* Sticky action bar — the running profit and the primary CTA stay in view
+          while the agent scrolls through a long booking. */}
+      <div className="glass-panel sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+          <span className="text-slate-500 dark:text-slate-400">
+            {paxCount} {paxCount === 1 ? "passenger" : "passengers"}
+          </span>
+          <span className="text-slate-500 dark:text-slate-400">
+            Profit{" "}
+            <span
+              className={`font-semibold ${
+                profit < 0
+                  ? "text-rose-600 dark:text-rose-400"
+                  : "text-emerald-600 dark:text-emerald-400"
+              }`}
+            >
+              {fmtMoney(profit)}
+            </span>
+          </span>
+        </div>
+        <div className="flex gap-2">
           <Button
             type="button"
             variant="secondary"
@@ -492,9 +551,75 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           >
             Cancel
           </Button>
+          <Button type="submit" disabled={busy}>
+            {busy ? "Saving…" : editing ? "Save changes" : "Create booking"}
+          </Button>
         </div>
-      </form>
-    </Card>
+      </div>
+    </form>
+  );
+}
+
+// A titled panel with an icon chip — the building block for every form section.
+function Section({
+  icon,
+  title,
+  subtitle,
+  action,
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="glass-panel rounded-2xl p-4 sm:p-5">
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:bg-blue-400/15 dark:text-blue-300">
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+// A read-only figure tile used in the pricing summary.
+function Stat({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "positive" | "negative";
+}) {
+  const valueTone =
+    tone === "positive"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : tone === "negative"
+        ? "text-rose-600 dark:text-rose-400"
+        : "text-slate-900 dark:text-slate-100";
+  return (
+    <div className="rounded-xl border border-white/50 bg-white/40 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.04]">
+      <div className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        {label}
+      </div>
+      <div className={`mt-0.5 text-lg font-semibold ${valueTone}`}>{value}</div>
+    </div>
   );
 }
 
@@ -557,51 +682,72 @@ function DestinationSelect({
   );
 }
 
-// A small "list of rows with add/remove" helper used for passengers + segments.
+// A "list of rows with add/remove" section used for passengers + itinerary.
+// Each row gets a numbered header so a long booking stays easy to scan.
 function RepeatSection<T>({
+  icon,
   title,
+  subtitle,
+  singular,
   rows,
   onAdd,
   onRemove,
   render,
 }: {
+  icon: ReactNode;
   title: string;
+  subtitle?: string;
+  singular: string;
   rows: T[];
   onAdd: () => void;
   onRemove: (i: number) => void;
-  render: (row: T, i: number) => React.ReactNode;
+  render: (row: T, i: number) => ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          {title}
-        </div>
+    <Section
+      icon={icon}
+      title={title}
+      subtitle={subtitle}
+      action={
         <button
           type="button"
           onClick={onAdd}
-          className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+          className="shrink-0 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
         >
-          + Add
+          + Add {singular.toLowerCase()}
         </button>
-      </div>
+      }
+    >
       <div className="space-y-3">
         {rows.map((row, i) => (
-          <div key={i} className="flex items-start gap-2">
-            <div className="min-w-0 flex-1">{render(row, i)}</div>
-            {rows.length > 1 && (
-              <button
-                type="button"
-                onClick={() => onRemove(i)}
-                aria-label="Remove"
-                className="mt-1 shrink-0 rounded-lg px-2 py-1 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
-              >
-                ✕
-              </button>
-            )}
+          <div
+            key={i}
+            className="rounded-xl border border-white/50 bg-white/35 p-3 dark:border-white/10 dark:bg-white/[0.04]"
+          >
+            <div className="mb-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/15 text-[11px] font-semibold text-blue-600 dark:bg-blue-400/15 dark:text-blue-300">
+                  {i + 1}
+                </span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {singular} {i + 1}
+                </span>
+              </div>
+              {rows.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => onRemove(i)}
+                  aria-label={`Remove ${singular.toLowerCase()} ${i + 1}`}
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            {render(row, i)}
           </div>
         ))}
       </div>
-    </div>
+    </Section>
   );
 }

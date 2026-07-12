@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { FlightSupplier, SupplierType } from "@/lib/types";
-import { SUPPLIER_TYPE_LABEL } from "@/lib/format";
+import type { FlightSupplier } from "@/lib/types";
 import {
   Button,
   Card,
@@ -13,7 +12,6 @@ import {
   Field,
   Input,
   PageHeader,
-  Select,
   Td,
   Th,
 } from "@/components/ui";
@@ -22,7 +20,6 @@ export default function FlightSuppliersPage() {
   const [suppliers, setSuppliers] = useState<FlightSupplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
-  const [type, setType] = useState<SupplierType>("airline");
   const [contact, setContact] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,7 +50,7 @@ export default function FlightSuppliersPage() {
     setError(null);
     const { error } = await supabase.from("flight_suppliers").insert({
       name: name.trim(),
-      type,
+      type: "airline",
       contact: contact.trim() || null,
     });
     setBusy(false);
@@ -67,7 +64,6 @@ export default function FlightSuppliersPage() {
     }
     setName("");
     setContact("");
-    setType("airline");
     reload();
   }
 
@@ -98,18 +94,6 @@ export default function FlightSuppliersPage() {
                 required
               />
             </Field>
-            <Field label="Type">
-              <Select
-                value={type}
-                onChange={(e) => setType(e.target.value as SupplierType)}
-              >
-                {Object.entries(SUPPLIER_TYPE_LABEL).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
-              </Select>
-            </Field>
             <Field label="Contact">
               <Input
                 value={contact}
@@ -128,7 +112,6 @@ export default function FlightSuppliersPage() {
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Name</Th>
-                <Th>Type</Th>
                 <Th>Contact</Th>
                 <Th />
               </tr>
@@ -137,7 +120,6 @@ export default function FlightSuppliersPage() {
               {suppliers.map((s) => (
                 <tr key={s.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                   <Td className="font-medium">{s.name}</Td>
-                  <Td>{SUPPLIER_TYPE_LABEL[s.type] ?? s.type}</Td>
                   <Td>{s.contact ?? "—"}</Td>
                   <Td className="text-right">
                     <button
