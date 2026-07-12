@@ -27,7 +27,7 @@ export default function FlightPayablesPage() {
 
   function exportCsv() {
     downloadCsv("flight-payables.csv", [
-      ["Date", "Amount", "Supplier", "Booking", "Method", "Note"],
+      ["Date", "Amount", "Airline", "Booking", "Method", "Note"],
       ...payments.map((p) => [
         p.paid_date,
         Number(p.amount),
@@ -42,7 +42,7 @@ export default function FlightPayablesPage() {
   return (
     <div>
       <PageHeader
-        title="Supplier payments"
+        title="Airline payments"
         action={
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -64,7 +64,7 @@ export default function FlightPayablesPage() {
             <tr>
               <Th>Date</Th>
               <Th>Amount</Th>
-              <Th>Supplier</Th>
+              <Th>Airline</Th>
               <Th>Booking</Th>
               <Th>Method</Th>
             </tr>
@@ -93,7 +93,7 @@ export default function FlightPayablesPage() {
           </tbody>
         </table>
         {!loading && payments.length === 0 && (
-          <EmptyState message="No supplier payments yet — record them from a booking's page." />
+          <EmptyState message="No airline payments yet — record them from a booking's page." />
         )}
       </Card>
     </div>

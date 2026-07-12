@@ -130,7 +130,7 @@ export type FlightBookingStatus =
   | "refunded"
   | "void";
 
-export type TripType = "oneway" | "return" | "multicity";
+export type TripType = "oneway" | "return";
 
 export type PassengerType = "adult" | "child" | "infant";
 

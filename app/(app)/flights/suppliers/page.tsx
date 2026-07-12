@@ -60,7 +60,7 @@ export default function FlightSuppliersPage() {
     if (error) {
       setError(
         error.code === "23505"
-          ? "A supplier with that name already exists."
+          ? "An airline with that name already exists."
           : error.message,
       );
       return;
@@ -86,7 +86,7 @@ export default function FlightSuppliersPage() {
 
   return (
     <div>
-      <PageHeader title="Suppliers" />
+      <PageHeader title="Airlines" />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <Card className="p-4">
           <form onSubmit={add} className="space-y-3">
@@ -94,7 +94,7 @@ export default function FlightSuppliersPage() {
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Turkish Airlines / BSP"
+                placeholder="e.g. Turkish Airlines"
                 required
               />
             </Field>
@@ -118,7 +118,7 @@ export default function FlightSuppliersPage() {
               />
             </Field>
             <Button type="submit" disabled={busy}>
-              {busy ? "Adding…" : "Add supplier"}
+              {busy ? "Adding…" : "Add airline"}
             </Button>
             <ErrorNote message={error} />
           </form>
@@ -152,17 +152,17 @@ export default function FlightSuppliersPage() {
             </tbody>
           </table>
           {!loading && suppliers.length === 0 && (
-            <EmptyState message="No suppliers yet — add the airlines, consolidators or BSP you buy through." />
+            <EmptyState message="No airlines yet — add the airlines you buy through." />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete supplier?"
+        title="Delete airline?"
         message={
           pending
-            ? `Delete "${pending.name}"? Their bookings keep working but show no supplier.`
+            ? `Delete "${pending.name}"? Their bookings keep working but show no airline.`
             : undefined
         }
         busy={deleting}
