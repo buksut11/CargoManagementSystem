@@ -345,12 +345,8 @@ function RefundSection({
   onDelete: (id: number) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<RefundType>("refund");
   const [date, setDate] = useState(today());
   const [customerRefund, setCustomerRefund] = useState("");
-  const [supplierRefund, setSupplierRefund] = useState("");
-  const [penalty, setPenalty] = useState("");
-  const [adm, setAdm] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const n = (v: string) => (v === "" ? 0 : parseFloat(v) || 0);
@@ -359,23 +355,19 @@ function RefundSection({
     e.preventDefault();
     setBusy(true);
     const ok = await onAdd({
-      refund_type: type,
+      refund_type: "refund",
       refund_date: date,
       customer_refund: n(customerRefund),
-      supplier_refund: n(supplierRefund),
-      penalty: n(penalty),
-      adm_amount: n(adm),
+      supplier_refund: 0,
+      penalty: 0,
+      adm_amount: 0,
       note: note.trim() || null,
     });
     setBusy(false);
     if (ok) {
       setCustomerRefund("");
-      setSupplierRefund("");
-      setPenalty("");
-      setAdm("");
       setNote("");
       setDate(today());
-      setType("refund");
       setOpen(false);
     }
   }
@@ -397,19 +389,12 @@ function RefundSection({
       {open && (
         <form onSubmit={submit} className="mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
-            <Select value={type} onChange={(e) => setType(e.target.value as RefundType)}>
+            <Select value="refund" disabled>
               <option value="refund">Refund</option>
-              <option value="void">Void</option>
-              <option value="reissue">Reissue</option>
             </Select>
             <DatePicker value={date} onChange={setDate} required />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
-            <Input type="number" step="0.01" min="0" value={supplierRefund} onChange={(e) => setSupplierRefund(e.target.value)} placeholder="Recovered from airline" />
-            <Input type="number" step="0.01" min="0" value={penalty} onChange={(e) => setPenalty(e.target.value)} placeholder="Penalty" />
-            <Input type="number" step="0.01" min="0" value={adm} onChange={(e) => setAdm(e.target.value)} placeholder="ADM amount" />
-          </div>
+          <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
           <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" />
           <Button type="submit" disabled={busy}>
             {busy ? "Saving…" : "Record"}
