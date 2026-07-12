@@ -24,6 +24,7 @@ import {
   LogoutIcon,
   MenuIcon,
   PinIcon,
+  PlaneIcon,
   ReceiptIcon,
   SettingsIcon,
   TicketIcon,
@@ -58,6 +59,7 @@ const CARGO_NAV: NavItem[] = [
 const FLIGHT_NAV: NavItem[] = [
   { href: "/flights", label: "Flight Dashboard", icon: DashboardIcon, roles: EDITORS },
   { href: "/flights/bookings", label: "Bookings", icon: TicketIcon, roles: ALL },
+  { href: "/flights/booking-seats", label: "Booking Seats", icon: PlaneIcon, roles: EDITORS },
   { href: "/flights/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
   { href: "/flights/suppliers", label: "Airlines", icon: BuildingIcon, roles: EDITORS },
   { href: "/flights/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },

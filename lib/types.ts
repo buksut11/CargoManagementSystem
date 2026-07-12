@@ -170,6 +170,18 @@ export type FlightDestination = {
   created_at: string;
 };
 
+// Standalone "Booking Seats" log — a free-standing list (date, air name, city,
+// seat count) that is intentionally not linked to any other flight table.
+export type BookingSeat = {
+  id: number;
+  organization_id: string;
+  seat_date: string;
+  air_name: string;
+  city: string;
+  seats: number;
+  created_at: string;
+};
+
 export type FlightBooking = {
   id: number;
   organization_id: string;
