@@ -136,7 +136,32 @@ export default function FlightReportsPage() {
               By airline
             </div>
           </div>
-          <table className="mt-2 w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {byAirline.map((r) => (
+              <div
+                key={r.key}
+                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{r.key}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {r.bookings} bookings
+                  </span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                  <span>
+                    <span className="text-slate-500 dark:text-slate-400">Sales </span>
+                    {fmtMoney(r.sales)}
+                  </span>
+                  <span>
+                    <span className="text-slate-500 dark:text-slate-400">Profit </span>
+                    {fmtMoney(r.profit)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <table className="mt-2 hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Airline</Th>
@@ -170,7 +195,26 @@ export default function FlightReportsPage() {
               Customer outstanding
             </div>
           </div>
-          <table className="mt-2 w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {byCustomer.map((r) => (
+              <div
+                key={r.name}
+                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{r.name}</span>
+                  <span className="font-medium text-amber-600 dark:text-amber-400">
+                    {fmtMoney(r.outstanding)}
+                  </span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                  <span>Sales {fmtMoney(r.sales)}</span>
+                  <span>Received {fmtMoney(r.received)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <table className="mt-2 hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Customer</Th>

@@ -143,7 +143,30 @@ export default function FlightSuppliersPage() {
           </form>
         </Section>
         <Card className="table-scroll">
-          <table className="w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {suppliers.map((s) => (
+              <div
+                key={s.id}
+                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              >
+                <div className="font-medium">{s.name}</div>
+                {s.contact && (
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {s.contact}
+                  </div>
+                )}
+                <div className="mt-2 flex items-center gap-2">
+                  <button onClick={() => startEdit(s)} className={rowActionClass}>
+                    Edit
+                  </button>
+                  <button onClick={() => setPending(s)} className={rowDeleteClass}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Name</Th>

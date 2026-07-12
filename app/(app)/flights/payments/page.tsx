@@ -58,7 +58,32 @@ export default function FlightReceiptsPage() {
         }
       />
       <Card className="table-scroll">
-        <table className="w-full">
+        <div className="space-y-3 p-3 lg:hidden">
+          {payments.map((p) => (
+            <div
+              key={p.id}
+              className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold">{fmtMoney(Number(p.amount))}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {fmtDate(p.paid_date)}
+                </span>
+              </div>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                <Link
+                  href={`/flights/bookings/${p.booking_id}`}
+                  className="text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  {bookingRef(p.booking_id)}
+                </Link>
+                {p.method && <span>{p.method}</span>}
+                {p.note && <span>{p.note}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+        <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Date</Th>

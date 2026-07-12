@@ -263,7 +263,50 @@ export default function MembersPage() {
         </div>
 
         <Card className="table-scroll">
-          <table className="w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {members.map((m) => {
+              const isSelf = m.user_id === meId;
+              const isOwner = m.role === "owner";
+              return (
+                <div
+                  key={m.id}
+                  className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+                >
+                  <div className="break-all text-sm font-medium">
+                    {m.email ?? "—"}
+                    {isSelf && (
+                      <span className="ml-1 text-xs text-slate-400">(you)</span>
+                    )}
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {isOwner ? (
+                      <span className="text-sm capitalize text-slate-500 dark:text-slate-400">
+                        {m.role}
+                      </span>
+                    ) : (
+                      <Select
+                        value={m.role}
+                        onChange={(e) => changeRole(m, e.target.value as OrgRole)}
+                      >
+                        <option value="agent">Agent</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                      </Select>
+                    )}
+                    {!isOwner && !isSelf && (
+                      <button
+                        onClick={() => setPendingRemove(m)}
+                        className={rowDeleteClass}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Email</Th>

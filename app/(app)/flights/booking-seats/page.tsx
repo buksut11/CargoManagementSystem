@@ -165,7 +165,33 @@ export default function BookingSeatsPage() {
           </form>
         </Section>
         <Card className="table-scroll">
-          <table className="w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {rows.map((r) => (
+              <div
+                key={r.id}
+                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{r.air_name}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {fmtDate(r.seat_date)}
+                  </span>
+                </div>
+                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  📍 {r.city} · {fmtCount(r.seats)} seats
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <button onClick={() => startEdit(r)} className={rowActionClass}>
+                    Edit
+                  </button>
+                  <button onClick={() => setPending(r)} className={rowDeleteClass}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Date</Th>

@@ -180,7 +180,46 @@ export default function FlightLedgerPage() {
       </div>
 
       <Card className="table-scroll">
-        <table className="w-full">
+        <div className="space-y-3 p-3 lg:hidden">
+          {entries.map((e) => (
+            <div
+              key={e.key}
+              className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <Badge className={KIND_CLASS[e.kind]}>{KIND_LABEL[e.kind]}</Badge>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {fmtDate(e.date)}
+                </span>
+              </div>
+              <div className="mt-1.5 text-sm">{e.description}</div>
+              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+                {e.bookingId ? (
+                  <Link
+                    href={`/flights/bookings/${e.bookingId}`}
+                    className="text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    {bookingRef(e.bookingId)}
+                  </Link>
+                ) : (
+                  <span className="text-slate-400">—</span>
+                )}
+                <span className="font-semibold">
+                  {e.inAmt ? (
+                    <span className="text-emerald-600 dark:text-emerald-400">
+                      + {fmtMoney(e.inAmt)}
+                    </span>
+                  ) : (
+                    <span className="text-rose-600 dark:text-rose-400">
+                      − {fmtMoney(e.outAmt)}
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
               <Th>Date</Th>

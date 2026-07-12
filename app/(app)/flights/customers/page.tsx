@@ -156,7 +156,35 @@ export default function FlightCustomersPage() {
           </form>
         </Section>
         <Card className="table-scroll">
-          <table className="w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {customers.map((c) => (
+              <div
+                key={c.id}
+                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              >
+                <div className="font-medium">{c.name}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                  {c.email && <span>✉️ {c.email}</span>}
+                  {c.phone && <span>📞 {c.phone}</span>}
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/flights/customers/${c.id}/statement`}
+                    className={rowActionClass}
+                  >
+                    Statement
+                  </Link>
+                  <button onClick={() => startEdit(c)} className={rowActionClass}>
+                    Edit
+                  </button>
+                  <button onClick={() => setPending(c)} className={rowDeleteClass}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Name</Th>

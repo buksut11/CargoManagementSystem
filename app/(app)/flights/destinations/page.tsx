@@ -146,7 +146,32 @@ export default function FlightDestinationsPage() {
           </form>
         </Section>
         <Card className="table-scroll">
-          <table className="w-full">
+          <div className="space-y-3 p-3 lg:hidden">
+            {destinations.map((d) => (
+              <div
+                key={d.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              >
+                <div className="min-w-0">
+                  <div className="font-medium">{d.name}</div>
+                  {d.code && (
+                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {d.code}
+                    </div>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button onClick={() => startEdit(d)} className={rowActionClass}>
+                    Edit
+                  </button>
+                  <button onClick={() => setPending(d)} className={rowDeleteClass}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
                 <Th>Name</Th>
