@@ -15,11 +15,16 @@ import {
   Field,
   Input,
   PageHeader,
-  rowActionClass,
-  rowDeleteClass,
   Section,
 } from "@/components/ui";
-import { PhoneIcon, SearchIcon, UsersIcon } from "@/components/icons";
+import {
+  EditIcon,
+  PhoneIcon,
+  SearchIcon,
+  StatementIcon,
+  TrashIcon,
+  UsersIcon,
+} from "@/components/icons";
 
 // Deterministic gradient for a customer avatar so each person keeps a stable,
 // tasteful colour instead of everything looking identical.
@@ -45,13 +50,18 @@ function Avatar({ name }: { name: string }) {
   const gradient = AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
   return (
     <span
-      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-sm font-semibold text-white shadow-sm ring-1 ring-white/40 dark:ring-white/10`}
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-sm font-bold tracking-wide text-white shadow-md shadow-black/10 ring-1 ring-white/40 dark:ring-white/10`}
       aria-hidden
     >
       {initials(name)}
     </span>
   );
 }
+
+// Filled-tint action pill used only on this page, so the redesign stays
+// contained to the flight Customers list and no other table is affected.
+const custActionClass =
+  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors";
 
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
@@ -229,48 +239,82 @@ export default function FlightCustomersPage() {
                 return (
                   <div
                     key={c.id}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3.5 transition-colors hover:bg-white/45 dark:hover:bg-white/[0.05]"
+                    className="group relative flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-gradient-to-r hover:from-white/60 hover:to-transparent sm:flex-row sm:items-center sm:gap-4 dark:hover:from-white/[0.06]"
                   >
-                    <Avatar name={c.name} />
-                    <div className="min-w-0 flex-1 basis-40">
-                      <div className="truncate font-semibold text-slate-900 dark:text-slate-100">
-                        {c.name}
-                      </div>
-                      {c.email && (
-                        <div className="truncate text-xs text-slate-500 dark:text-slate-400">
-                          {c.email}
+                    {/* Accent bar for customers who owe money — a quick visual cue. */}
+                    <span
+                      className={`absolute inset-y-2 left-0 w-1 rounded-full transition-opacity ${
+                        due > 0
+                          ? "bg-gradient-to-b from-amber-400 to-orange-500 opacity-100"
+                          : "opacity-0"
+                      }`}
+                      aria-hidden
+                    />
+
+                    {/* Identity */}
+                    <div className="flex min-w-0 flex-1 items-center gap-3.5">
+                      <Avatar name={c.name} />
+                      <div className="min-w-0">
+                        <div className="truncate font-semibold text-slate-900 dark:text-slate-100">
+                          {c.name}
                         </div>
-                      )}
-                    </div>
-                    {c.phone && (
-                      <div className="hidden shrink-0 items-center gap-1.5 text-sm tabular-nums text-slate-500 dark:text-slate-400 sm:flex">
-                        <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                        {c.phone}
+                        {c.email && (
+                          <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                            {c.email}
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="shrink-0">
+                    </div>
+
+                    {/* Phone + status */}
+                    <div className="flex items-center gap-2 pl-[3.875rem] sm:gap-3 sm:pl-0">
+                      {c.phone && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/[0.06] px-3 py-1.5 text-xs font-medium tabular-nums text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">
+                          <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+                          {c.phone}
+                        </span>
+                      )}
                       {due > 0 ? (
-                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-400/15 dark:text-amber-400">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-400/15 dark:text-amber-400">
                           {fmtMoney(due)} due
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           Settled
                         </span>
                       )}
                     </div>
-                    <div className="flex shrink-0 items-center gap-1.5">
+
+                    {/* Actions — icon-only on desktop (labels appear on mobile,
+                        where they sit on their own line with room to spare). */}
+                    <div className="flex shrink-0 flex-wrap items-center gap-1.5 pl-[3.875rem] sm:pl-0">
                       <Link
                         href={`/flights/customers/${c.id}/statement`}
-                        className={rowActionClass}
+                        title="View statement"
+                        aria-label={`View ${c.name}'s statement`}
+                        className={`${custActionClass} bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:hover:bg-blue-400/20`}
                       >
-                        Statement
+                        <StatementIcon className="h-4 w-4" />
+                        <span className="sm:hidden">Statement</span>
                       </Link>
-                      <button onClick={() => startEdit(c)} className={rowActionClass}>
-                        Edit
+                      <button
+                        onClick={() => startEdit(c)}
+                        title="Edit"
+                        aria-label={`Edit ${c.name}`}
+                        className={`${custActionClass} bg-slate-500/[0.07] text-slate-600 hover:bg-slate-500/15 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/[0.12]`}
+                      >
+                        <EditIcon className="h-4 w-4" />
+                        <span className="sm:hidden">Edit</span>
                       </button>
-                      <button onClick={() => setPending(c)} className={rowDeleteClass}>
-                        Delete
+                      <button
+                        onClick={() => setPending(c)}
+                        title="Delete"
+                        aria-label={`Delete ${c.name}`}
+                        className={`${custActionClass} bg-red-500/[0.08] text-red-600 hover:bg-red-500/15 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20`}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                        <span className="sm:hidden">Delete</span>
                       </button>
                     </div>
                   </div>

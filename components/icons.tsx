@@ -94,6 +94,29 @@ export const PhoneIcon = (props: SVGProps<SVGSVGElement>) => (
   </Base>
 );
 
+export const StatementIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <path d="M6 2h9l5 5v15H6V2z" />
+    <path d="M14 2v6h6" />
+    <path d="M9 13h6M9 17h4" />
+  </Base>
+);
+
+export const EditIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+  </Base>
+);
+
+export const TrashIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <path d="M3 6h18" />
+    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
+  </Base>
+);
+
 export const LockIcon = () => (
   <Base>
     <rect x={5} y={11} width={14} height={10} rx={2} />
