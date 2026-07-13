@@ -581,6 +581,14 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               {fmtMoney(profit)}
             </span>
           </span>
+          {existingBalance !== null && existingBalance > 0 && (
+            <span className="text-slate-500 dark:text-slate-400">
+              Total due{" "}
+              <span className="font-semibold text-amber-600 dark:text-amber-400">
+                {fmtMoney(existingBalance + saleTotal)}
+              </span>
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <Button
