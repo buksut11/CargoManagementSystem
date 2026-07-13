@@ -12,6 +12,7 @@ import type {
 } from "@/lib/types";
 import {
   bookingRef,
+  displaySaleTotal,
   fmtDate,
   fmtDateTime,
   fmtMoney,
@@ -79,6 +80,9 @@ export default function PrintBookingPage() {
   }
 
   const saleTotal = Number(booking.sale_total);
+  const refunded = booking.status === "refunded";
+  // On a refunded ticket the fare is shown as a negative amount (e.g. -$130).
+  const totalDisplay = displaySaleTotal(booking.status, saleTotal);
   const balance = Math.max(0, saleTotal - received);
 
   return (
@@ -212,17 +216,27 @@ export default function PrintBookingPage() {
         <div className="mt-6 space-y-1 text-right">
           <div className="flex items-baseline justify-end gap-4">
             <span className="text-sm text-slate-500">Total</span>
-            <span className="text-2xl font-bold">{fmtMoney(saleTotal)}</span>
+            <span
+              className={`text-2xl font-bold ${refunded ? "text-rose-600" : ""}`}
+            >
+              {fmtMoney(totalDisplay)}
+            </span>
           </div>
-          {received > 0 && (
-            <>
-              <div className="text-sm text-slate-600">
-                Paid: {fmtMoney(received)}
-              </div>
-              <div className="text-sm font-semibold text-slate-800">
-                Balance due: {fmtMoney(balance)}
-              </div>
-            </>
+          {refunded ? (
+            <div className="text-sm font-semibold text-rose-600">
+              Refunded to customer
+            </div>
+          ) : (
+            received > 0 && (
+              <>
+                <div className="text-sm text-slate-600">
+                  Paid: {fmtMoney(received)}
+                </div>
+                <div className="text-sm font-semibold text-slate-800">
+                  Balance due: {fmtMoney(balance)}
+                </div>
+              </>
+            )
           )}
         </div>
 
