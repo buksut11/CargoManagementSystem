@@ -84,10 +84,28 @@ migration `0036_lock_org_modules.sql`). Set it in the `modules` line above:
 
 **Changing an existing org later** (SQL Editor → New query → Run):
 
-```sql
--- Give this org Flights only. Allowed values: 'cargo', 'flights'.
-select public.set_org_modules('PASTE-ORG-UID-HERE', array['flights']);
-```
+1. **Find the organization's UID.** List every org with its current modules:
+
+   ```sql
+   select id, name, modules
+   from public.organizations
+   order by name;
+   ```
+
+   Copy the `id` of the org you want to change (a long code like
+   `a1b2c3d4-5678-90ab-cdef-1234567890ab`). Note this is the **organization's**
+   id, not a user's UID from Authentication → Users. You can also read it from
+   **Table Editor → `organizations`**, the `id` column.
+
+2. **Set its modules**, pasting the id from step 1:
+
+   ```sql
+   -- Give this org Flights only. Allowed values: 'cargo', 'flights'.
+   select public.set_org_modules('a1b2c3d4-5678-90ab-cdef-1234567890ab', array['flights']);
+   ```
+
+3. **Confirm** by running the step-1 query again — the `modules` column should
+   now show the new value.
 
 The org's sidebar updates to match the next time its users load the app. At
 least one module is required — an empty list is rejected.
