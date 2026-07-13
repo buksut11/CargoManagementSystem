@@ -21,8 +21,9 @@ export type Organization = {
   subscription_status: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
-  // Which product modules the org has turned on ('cargo' | 'flights').
-  // Backfilled to ['cargo'] for every existing org by migration 0026.
+  // Which products this org runs ('cargo' | 'flights'). Set by the platform
+  // operator at provisioning time and locked against tenant changes (migration
+  // 0036); backfilled to ['cargo'] for every existing org by migration 0026.
   modules: string[];
   created_at: string;
 };
