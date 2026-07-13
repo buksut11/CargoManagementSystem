@@ -81,6 +81,19 @@ export const MailIcon = () => (
   </Base>
 );
 
+export const SearchIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <circle cx={11} cy={11} r={7} />
+    <path d="M21 21l-4.3-4.3" />
+  </Base>
+);
+
+export const PhoneIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <path d="M4 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L20 13l1 4v3a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 0-1z" />
+  </Base>
+);
+
 export const LockIcon = () => (
   <Base>
     <rect x={5} y={11} width={14} height={10} rx={2} />

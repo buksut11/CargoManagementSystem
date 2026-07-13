@@ -147,7 +147,7 @@ export default function FlightSuppliersPage() {
             {suppliers.map((s) => (
               <div
                 key={s.id}
-                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+                className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
               >
                 <div className="font-medium">{s.name}</div>
                 {s.contact && (

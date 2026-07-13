@@ -140,7 +140,7 @@ export default function FlightReportsPage() {
             {byAirline.map((r) => (
               <div
                 key={r.key}
-                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+                className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{r.key}</span>
@@ -199,7 +199,7 @@ export default function FlightReportsPage() {
             {byCustomer.map((r) => (
               <div
                 key={r.name}
-                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+                className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{r.name}</span>
