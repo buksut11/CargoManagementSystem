@@ -15,6 +15,7 @@ import {
   Button,
   ErrorNote,
   Input,
+  rowActionClass,
   rowDeleteClass,
   Section,
   Select,
@@ -142,6 +143,12 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             </span>
           </>
         )}
+        toForm={(p) => ({
+          amount: Number(p.amount),
+          date: p.paid_date,
+          method: p.method ?? "",
+          note: p.note ?? "",
+        })}
         onDelete={async (id) => {
           await supabase.from("booking_payments").delete().eq("id", id);
           load();
@@ -154,6 +161,23 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             method: form.method || null,
             note: form.note || null,
           });
+          if (error) {
+            setError(error.message);
+            return false;
+          }
+          load();
+          return true;
+        }}
+        onUpdate={async (id, form) => {
+          const { error } = await supabase
+            .from("booking_payments")
+            .update({
+              amount: form.amount,
+              paid_date: form.date,
+              method: form.method || null,
+              note: form.note || null,
+            })
+            .eq("id", id);
           if (error) {
             setError(error.message);
             return false;
@@ -176,6 +200,12 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             </span>
           </>
         )}
+        toForm={(p) => ({
+          amount: Number(p.amount),
+          date: p.paid_date,
+          method: p.method ?? "",
+          note: p.note ?? "",
+        })}
         onDelete={async (id) => {
           await supabase.from("supplier_payments").delete().eq("id", id);
           load();
@@ -196,6 +226,23 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
           load();
           return true;
         }}
+        onUpdate={async (id, form) => {
+          const { error } = await supabase
+            .from("supplier_payments")
+            .update({
+              amount: form.amount,
+              paid_date: form.date,
+              method: form.method || null,
+              note: form.note || null,
+            })
+            .eq("id", id);
+          if (error) {
+            setError(error.message);
+            return false;
+          }
+          load();
+          return true;
+        }}
       />
 
       <RefundSection
@@ -209,6 +256,18 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             booking_id: booking.id,
             ...r,
           });
+          if (error) {
+            setError(error.message);
+            return false;
+          }
+          load();
+          return true;
+        }}
+        onUpdate={async (id, r) => {
+          const { error } = await supabase
+            .from("booking_refunds")
+            .update(r)
+            .eq("id", id);
           if (error) {
             setError(error.message);
             return false;
@@ -256,39 +315,65 @@ function LedgerSection<T extends { id: number }>({
   title,
   rows,
   rowLabel,
+  toForm,
   onAdd,
+  onUpdate,
   onDelete,
 }: {
   icon: ReactNode;
   title: string;
   rows: T[];
   rowLabel: (row: T) => React.ReactNode;
+  toForm: (row: T) => AddForm;
   onAdd: (form: AddForm) => Promise<boolean>;
+  onUpdate: (id: number, form: AddForm) => Promise<boolean>;
   onDelete: (id: number) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(today());
   const [method, setMethod] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
 
+  function resetForm() {
+    setEditingId(null);
+    setAmount("");
+    setMethod("");
+    setNote("");
+    setDate(today());
+  }
+
+  function startAdd() {
+    if (open && editingId == null) {
+      setOpen(false);
+      return;
+    }
+    resetForm();
+    setOpen(true);
+  }
+
+  function startEdit(row: T) {
+    const f = toForm(row);
+    setEditingId(row.id);
+    setAmount(String(f.amount));
+    setDate(f.date);
+    setMethod(f.method);
+    setNote(f.note);
+    setOpen(true);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!amount) return;
     setBusy(true);
-    const ok = await onAdd({
-      amount: parseFloat(amount),
-      date,
-      method,
-      note,
-    });
+    const form = { amount: parseFloat(amount), date, method, note };
+    const ok =
+      editingId != null ? await onUpdate(editingId, form) : await onAdd(form);
     setBusy(false);
     if (ok) {
-      setAmount("");
-      setMethod("");
-      setNote("");
-      setDate(today());
+      resetForm();
       setOpen(false);
     }
   }
@@ -300,10 +385,10 @@ function LedgerSection<T extends { id: number }>({
       action={
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={startAdd}
           className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
-          {open ? "Close" : "+ Add"}
+          {open && editingId == null ? "Close" : "+ Add"}
         </button>
       }
     >
@@ -331,9 +416,23 @@ function LedgerSection<T extends { id: number }>({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Note (optional)"
           />
-          <Button type="submit" disabled={busy}>
-            {busy ? "Saving…" : "Record"}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={busy}>
+              {busy ? "Saving…" : editingId != null ? "Save changes" : "Record"}
+            </Button>
+            {editingId != null && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  resetForm();
+                  setOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       )}
       {rows.length === 0 ? (
@@ -343,9 +442,14 @@ function LedgerSection<T extends { id: number }>({
           {rows.map((row) => (
             <li key={row.id} className="flex items-center justify-between gap-3 py-2">
               <div className="flex flex-col">{rowLabel(row)}</div>
-              <button onClick={() => onDelete(row.id)} className={rowDeleteClass}>
-                Delete
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button onClick={() => startEdit(row)} className={rowActionClass}>
+                  Edit
+                </button>
+                <button onClick={() => onDelete(row.id)} className={rowDeleteClass}>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -367,23 +471,50 @@ type RefundInput = {
 function RefundSection({
   refunds,
   onAdd,
+  onUpdate,
   onDelete,
 }: {
   refunds: BookingRefund[];
   onAdd: (r: RefundInput) => Promise<boolean>;
+  onUpdate: (id: number, r: RefundInput) => Promise<boolean>;
   onDelete: (id: number) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [date, setDate] = useState(today());
   const [customerRefund, setCustomerRefund] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const n = (v: string) => (v === "" ? 0 : parseFloat(v) || 0);
 
+  function resetForm() {
+    setEditingId(null);
+    setCustomerRefund("");
+    setNote("");
+    setDate(today());
+  }
+
+  function startAdd() {
+    if (open && editingId == null) {
+      setOpen(false);
+      return;
+    }
+    resetForm();
+    setOpen(true);
+  }
+
+  function startEdit(r: BookingRefund) {
+    setEditingId(r.id);
+    setDate(r.refund_date);
+    setCustomerRefund(String(Number(r.customer_refund)));
+    setNote(r.note ?? "");
+    setOpen(true);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const ok = await onAdd({
+    const input: RefundInput = {
       refund_type: "refund",
       refund_date: date,
       customer_refund: n(customerRefund),
@@ -391,12 +522,12 @@ function RefundSection({
       penalty: 0,
       adm_amount: 0,
       note: note.trim() || null,
-    });
+    };
+    const ok =
+      editingId != null ? await onUpdate(editingId, input) : await onAdd(input);
     setBusy(false);
     if (ok) {
-      setCustomerRefund("");
-      setNote("");
-      setDate(today());
+      resetForm();
       setOpen(false);
     }
   }
@@ -408,10 +539,10 @@ function RefundSection({
       action={
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={startAdd}
           className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
-          {open ? "Close" : "+ Add"}
+          {open && editingId == null ? "Close" : "+ Add"}
         </button>
       }
     >
@@ -425,9 +556,23 @@ function RefundSection({
           </div>
           <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
           <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" />
-          <Button type="submit" disabled={busy}>
-            {busy ? "Saving…" : "Record"}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={busy}>
+              {busy ? "Saving…" : editingId != null ? "Save changes" : "Record"}
+            </Button>
+            {editingId != null && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  resetForm();
+                  setOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       )}
       {refunds.length === 0 ? (
@@ -446,9 +591,14 @@ function RefundSection({
                   {Number(r.adm_amount) > 0 ? ` · ADM ${fmtMoney(Number(r.adm_amount))}` : ""}
                 </span>
               </div>
-              <button onClick={() => onDelete(r.id)} className={rowDeleteClass}>
-                Delete
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button onClick={() => startEdit(r)} className={rowActionClass}>
+                  Edit
+                </button>
+                <button onClick={() => onDelete(r.id)} className={rowDeleteClass}>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
