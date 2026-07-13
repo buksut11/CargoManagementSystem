@@ -79,10 +79,12 @@ export default function BookingDetailPage() {
       <PageHeader
         title={`Edit ${bookingRef(booking.id)}`}
         action={
-          <div className="flex flex-wrap gap-2">
-            <Badge className={FLIGHT_STATUS_CLASS[booking.status]}>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium ${FLIGHT_STATUS_CLASS[booking.status]}`}
+            >
               {FLIGHT_STATUS_LABEL[booking.status]}
-            </Badge>
+            </span>
             <Link
               href={`/flights/bookings/${booking.id}/print`}
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"

@@ -13,7 +13,7 @@ import type {
   PassengerType,
   TripType,
 } from "@/lib/types";
-import { fmtMoney, TRIP_TYPE_LABEL } from "@/lib/format";
+import { fmtMoney, FLIGHT_STATUS_LABEL, TRIP_TYPE_LABEL } from "@/lib/format";
 import { fetchCustomerBalance } from "@/lib/balance";
 import {
   Button,
@@ -397,10 +397,14 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               }
             >
               <option value="booked">Booked</option>
-              <option value="ticketed">Ticketed</option>
               <option value="cancelled">Cancelled</option>
               <option value="refunded">Refunded</option>
-              <option value="void">Void</option>
+              {/* Ticketed / Void aren't offered when setting a status, but keep
+                  the current one selectable so editing an older booking that
+                  already carries it doesn't silently lose or mislabel it. */}
+              {(status === "ticketed" || status === "void") && (
+                <option value={status}>{FLIGHT_STATUS_LABEL[status]}</option>
+              )}
             </Select>
           </Field>
         </div>
