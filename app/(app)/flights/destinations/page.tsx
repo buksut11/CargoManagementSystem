@@ -40,7 +40,7 @@ function CodeBadge({ name, code }: { name: string; code: string | null }) {
   const gradient = gradientFor(code || name);
   return (
     <span
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
+      className={`flex h-11 w-11 shrink-0 transform-gpu items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out will-change-transform group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
       aria-hidden
     >
       {code ? (
@@ -196,7 +196,7 @@ export default function FlightDestinationsPage() {
               {destinations.map((d) => (
                 <div
                   key={d.id}
-                  className="group flex items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
+                  className="group flex transform-gpu items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
                 >
                   <CodeBadge name={d.name} code={d.code ?? null} />
                   <div className="min-w-0 flex-1">
