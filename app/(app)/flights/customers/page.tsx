@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { FlightCustomer } from "@/lib/types";
@@ -24,6 +24,7 @@ import { UsersIcon } from "@/components/icons";
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -71,6 +72,22 @@ export default function FlightCustomersPage() {
       active = false;
     };
   }, [version]);
+
+  // Search by customer name or phone ("customer number"). Case-insensitive;
+  // digits-only matching for phones so "0712 345" matches "0712345".
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return customers;
+    const digits = q.replace(/\D/g, "");
+    return customers.filter((c) => {
+      const nameHit = c.name.toLowerCase().includes(q);
+      const phone = c.phone ?? "";
+      const phoneHit =
+        phone.toLowerCase().includes(q) ||
+        (digits.length > 0 && phone.replace(/\D/g, "").includes(digits));
+      return nameHit || phoneHit;
+    });
+  }, [customers, search]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -156,8 +173,17 @@ export default function FlightCustomersPage() {
           </form>
         </Section>
         <Card className="table-scroll">
+          <div className="border-b border-slate-200/60 p-3 dark:border-white/10">
+            <Input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or phone number…"
+              aria-label="Search customers by name or phone number"
+            />
+          </div>
           <div className="space-y-3 p-3 lg:hidden">
-            {customers.map((c) => (
+            {filtered.map((c) => (
               <div
                 key={c.id}
                 className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
@@ -194,7 +220,7 @@ export default function FlightCustomersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
-              {customers.map((c) => (
+              {filtered.map((c) => (
                 <tr key={c.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                   <Td className="font-medium">{c.name}</Td>
                   <Td>{c.email ?? "—"}</Td>
@@ -221,6 +247,9 @@ export default function FlightCustomersPage() {
           </table>
           {!loading && customers.length === 0 && (
             <EmptyState message="No customers yet — add the people or agencies you sell tickets to." />
+          )}
+          {!loading && customers.length > 0 && filtered.length === 0 && (
+            <EmptyState message={`No customers match "${search.trim()}".`} />
           )}
         </Card>
       </div>

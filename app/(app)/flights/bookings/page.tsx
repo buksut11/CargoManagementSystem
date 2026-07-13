@@ -22,6 +22,7 @@ import {
   Badge,
   Card,
   EmptyState,
+  Input,
   PageHeader,
   Select,
   Td,
@@ -40,13 +41,14 @@ export default function BookingsPage() {
   >({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function load() {
       const [b, p, r] = await Promise.all([
         supabase
           .from("flight_bookings")
-          .select("*, flight_customers(id, name), flight_suppliers(id, name)")
+          .select("*, flight_customers(id, name, phone), flight_suppliers(id, name)")
           .order("created_at", { ascending: false }),
         supabase.from("booking_payments").select("booking_id, amount"),
         supabase.from("booking_refunds").select("booking_id, customer_refund"),
@@ -68,13 +70,24 @@ export default function BookingsPage() {
     load();
   }, []);
 
-  const filtered = useMemo(
-    () =>
-      statusFilter === "all"
-        ? bookings
-        : bookings.filter((b) => b.status === statusFilter),
-    [bookings, statusFilter],
-  );
+  // Filter by status and by a free-text search over customer name / phone
+  // ("customer number"). Phone matching also compares digits-only so a query
+  // like "0712 345" matches a stored "0712345".
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const digits = q.replace(/\D/g, "");
+    return bookings.filter((b) => {
+      if (statusFilter !== "all" && b.status !== statusFilter) return false;
+      if (!q) return true;
+      const name = b.flight_customers?.name?.toLowerCase() ?? "";
+      const phone = b.flight_customers?.phone ?? "";
+      const nameHit = name.includes(q);
+      const phoneHit =
+        phone.toLowerCase().includes(q) ||
+        (digits.length > 0 && phone.replace(/\D/g, "").includes(digits));
+      return nameHit || phoneHit;
+    });
+  }, [bookings, statusFilter, search]);
 
   // Net money kept from the customer = payments in − refunds returned. A refund
   // is a credit on the balance, so it also lowers what is still receivable.
@@ -133,22 +146,35 @@ export default function BookingsPage() {
         }
       />
 
-      <div className="mb-4 flex items-center gap-2">
-        <span className="text-sm text-slate-500 dark:text-slate-400">Status</span>
-        <div className="w-44">
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All</option>
-            {(Object.keys(FLIGHT_STATUS_LABEL) as FlightBookingStatus[]).map(
-              (s) => (
-                <option key={s} value={s}>
-                  {FLIGHT_STATUS_LABEL[s]}
-                </option>
-              ),
-            )}
-          </Select>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-slate-500 dark:text-slate-400">
+            Status
+          </span>
+          <div className="w-44">
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All</option>
+              {(Object.keys(FLIGHT_STATUS_LABEL) as FlightBookingStatus[]).map(
+                (s) => (
+                  <option key={s} value={s}>
+                    {FLIGHT_STATUS_LABEL[s]}
+                  </option>
+                ),
+              )}
+            </Select>
+          </div>
+        </div>
+        <div className="min-w-[16rem] flex-1 sm:max-w-xs">
+          <Input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search customer name or phone number…"
+            aria-label="Search bookings by customer name or phone number"
+          />
         </div>
       </div>
 
