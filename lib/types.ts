@@ -280,6 +280,10 @@ export type BookingRefund = {
 // Operating (overhead) expenses for the flight agency — staff salary, rent,
 // electricity, or anything else that isn't tied to a single booking. Standalone
 // and editor-only (migration 0037). Net profit = booking gross profit − these.
+//
+// The four built-in category keys; custom per-org categories (migration 0039)
+// are stored as their own free-text name, so `category` on a stored expense is
+// a plain string.
 export type FlightExpenseCategory =
   | "staff_salary"
   | "rent"
@@ -290,9 +294,17 @@ export type FlightExpense = {
   id: number;
   organization_id: string;
   expense_date: string;
-  category: FlightExpenseCategory;
+  category: string;
   amount: number;
   note: string | null;
+  created_at: string;
+};
+
+// A custom, org-defined operating-expense category (migration 0039).
+export type FlightExpenseCategoryRow = {
+  id: number;
+  organization_id: string;
+  name: string;
   created_at: string;
 };
 

@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type { FlightBooking, FlightExpense, FlightExpenseCategory } from "@/lib/types";
+import type { FlightBooking, FlightExpense } from "@/lib/types";
 import {
   fmtDate,
   fmtMoney,
   flightExpenseCategoryLabel,
-  FLIGHT_EXPENSE_CATEGORY_LABEL,
   REVERSED_IN_LIST,
 } from "@/lib/format";
 import { DatePicker } from "@/components/date-picker";
+import { FlightExpenseSelect } from "@/components/flight-expense-select";
 import {
   Button,
   Card,
@@ -22,6 +22,7 @@ import {
   IconChip,
   Input,
   PageHeader,
+  rowActionClass,
   rowDeleteClass,
   Section,
   Select,
@@ -30,19 +31,30 @@ import {
 } from "@/components/ui";
 import { ChartIcon, WalletIcon } from "@/components/icons";
 
-const CATEGORIES = Object.keys(
-  FLIGHT_EXPENSE_CATEGORY_LABEL,
-) as FlightExpenseCategory[];
+type BookingProfit = Pick<FlightBooking, "profit" | "booking_date">;
+
+// "2026-06" → "Jun 2026" for the period dropdown.
+function monthLabel(ym: string): string {
+  const [y, m] = ym.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export default function FlightExpensesPage() {
   const [expenses, setExpenses] = useState<FlightExpense[]>([]);
-  const [grossProfit, setGrossProfit] = useState(0);
+  const [bookings, setBookings] = useState<BookingProfit[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [category, setCategory] = useState<FlightExpenseCategory>("staff_salary");
+  // "" = all time; otherwise a "YYYY-MM" period.
+  const [month, setMonth] = useState("");
+
+  const [category, setCategory] = useState<string>("staff_salary");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<FlightExpense | null>(null);
@@ -50,6 +62,7 @@ export default function FlightExpensesPage() {
 
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
+  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -62,17 +75,12 @@ export default function FlightExpensesPage() {
         // Recognised bookings only, so gross profit matches the dashboard.
         supabase
           .from("flight_bookings")
-          .select("profit")
+          .select("profit, booking_date")
           .not("status", "in", REVERSED_IN_LIST),
       ]);
       if (!active) return;
       setExpenses((e.data as FlightExpense[]) ?? []);
-      setGrossProfit(
-        ((b.data as Pick<FlightBooking, "profit">[]) ?? []).reduce(
-          (sum, r) => sum + Number(r.profit),
-          0,
-        ),
-      );
+      setBookings((b.data as BookingProfit[]) ?? []);
       setLoading(false);
     }
     load();
@@ -81,24 +89,67 @@ export default function FlightExpensesPage() {
     };
   }, [version]);
 
-  async function add(e: React.FormEvent) {
+  // Every month that has either an expense or a booking, newest first.
+  const months = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of expenses) set.add(e.expense_date.slice(0, 7));
+    for (const b of bookings) set.add(b.booking_date.slice(0, 7));
+    return [...set].sort().reverse();
+  }, [expenses, bookings]);
+
+  const inMonth = (d: string) => !month || d.slice(0, 7) === month;
+  const filteredExpenses = expenses.filter((e) => inMonth(e.expense_date));
+
+  const grossProfit = bookings
+    .filter((b) => inMonth(b.booking_date))
+    .reduce((sum, b) => sum + Number(b.profit), 0);
+  const totalExpenses = filteredExpenses.reduce(
+    (sum, e) => sum + Number(e.amount),
+    0,
+  );
+  const netProfit = grossProfit - totalExpenses;
+
+  function resetForm() {
+    setEditingId(null);
+    setCategory("staff_salary");
+    setAmount("");
+    setDate("");
+    setNote("");
+    setError(null);
+  }
+
+  function startEdit(exp: FlightExpense) {
+    setEditingId(exp.id);
+    setCategory(exp.category);
+    setAmount(String(exp.amount));
+    setDate(exp.expense_date);
+    setNote(exp.note ?? "");
+    setError(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await supabase.from("flight_expenses").insert({
+    const payload = {
       category,
       amount: parseFloat(amount),
       expense_date: date || undefined,
       note: note.trim() || null,
-    });
+    };
+    const { error } = editingId
+      ? await supabase
+          .from("flight_expenses")
+          .update(payload)
+          .eq("id", editingId)
+      : await supabase.from("flight_expenses").insert(payload);
     setBusy(false);
     if (error) {
       setError(error.message);
       return;
     }
-    setAmount("");
-    setNote("");
-    setDate("");
+    resetForm();
     reload();
   }
 
@@ -115,19 +166,20 @@ export default function FlightExpensesPage() {
     setPending(null);
   }
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const netProfit = grossProfit - totalExpenses;
+  // Per-category totals for the selected period, largest first.
+  const byCategory = (() => {
+    const map = new Map<string, number>();
+    for (const e of filteredExpenses) {
+      map.set(e.category, (map.get(e.category) ?? 0) + Number(e.amount));
+    }
+    return [...map.entries()]
+      .map(([category, total]) => ({ category, total }))
+      .sort((a, b) => b.total - a.total);
+  })();
 
-  // Per-category totals, in the fixed category order.
-  const byCategory = CATEGORIES.map((c) => ({
-    category: c,
-    total: expenses
-      .filter((e) => e.category === c)
-      .reduce((sum, e) => sum + Number(e.amount), 0),
-  })).filter((r) => r.total > 0);
-
+  const periodNote = month ? ` · ${monthLabel(month)}` : " · all time";
   const stats = [
-    { label: "Gross profit (bookings)", value: fmtMoney(grossProfit) },
+    { label: `Gross profit (bookings)${periodNote}`, value: fmtMoney(grossProfit) },
     { label: "Operating expenses", value: `−${fmtMoney(totalExpenses)}`, red: true },
     { label: "Net profit", value: fmtMoney(netProfit), red: netProfit < 0 },
   ];
@@ -137,23 +189,38 @@ export default function FlightExpensesPage() {
       <PageHeader
         title="Operating Expenses"
         action={
-          <button
-            onClick={() =>
-              downloadCsv("flight-operating-expenses.csv", [
-                ["Date", "Category", "Note", "Amount"],
-                ...expenses.map((e) => [
-                  e.expense_date,
-                  flightExpenseCategoryLabel(e.category),
-                  e.note ?? "",
-                  Number(e.amount),
-                ]),
-              ])
-            }
-            disabled={expenses.length === 0}
-            className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
-          >
-            ⬇ Export CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-40">
+              <Select value={month} onChange={(e) => setMonth(e.target.value)}>
+                <option value="">All time</option>
+                {months.map((m) => (
+                  <option key={m} value={m}>
+                    {monthLabel(m)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <button
+              onClick={() =>
+                downloadCsv(
+                  `flight-operating-expenses${month ? `-${month}` : ""}.csv`,
+                  [
+                    ["Date", "Category", "Note", "Amount"],
+                    ...filteredExpenses.map((e) => [
+                      e.expense_date,
+                      flightExpenseCategoryLabel(e.category),
+                      e.note ?? "",
+                      Number(e.amount),
+                    ]),
+                  ],
+                )
+              }
+              disabled={filteredExpenses.length === 0}
+              className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
+            >
+              ⬇ Export CSV
+            </button>
+          </div>
         }
       />
 
@@ -179,27 +246,16 @@ export default function FlightExpensesPage() {
       <Section
         className="mt-5"
         icon={<WalletIcon />}
-        title="Add an operating expense"
+        title={editingId ? "Edit operating expense" : "Add an operating expense"}
         subtitle="Overhead that keeps the office running (staff salary, rent, electricity…)"
       >
+        <div ref={formRef} className="-mt-2 scroll-mt-6" />
         <form
-          onSubmit={add}
+          onSubmit={save}
           className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-5"
         >
           <Field label="Category">
-            <Select
-              value={category}
-              onChange={(e) =>
-                setCategory(e.target.value as FlightExpenseCategory)
-              }
-              required
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {FLIGHT_EXPENSE_CATEGORY_LABEL[c]}
-                </option>
-              ))}
-            </Select>
+            <FlightExpenseSelect value={category} onChange={setCategory} />
           </Field>
           <Field label="Amount">
             <Input
@@ -223,10 +279,19 @@ export default function FlightExpensesPage() {
               />
             </Field>
           </div>
-          <div className="sm:col-span-2 lg:col-span-5">
+          <div className="flex gap-2 sm:col-span-2 lg:col-span-5">
             <Button type="submit" disabled={busy}>
-              {busy ? "Adding…" : "Add expense"}
+              {busy
+                ? "Saving…"
+                : editingId
+                  ? "Save changes"
+                  : "Add expense"}
             </Button>
+            {editingId && (
+              <Button type="button" variant="secondary" onClick={resetForm}>
+                Cancel
+              </Button>
+            )}
           </div>
         </form>
         <div className="mt-3">
@@ -241,11 +306,11 @@ export default function FlightExpensesPage() {
               <WalletIcon />
             </IconChip>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              All expenses
+              {month ? `Expenses · ${monthLabel(month)}` : "All expenses"}
             </h2>
           </div>
           <div className="mt-2 space-y-3 p-3 lg:hidden">
-            {expenses.map((exp) => (
+            {filteredExpenses.map((exp) => (
               <div
                 key={exp.id}
                 className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
@@ -259,12 +324,14 @@ export default function FlightExpensesPage() {
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                   <span>{fmtDate(exp.expense_date)}</span>
                   {exp.note && <span>{exp.note}</span>}
-                  <button
-                    onClick={() => setPending(exp)}
-                    className={`ml-auto ${rowDeleteClass}`}
-                  >
-                    Delete
-                  </button>
+                  <span className="ml-auto flex items-center gap-2">
+                    <button onClick={() => startEdit(exp)} className={rowActionClass}>
+                      Edit
+                    </button>
+                    <button onClick={() => setPending(exp)} className={rowDeleteClass}>
+                      Delete
+                    </button>
+                  </span>
                 </div>
               </div>
             ))}
@@ -280,7 +347,7 @@ export default function FlightExpensesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
-              {expenses.map((exp) => (
+              {filteredExpenses.map((exp) => (
                 <tr
                   key={exp.id}
                   className="hover:bg-white/60 dark:hover:bg-white/[0.08]"
@@ -294,19 +361,30 @@ export default function FlightExpensesPage() {
                     −{fmtMoney(Number(exp.amount))}
                   </Td>
                   <Td className="text-right">
-                    <button
-                      onClick={() => setPending(exp)}
-                      className={rowDeleteClass}
-                    >
-                      Delete
-                    </button>
+                    <span className="inline-flex items-center gap-2">
+                      <button onClick={() => startEdit(exp)} className={rowActionClass}>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setPending(exp)}
+                        className={rowDeleteClass}
+                      >
+                        Delete
+                      </button>
+                    </span>
                   </Td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {!loading && expenses.length === 0 && (
-            <EmptyState message="No operating expenses yet — record staff salary, rent, electricity and other overhead to see your true net profit." />
+          {!loading && filteredExpenses.length === 0 && (
+            <EmptyState
+              message={
+                month
+                  ? "No operating expenses recorded for this month."
+                  : "No operating expenses yet — record staff salary, rent, electricity and other overhead to see your true net profit."
+              }
+            />
           )}
         </Card>
 
