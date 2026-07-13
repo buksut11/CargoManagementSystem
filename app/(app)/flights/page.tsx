@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import type { FlightBooking } from "@/lib/types";
 import {
   bookingRef,
+  displaySaleTotal,
   fmtDate,
   fmtMoney,
   FLIGHT_STATUS_CLASS,
@@ -218,9 +219,7 @@ export default function FlightDashboardPage() {
               // A refunded booking gives the customer their money back, so show
               // its sale as a negative amount (e.g. -$130) to reflect the reversal.
               const refunded = b.status === "refunded";
-              const amount = refunded
-                ? -Math.abs(Number(b.sale_total))
-                : Number(b.sale_total);
+              const amount = displaySaleTotal(b.status, Number(b.sale_total));
               return (
                 <Link
                   key={b.id}

@@ -145,6 +145,14 @@ export function isReversed(status: string): boolean {
   return (REVERSED_STATUSES as readonly string[]).includes(status);
 }
 
+// In listings that show a booking next to its status, a refunded booking's
+// sale is displayed as a negative amount (e.g. -$130) because the money was
+// returned to the customer. Recognised (non-refunded) bookings show their
+// sale as-is. This affects presentation only — not recognised revenue totals.
+export function displaySaleTotal(status: string, saleTotal: number): number {
+  return status === "refunded" ? -Math.abs(saleTotal) : saleTotal;
+}
+
 // PostgREST `in` list for filtering reversed bookings out of a query, e.g.
 //   supabase.from("flight_bookings").not("status", "in", REVERSED_IN_LIST)
 export const REVERSED_IN_LIST = `(${REVERSED_STATUSES.join(",")})`;

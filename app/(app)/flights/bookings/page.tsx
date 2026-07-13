@@ -12,6 +12,7 @@ import type {
 } from "@/lib/types";
 import {
   bookingRef,
+  displaySaleTotal,
   fmtDate,
   fmtMoney,
   FLIGHT_STATUS_CLASS,
@@ -112,7 +113,7 @@ export default function BookingsPage() {
         b.booking_date,
         b.travel_date ?? "",
         FLIGHT_STATUS_LABEL[b.status],
-        Number(b.sale_total),
+        displaySaleTotal(b.status, Number(b.sale_total)),
         received(b),
         receivable(b),
         Number(b.net_cost),
@@ -201,7 +202,17 @@ export default function BookingsPage() {
               </div>
               <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
                 <span>{fmtDate(b.travel_date)}</span>
-                {!isAgent && <span>{fmtMoney(Number(b.sale_total))}</span>}
+                {!isAgent && (
+                  <span
+                    className={
+                      b.status === "refunded"
+                        ? "text-rose-600 dark:text-rose-400"
+                        : undefined
+                    }
+                  >
+                    {fmtMoney(displaySaleTotal(b.status, Number(b.sale_total)))}
+                  </span>
+                )}
                 {!isAgent && receivable(b) > 0 && (
                   <span className="text-amber-600 dark:text-amber-400">
                     {fmtMoney(receivable(b))} due
@@ -248,8 +259,14 @@ export default function BookingsPage() {
                   </Badge>
                 </Td>
                 {!isAgent && (
-                  <Td className="whitespace-nowrap font-medium">
-                    {fmtMoney(Number(b.sale_total))}
+                  <Td
+                    className={`whitespace-nowrap font-medium ${
+                      b.status === "refunded"
+                        ? "text-rose-600 dark:text-rose-400"
+                        : ""
+                    }`}
+                  >
+                    {fmtMoney(displaySaleTotal(b.status, Number(b.sale_total)))}
                   </Td>
                 )}
                 {!isAgent && (
