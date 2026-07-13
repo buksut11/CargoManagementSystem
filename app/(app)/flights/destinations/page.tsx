@@ -192,7 +192,7 @@ export default function FlightDestinationsPage() {
           </div>
 
           {destinations.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-2 p-3 sm:[grid-template-columns:repeat(auto-fill,minmax(12rem,1fr))]">
               {destinations.map((d) => (
                 <div
                   key={d.id}
