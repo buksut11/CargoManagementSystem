@@ -18,10 +18,40 @@ import {
   rowActionClass,
   rowDeleteClass,
   Section,
-  Td,
-  Th,
 } from "@/components/ui";
-import { UsersIcon } from "@/components/icons";
+import { PhoneIcon, SearchIcon, UsersIcon } from "@/components/icons";
+
+// Deterministic gradient for a customer avatar so each person keeps a stable,
+// tasteful colour instead of everything looking identical.
+const AVATAR_GRADIENTS = [
+  "from-blue-500 to-indigo-500",
+  "from-emerald-500 to-teal-500",
+  "from-amber-500 to-orange-500",
+  "from-rose-500 to-pink-500",
+  "from-violet-500 to-purple-500",
+  "from-cyan-500 to-sky-500",
+];
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? "";
+  const second = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
+  return (first + second).toUpperCase() || "?";
+}
+
+function Avatar({ name }: { name: string }) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0;
+  const gradient = AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
+  return (
+    <span
+      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-sm font-semibold text-white shadow-sm ring-1 ring-white/40 dark:ring-white/10`}
+      aria-hidden
+    >
+      {initials(name)}
+    </span>
+  );
+}
 
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
@@ -177,87 +207,59 @@ export default function FlightCustomersPage() {
             <ErrorNote message={error} />
           </form>
         </Section>
-        <Card className="table-scroll">
-          <div className="border-b border-slate-200/60 p-3 dark:border-white/10">
-            <Input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name or phone number…"
-              aria-label="Search customers by name or phone number"
-            />
+        <Card className="overflow-hidden">
+          <div className="border-b border-slate-200/50 p-3 dark:border-white/[0.08]">
+            <div className="relative">
+              <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name or phone number…"
+                aria-label="Search customers by name or phone number"
+                className="w-full rounded-2xl border border-white/70 bg-white/50 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-black/[0.02] outline-none backdrop-blur transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white/70 focus:ring-4 focus:ring-blue-200/50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400/60 dark:focus:bg-white/[0.08] dark:focus:ring-blue-500/20"
+              />
+            </div>
           </div>
-          <div className="space-y-3 p-3 lg:hidden">
-            {filtered.map((c) => (
-              <div
-                key={c.id}
-                className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-medium">{c.name}</div>
-                  {(balances[c.id] ?? 0) > 0 && (
-                    <span className="shrink-0 text-sm font-semibold text-amber-600 dark:text-amber-400">
-                      {fmtMoney(balances[c.id])} due
-                    </span>
-                  )}
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                  {c.email && <span>✉️ {c.email}</span>}
-                  {c.phone && <span>📞 {c.phone}</span>}
-                </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Link
-                    href={`/flights/customers/${c.id}/statement`}
-                    className={rowActionClass}
+
+          {filtered.length > 0 && (
+            <div className="divide-y divide-slate-200/50 dark:divide-white/[0.06]">
+              {filtered.map((c) => {
+                const due = balances[c.id] ?? 0;
+                return (
+                  <div
+                    key={c.id}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3.5 transition-colors hover:bg-white/45 dark:hover:bg-white/[0.05]"
                   >
-                    Statement
-                  </Link>
-                  <button onClick={() => startEdit(c)} className={rowActionClass}>
-                    Edit
-                  </button>
-                  <button onClick={() => setPending(c)} className={rowDeleteClass}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <table className="hidden w-full lg:table">
-            <thead className="border-b border-slate-200/60 dark:border-white/10">
-              <tr>
-                <Th>Customer</Th>
-                <Th>Phone</Th>
-                <Th>Outstanding</Th>
-                <Th />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
-              {filtered.map((c) => (
-                <tr key={c.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
-                  <Td>
-                    <div className="font-medium text-slate-900 dark:text-slate-100">
-                      {c.name}
+                    <Avatar name={c.name} />
+                    <div className="min-w-0 flex-1 basis-40">
+                      <div className="truncate font-semibold text-slate-900 dark:text-slate-100">
+                        {c.name}
+                      </div>
+                      {c.email && (
+                        <div className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          {c.email}
+                        </div>
+                      )}
                     </div>
-                    {c.email && (
-                      <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                        {c.email}
+                    {c.phone && (
+                      <div className="hidden shrink-0 items-center gap-1.5 text-sm tabular-nums text-slate-500 dark:text-slate-400 sm:flex">
+                        <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+                        {c.phone}
                       </div>
                     )}
-                  </Td>
-                  <Td className="whitespace-nowrap text-slate-600 dark:text-slate-300">
-                    {c.phone ?? "—"}
-                  </Td>
-                  <Td
-                    className={`whitespace-nowrap font-medium ${
-                      (balances[c.id] ?? 0) > 0
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-slate-400 dark:text-slate-500"
-                    }`}
-                  >
-                    {(balances[c.id] ?? 0) > 0 ? fmtMoney(balances[c.id]) : "—"}
-                  </Td>
-                  <Td className="text-right">
-                    <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                    <div className="shrink-0">
+                      {due > 0 ? (
+                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-400/15 dark:text-amber-400">
+                          {fmtMoney(due)} due
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+                          Settled
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
                       <Link
                         href={`/flights/customers/${c.id}/statement`}
                         className={rowActionClass}
@@ -271,11 +273,11 @@ export default function FlightCustomersPage() {
                         Delete
                       </button>
                     </div>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           {!loading && customers.length === 0 && (
             <EmptyState message="No customers yet — add the people or agencies you sell tickets to." />
           )}

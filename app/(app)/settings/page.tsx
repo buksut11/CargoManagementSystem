@@ -438,7 +438,7 @@ export default function SettingsPage() {
               return (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-slate-900 dark:text-slate-100">

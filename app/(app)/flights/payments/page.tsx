@@ -62,7 +62,7 @@ export default function FlightReceiptsPage() {
           {payments.map((p) => (
             <div
               key={p.id}
-              className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
+              className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="font-semibold">{fmtMoney(Number(p.amount))}</span>

@@ -214,7 +214,7 @@ export default function FlightDashboardPage() {
               <Link
                 key={b.id}
                 href={`/flights/bookings/${b.id}`}
-                className="block rounded-xl border border-slate-200/60 p-3 hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
+                className="block rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-blue-600 dark:text-blue-400">
