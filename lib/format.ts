@@ -8,9 +8,13 @@ import type {
 // Change this if you bill in a different currency.
 export const CURRENCY = "USD";
 
+// Whole amounts show with no decimals ($200, not $200.00); cents appear only
+// when the value actually carries them ($200.50 stays $200.50).
 const money = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: CURRENCY,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
 });
 
 export function fmtMoney(n: number): string {
