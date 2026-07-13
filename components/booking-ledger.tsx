@@ -6,6 +6,7 @@ import type {
   BookingPayment,
   BookingRefund,
   FlightBooking,
+  FlightBookingStatus,
   RefundType,
   SupplierPayment,
 } from "@/lib/types";
@@ -26,7 +27,13 @@ import type { ReactNode } from "react";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function BookingLedger({ booking }: { booking: FlightBooking }) {
+export function BookingLedger({
+  booking,
+  onStatusChange,
+}: {
+  booking: FlightBooking;
+  onStatusChange?: (status: FlightBookingStatus) => void;
+}) {
   const [payments, setPayments] = useState<BookingPayment[]>([]);
   const [supplierPays, setSupplierPays] = useState<SupplierPayment[]>([]);
   const [refunds, setRefunds] = useState<BookingRefund[]>([]);
@@ -88,6 +95,41 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
   // still receivable just like a payment does.
   const receivable = Math.max(0, saleTotal - received - refunded);
   const payable = Math.max(0, netCost - paidSupplier);
+
+  // Keep the booking's status in step with its refunds: once the customer has
+  // been refunded the full sale it is effectively reversed, so flip it to
+  // "Refunded" (which drops it out of sales/profit everywhere and shows the
+  // badge). If a refund is later removed and the total falls back below the
+  // sale, restore it to "Booked". Manual Cancelled/Void are left untouched.
+  async function syncRefundStatus() {
+    const { data } = await supabase
+      .from("booking_refunds")
+      .select("customer_refund")
+      .eq("booking_id", booking.id);
+    const total = ((data as { customer_refund: number }[]) ?? []).reduce(
+      (sum, r) => sum + Number(r.customer_refund),
+      0,
+    );
+    const fullyRefunded = saleTotal > 0 && total >= saleTotal - 0.005;
+    let next: FlightBookingStatus | null = null;
+    if (
+      fullyRefunded &&
+      (booking.status === "quote" ||
+        booking.status === "booked" ||
+        booking.status === "ticketed")
+    ) {
+      next = "refunded";
+    } else if (!fullyRefunded && booking.status === "refunded") {
+      next = "booked";
+    }
+    if (next) {
+      await supabase
+        .from("flight_bookings")
+        .update({ status: next })
+        .eq("id", booking.id);
+      onStatusChange?.(next);
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -249,6 +291,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
         refunds={refunds}
         onDelete={async (id) => {
           await supabase.from("booking_refunds").delete().eq("id", id);
+          await syncRefundStatus();
           load();
         }}
         onAdd={async (r) => {
@@ -260,6 +303,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             setError(error.message);
             return false;
           }
+          await syncRefundStatus();
           load();
           return true;
         }}
@@ -272,6 +316,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             setError(error.message);
             return false;
           }
+          await syncRefundStatus();
           load();
           return true;
         }}

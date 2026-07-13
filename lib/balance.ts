@@ -1,8 +1,10 @@
 import { supabase } from "./supabase";
+import { REVERSED_IN_LIST } from "./format";
 
 // A customer's outstanding balance is the same figure the statement calls
-// "Balance due": the sum of every non-void booking's sale_total, minus every
-// payment received and every customer refund/credit across those bookings.
+// "Balance due": the sum of every recognised (non-reversed) booking's
+// sale_total, minus every payment received and every customer refund/credit
+// across those bookings. Cancelled/refunded/voided bookings drop out entirely.
 // A new unpaid ticket therefore stacks straight onto what the customer already
 // owes. A negative result means the customer is in credit.
 
@@ -20,7 +22,7 @@ export async function fetchCustomerBalances(): Promise<Record<number, number>> {
     supabase
       .from("flight_bookings")
       .select("id, customer_id, sale_total, status")
-      .neq("status", "void"),
+      .not("status", "in", REVERSED_IN_LIST),
     supabase.from("booking_payments").select("booking_id, amount"),
     supabase.from("booking_refunds").select("booking_id, customer_refund"),
   ]);
@@ -61,7 +63,7 @@ export async function fetchCustomerBalance(
     .from("flight_bookings")
     .select("id, sale_total, status")
     .eq("customer_id", customerId)
-    .neq("status", "void");
+    .not("status", "in", REVERSED_IN_LIST);
 
   const bookings = ((data as { id: number; sale_total: number | string }[]) ?? [])
     .filter((bk) => bk.id !== excludeBookingId);

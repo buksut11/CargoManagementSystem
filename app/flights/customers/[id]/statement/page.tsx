@@ -11,7 +11,7 @@ import type {
   FlightCustomer,
   Organization,
 } from "@/lib/types";
-import { bookingRef, fmtDate, fmtMoney } from "@/lib/format";
+import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
 
 // One line of the statement: a charge (booking) or a credit (payment/refund).
 type Line = {
@@ -56,7 +56,7 @@ export default function CustomerStatementPage() {
         .from("flight_bookings")
         .select("*")
         .eq("customer_id", customerId)
-        .neq("status", "void")
+        .not("status", "in", REVERSED_IN_LIST)
         .order("booking_date");
       const bookings = (b as FlightBooking[]) ?? [];
       const ids = bookings.map((r) => r.id);

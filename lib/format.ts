@@ -130,6 +130,25 @@ export const TRIP_TYPE_LABEL: Record<TripType, string> = {
   return: "Round-Trip",
 };
 
+// A booking in one of these states has been reversed — cancelled, refunded or
+// voided — so its money is not the agency's: it must never count toward sales,
+// profit or receivables anywhere in the app. Only quote/booked/ticketed
+// bookings are recognised revenue. Keep this list in sync with the same filter
+// in flight_dashboard_summary() (migration 0035).
+export const REVERSED_STATUSES: readonly FlightBookingStatus[] = [
+  "cancelled",
+  "refunded",
+  "void",
+];
+
+export function isReversed(status: string): boolean {
+  return (REVERSED_STATUSES as readonly string[]).includes(status);
+}
+
+// PostgREST `in` list for filtering reversed bookings out of a query, e.g.
+//   supabase.from("flight_bookings").not("status", "in", REVERSED_IN_LIST)
+export const REVERSED_IN_LIST = `(${REVERSED_STATUSES.join(",")})`;
+
 export const SUPPLIER_TYPE_LABEL: Record<string, string> = {
   airline: "Airline",
   consolidator: "Consolidator",
