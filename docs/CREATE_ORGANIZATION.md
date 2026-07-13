@@ -39,8 +39,9 @@ another org's shipments, invoices, or anything else.
 
 1. Supabase dashboard → **SQL Editor** → **New query**.
 2. Paste the block below.
-3. Change **two things**:
+3. Change **three things**:
    - `'Second Business'` → the new organization's name.
+   - `array['cargo']` → which products this org gets (see **Modules** below).
    - `'PASTE-USER-UID-HERE'` → the User UID you copied in Step 2.
 4. Click **Run**.
 
@@ -50,8 +51,9 @@ declare
   v_org uuid;
 begin
   -- 1. Create the organization (the isolated workspace)
-  insert into public.organizations (name)
-  values ('Second Business')
+  --    `modules` decides which products it runs — see the Modules note below.
+  insert into public.organizations (name, modules)
+  values ('Second Business', array['cargo'])
   returning id into v_org;
 
   -- 2. Make the user its owner
@@ -69,6 +71,44 @@ end $$;
 ```
 
 If it runs with no error, the organization exists.
+
+### Modules — which products this org gets
+
+An organization runs **Cargo**, **Flights**, or **both**. You choose this; the
+org's own owner/admins can't change it (that's enforced in the database — see
+migration `0036_lock_org_modules.sql`). Set it in the `modules` line above:
+
+- Cargo only → `array['cargo']`
+- Flights only → `array['flights']`
+- Both → `array['cargo', 'flights']`
+
+**Changing an existing org later** (SQL Editor → New query → Run):
+
+1. **Find the organization's UID.** List every org with its current modules:
+
+   ```sql
+   select id, name, modules
+   from public.organizations
+   order by name;
+   ```
+
+   Copy the `id` of the org you want to change (a long code like
+   `a1b2c3d4-5678-90ab-cdef-1234567890ab`). Note this is the **organization's**
+   id, not a user's UID from Authentication → Users. You can also read it from
+   **Table Editor → `organizations`**, the `id` column.
+
+2. **Set its modules**, pasting the id from step 1:
+
+   ```sql
+   -- Give this org Flights only. Allowed values: 'cargo', 'flights'.
+   select public.set_org_modules('a1b2c3d4-5678-90ab-cdef-1234567890ab', array['flights']);
+   ```
+
+3. **Confirm** by running the step-1 query again — the `modules` column should
+   now show the new value.
+
+The org's sidebar updates to match the next time its users load the app. At
+least one module is required — an empty list is rejected.
 
 ## Step 4 — Verify (optional but recommended)
 

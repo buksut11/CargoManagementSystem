@@ -41,7 +41,6 @@ export default function SettingsPage() {
   const [plan, setPlan] = useState<string>("free");
   const [subStatus, setSubStatus] = useState<string | null>(null);
   const [modules, setModules] = useState<string[]>(["cargo"]);
-  const [savingModules, setSavingModules] = useState(false);
   const [loading, setLoading] = useState(true);
   // Backup & restore.
   const [backupBusy, setBackupBusy] = useState(false);
@@ -184,33 +183,6 @@ export default function SettingsPage() {
       return;
     }
     window.location.href = data.url;
-  }
-
-  // Turn a product module on/off for this organization. At least one module
-  // must stay enabled. The page reloads on success so the sidebar reflects the
-  // change (nav is resolved once in the app layout).
-  async function setModuleEnabled(mod: string, enabled: boolean) {
-    const next = enabled
-      ? Array.from(new Set([...modules, mod]))
-      : modules.filter((m) => m !== mod);
-    if (next.length === 0) {
-      setError("Keep at least one module enabled.");
-      return;
-    }
-    setSavingModules(true);
-    setError(null);
-    const { error: upErr } = await supabase
-      .from("organizations")
-      .update({ modules: next })
-      .eq("id", orgId);
-    if (upErr) {
-      setSavingModules(false);
-      setError(upErr.message);
-      return;
-    }
-    setModules(next);
-    // Reflect the new nav immediately.
-    window.location.reload();
   }
 
   async function makeBackup() {
@@ -430,7 +402,7 @@ export default function SettingsPage() {
         <Section
           icon={<DashboardIcon />}
           title="Modules"
-          subtitle="Turn product areas on or off for this organization. The sidebar updates when you toggle one."
+          subtitle="The product areas included in your plan. Contact us to add or remove one."
         >
           <div className="space-y-2">
             {MODULE_INFO.map((m) => {
@@ -448,27 +420,18 @@ export default function SettingsPage() {
                       {m.desc}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={enabled}
-                    aria-label={`${enabled ? "Disable" : "Enable"} ${m.name}`}
-                    disabled={savingModules}
-                    onClick={() => setModuleEnabled(m.id, !enabled)}
-                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+                  {/* Read-only status. Which modules an org runs is set by the
+                      platform operator at provisioning time (see migration
+                      0036), not toggled by tenants — so this only reports. */}
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
                       enabled
-                        ? "bg-blue-600"
-                        : "bg-slate-300 dark:bg-slate-600"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                        : "bg-slate-100 text-slate-500 dark:bg-white/[0.06] dark:text-slate-400"
                     }`}
                   >
-                    {/* left-0.5 anchors the knob; without it the button's
-                        centered content pushed the knob past the pill. */}
-                    <span
-                      className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                        enabled ? "translate-x-5" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
+                    {enabled ? "Included" : "Not included"}
+                  </span>
                 </div>
               );
             })}
