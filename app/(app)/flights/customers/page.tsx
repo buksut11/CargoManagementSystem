@@ -50,7 +50,7 @@ function Avatar({ name }: { name: string }) {
   const gradient = AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
   return (
     <span
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-sm font-bold tracking-wide text-white shadow-md shadow-black/10 ring-1 ring-white/40 dark:ring-white/10`}
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-sm font-bold tracking-wide text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
       aria-hidden
     >
       {initials(name)}
@@ -61,7 +61,7 @@ function Avatar({ name }: { name: string }) {
 // Filled-tint action pill used only on this page, so the redesign stays
 // contained to the flight Customers list and no other table is affected.
 const custActionClass =
-  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors";
+  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 ease-out";
 
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
@@ -239,11 +239,11 @@ export default function FlightCustomersPage() {
                 return (
                   <div
                     key={c.id}
-                    className="group relative flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-gradient-to-r hover:from-white/60 hover:to-transparent sm:flex-row sm:items-center sm:gap-4 dark:hover:from-white/[0.06]"
+                    className="group relative flex flex-col gap-3 px-4 py-4 transition-colors duration-300 ease-out hover:bg-gradient-to-r hover:from-white/60 hover:to-transparent sm:flex-row sm:items-center sm:gap-4 dark:hover:from-white/[0.06]"
                   >
                     {/* Accent bar for customers who owe money — a quick visual cue. */}
                     <span
-                      className={`absolute inset-y-2 left-0 w-1 rounded-full transition-opacity ${
+                      className={`absolute inset-y-2 left-0 w-1 rounded-full transition-opacity duration-300 ease-out ${
                         due > 0
                           ? "bg-gradient-to-b from-amber-400 to-orange-500 opacity-100"
                           : "opacity-0"
