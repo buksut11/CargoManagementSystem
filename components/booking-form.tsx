@@ -14,6 +14,7 @@ import type {
   TripType,
 } from "@/lib/types";
 import { fmtMoney, TRIP_TYPE_LABEL } from "@/lib/format";
+import { fetchCustomerBalance } from "@/lib/balance";
 import {
   Button,
   ErrorNote,
@@ -94,6 +95,15 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The selected customer's outstanding balance from their *other* bookings, so
+  // the form can show how this ticket stacks onto what they already owe. When
+  // editing, this booking itself is excluded to avoid double-counting. Keyed by
+  // customer id so a stale result never shows against a newer selection.
+  const [customerBalance, setCustomerBalance] = useState<{
+    id: number;
+    value: number;
+  } | null>(null);
+
   // Dropdown data.
   useEffect(() => {
     let active = true;
@@ -154,6 +164,25 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       active = false;
     };
   }, [booking]);
+
+  // Load the chosen customer's existing balance whenever the selection changes.
+  useEffect(() => {
+    if (!customerId) return;
+    const id = Number(customerId);
+    let active = true;
+    fetchCustomerBalance(id, booking?.id).then((value) => {
+      if (active) setCustomerBalance({ id, value });
+    });
+    return () => {
+      active = false;
+    };
+  }, [customerId, booking?.id]);
+
+  // Only trust the loaded balance if it matches the current selection.
+  const existingBalance =
+    customerId && customerBalance?.id === Number(customerId)
+      ? customerBalance.value
+      : null;
 
   const num = (v: string) => (v === "" ? 0 : parseFloat(v) || 0);
   const saleTotal = useMemo(
@@ -316,6 +345,15 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                 </option>
               ))}
             </Select>
+            {existingBalance !== null && existingBalance > 0 && (
+              <span className="mt-1.5 block text-xs text-amber-600 dark:text-amber-400">
+                Existing balance {fmtMoney(existingBalance)} · with this ticket{" "}
+                <span className="font-semibold">
+                  {fmtMoney(existingBalance + saleTotal)}
+                </span>{" "}
+                due
+              </span>
+            )}
           </Field>
           <Field label="PNR" hint="Airline booking reference / locator">
             <Input

@@ -10,6 +10,7 @@ import type {
   SupplierPayment,
 } from "@/lib/types";
 import { fmtDate, fmtMoney } from "@/lib/format";
+import { fetchCustomerBalance } from "@/lib/balance";
 import {
   Button,
   ErrorNote,
@@ -28,6 +29,7 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
   const [payments, setPayments] = useState<BookingPayment[]>([]);
   const [supplierPays, setSupplierPays] = useState<SupplierPayment[]>([]);
   const [refunds, setRefunds] = useState<BookingRefund[]>([]);
+  const [customerDue, setCustomerDue] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
   const load = () => setVersion((v) => v + 1);
@@ -63,6 +65,19 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
     };
   }, [booking.id, version]);
 
+  // The customer's total outstanding across all their bookings (including this
+  // one) — recomputed when a payment/refund is added so it stays live.
+  useEffect(() => {
+    if (booking.customer_id == null) return;
+    let active = true;
+    fetchCustomerBalance(booking.customer_id).then((bal) => {
+      if (active) setCustomerDue(bal);
+    });
+    return () => {
+      active = false;
+    };
+  }, [booking.customer_id, booking.id, version]);
+
   const received = payments.reduce((sum, p) => sum + Number(p.amount), 0);
   const paidSupplier = supplierPays.reduce((sum, p) => sum + Number(p.amount), 0);
   const refunded = refunds.reduce((sum, r) => sum + Number(r.customer_refund), 0);
@@ -84,6 +99,13 @@ export function BookingLedger({ booking }: { booking: FlightBooking }) {
             value={fmtMoney(receivable)}
             accent={receivable > 0 ? "amber" : "emerald"}
           />
+          {customerDue != null && customerDue !== receivable && (
+            <Row
+              label="Customer total due"
+              value={fmtMoney(Math.max(0, customerDue))}
+              accent={customerDue > 0 ? "amber" : "emerald"}
+            />
+          )}
           <div className="my-2 border-t border-slate-200/60 dark:border-white/10" />
           <Row label="Net cost" value={fmtMoney(netCost)} />
           <Row label="Paid to airline" value={fmtMoney(paidSupplier)} />

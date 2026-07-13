@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { fetchCustomerBalances } from "@/lib/balance";
+import { fmtMoney } from "@/lib/format";
 import type { FlightCustomer } from "@/lib/types";
 import {
   Button,
@@ -23,6 +25,7 @@ import { UsersIcon } from "@/components/icons";
 
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
+  const [balances, setBalances] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [name, setName] = useState("");
@@ -59,15 +62,17 @@ export default function FlightCustomersPage() {
 
   useEffect(() => {
     let active = true;
-    supabase
-      .from("flight_customers")
-      .select("*")
-      .order("name")
-      .then(({ data }) => {
-        if (!active) return;
-        setCustomers((data as FlightCustomer[]) ?? []);
-        setLoading(false);
-      });
+    async function load() {
+      const [{ data }, bal] = await Promise.all([
+        supabase.from("flight_customers").select("*").order("name"),
+        fetchCustomerBalances(),
+      ]);
+      if (!active) return;
+      setCustomers((data as FlightCustomer[]) ?? []);
+      setBalances(bal);
+      setLoading(false);
+    }
+    load();
     return () => {
       active = false;
     };
@@ -188,7 +193,14 @@ export default function FlightCustomersPage() {
                 key={c.id}
                 className="rounded-xl border border-slate-200/60 p-3 dark:border-white/10"
               >
-                <div className="font-medium">{c.name}</div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-medium">{c.name}</div>
+                  {(balances[c.id] ?? 0) > 0 && (
+                    <span className="shrink-0 text-sm font-semibold text-amber-600 dark:text-amber-400">
+                      {fmtMoney(balances[c.id])} due
+                    </span>
+                  )}
+                </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                   {c.email && <span>✉️ {c.email}</span>}
                   {c.phone && <span>📞 {c.phone}</span>}
@@ -216,6 +228,7 @@ export default function FlightCustomersPage() {
                 <Th>Name</Th>
                 <Th>Email</Th>
                 <Th>Phone</Th>
+                <Th>Outstanding</Th>
                 <Th />
               </tr>
             </thead>
@@ -225,6 +238,15 @@ export default function FlightCustomersPage() {
                   <Td className="font-medium">{c.name}</Td>
                   <Td>{c.email ?? "—"}</Td>
                   <Td>{c.phone ?? "—"}</Td>
+                  <Td
+                    className={`whitespace-nowrap font-medium ${
+                      (balances[c.id] ?? 0) > 0
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-slate-400 dark:text-slate-500"
+                    }`}
+                  >
+                    {(balances[c.id] ?? 0) > 0 ? fmtMoney(balances[c.id]) : "—"}
+                  </Td>
                   <Td className="text-right">
                     <span className="inline-flex items-center gap-2">
                       <Link
