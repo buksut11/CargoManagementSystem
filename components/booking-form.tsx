@@ -196,6 +196,18 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     setBusy(true);
     setError(null);
 
+    // A segment can't fly from and to the same city — flag it before saving.
+    const sameCity = segments.findIndex(
+      (s) => s.origin && s.destination && s.origin === s.destination,
+    );
+    if (sameCity !== -1) {
+      setBusy(false);
+      setError(
+        `Flight ${sameCity + 1} has the same From and To destination — pick a different arrival city.`,
+      );
+      return;
+    }
+
     // Passengers carry the sale price now; keep the booking's base_fare in sync
     // with their total so the generated sale_total / profit columns stay correct.
     const savedPax = passengers.filter((p) => p.full_name.trim());
@@ -479,6 +491,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                 placeholder="To"
               />
             </div>
+            {s.origin && s.destination && s.origin === s.destination && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                From and To are the same destination — pick a different arrival
+                city.
+              </p>
+            )}
             <div className="grid gap-2 sm:grid-cols-2">
               <DateTimeInput
                 value={s.departure_at}
