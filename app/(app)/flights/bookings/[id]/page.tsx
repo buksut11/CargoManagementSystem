@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import {
   bookingRef,
+  displaySaleTotal,
   fmtDate,
   fmtDateTime,
   fmtMoney,
@@ -155,7 +156,19 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
     ["Trip type", TRIP_TYPE_LABEL[booking.trip_type]],
     ["Booking date", fmtDate(booking.booking_date)],
     ["Travel date", fmtDate(booking.travel_date)],
-    ["Price", fmtMoney(Number(booking.sale_total))],
+    [
+      "Price",
+      <span
+        key="price"
+        className={
+          booking.status === "refunded"
+            ? "text-rose-600 dark:text-rose-400"
+            : undefined
+        }
+      >
+        {fmtMoney(displaySaleTotal(booking.status, Number(booking.sale_total)))}
+      </span>,
+    ],
   ];
 
   return (
