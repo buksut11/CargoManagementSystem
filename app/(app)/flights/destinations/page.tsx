@@ -12,13 +12,47 @@ import {
   Field,
   Input,
   PageHeader,
-  rowActionClass,
-  rowDeleteClass,
   Section,
-  Td,
-  Th,
 } from "@/components/ui";
-import { PinIcon } from "@/components/icons";
+import { EditIcon, PinIcon, TrashIcon } from "@/components/icons";
+
+// A tasteful, deterministic gradient per destination so the code badges carry
+// a bit of colour variety instead of a wall of identical blue.
+const BADGE_GRADIENTS = [
+  "from-sky-500 to-blue-600",
+  "from-emerald-500 to-teal-600",
+  "from-amber-500 to-orange-600",
+  "from-rose-500 to-pink-600",
+  "from-violet-500 to-purple-600",
+  "from-cyan-500 to-sky-600",
+  "from-indigo-500 to-blue-600",
+];
+
+function gradientFor(key: string) {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) | 0;
+  return BADGE_GRADIENTS[Math.abs(hash) % BADGE_GRADIENTS.length];
+}
+
+// The leading badge: the IATA/airport code set in mono like a boarding pass,
+// or a location pin when a destination has no code yet.
+function CodeBadge({ name, code }: { name: string; code: string | null }) {
+  const gradient = gradientFor(code || name);
+  return (
+    <span
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 dark:ring-white/10`}
+      aria-hidden
+    >
+      {code ? (
+        <span className="font-mono text-[13px] font-bold tracking-tight">
+          {code}
+        </span>
+      ) : (
+        <PinIcon />
+      )}
+    </span>
+  );
+}
 
 export default function FlightDestinationsPage() {
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
@@ -145,59 +179,56 @@ export default function FlightDestinationsPage() {
             <ErrorNote message={error} />
           </form>
         </Section>
-        <Card className="table-scroll">
-          <div className="space-y-3 p-3 lg:hidden">
-            {destinations.map((d) => (
-              <div
-                key={d.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
-              >
-                <div className="min-w-0">
-                  <div className="font-medium">{d.name}</div>
-                  {d.code && (
-                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      {d.code}
-                    </div>
-                  )}
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button onClick={() => startEdit(d)} className={rowActionClass}>
-                    Edit
-                  </button>
-                  <button onClick={() => setPending(d)} className={rowDeleteClass}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+        <Card className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              All destinations
+            </h2>
+            {destinations.length > 0 && (
+              <span className="rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-white/[0.08] dark:text-slate-300">
+                {destinations.length}
+              </span>
+            )}
           </div>
-          <table className="hidden w-full lg:table">
-            <thead className="border-b border-slate-200/60 dark:border-white/10">
-              <tr>
-                <Th>Name</Th>
-                <Th>Code</Th>
-                <Th />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
+
+          {destinations.length > 0 && (
+            <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 2xl:grid-cols-3">
               {destinations.map((d) => (
-                <tr key={d.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
-                  <Td className="font-medium">{d.name}</Td>
-                  <Td>{d.code ?? "—"}</Td>
-                  <Td className="text-right">
-                    <span className="inline-flex items-center gap-2">
-                      <button onClick={() => startEdit(d)} className={rowActionClass}>
-                        Edit
-                      </button>
-                      <button onClick={() => setPending(d)} className={rowDeleteClass}>
-                        Delete
-                      </button>
-                    </span>
-                  </Td>
-                </tr>
+                <div
+                  key={d.id}
+                  className="group flex items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
+                >
+                  <CodeBadge name={d.name} code={d.code ?? null} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold text-slate-900 dark:text-slate-100">
+                      {d.name}
+                    </div>
+                    <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                      {d.code ? "Airport" : "No code"}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <button
+                      onClick={() => startEdit(d)}
+                      title="Edit"
+                      aria-label={`Edit ${d.name}`}
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                    >
+                      <EditIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setPending(d)}
+                      title="Delete"
+                      aria-label={`Delete ${d.name}`}
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
           {!loading && destinations.length === 0 && (
             <EmptyState message="No destinations yet — add the airports or cities you fly to." />
           )}
