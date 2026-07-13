@@ -40,11 +40,11 @@ function CodeBadge({ name, code }: { name: string; code: string | null }) {
   const gradient = gradientFor(code || name);
   return (
     <span
-      className={`flex h-11 w-11 shrink-0 transform-gpu items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out will-change-transform group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
+      className={`flex h-9 w-9 shrink-0 transform-gpu items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out will-change-transform group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
       aria-hidden
     >
       {code ? (
-        <span className="font-mono text-[13px] font-bold tracking-tight">
+        <span className="font-mono text-[11px] font-bold tracking-tight">
           {code}
         </span>
       ) : (
@@ -192,27 +192,27 @@ export default function FlightDestinationsPage() {
           </div>
 
           {destinations.length > 0 && (
-            <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {destinations.map((d) => (
                 <div
                   key={d.id}
-                  className="group flex transform-gpu items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
+                  className="group flex transform-gpu items-center gap-2.5 rounded-xl border border-white/60 bg-white/40 px-2.5 py-2 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
                 >
                   <CodeBadge name={d.name} code={d.code ?? null} />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold text-slate-900 dark:text-slate-100">
+                    <div className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">
                       {d.name}
                     </div>
-                    <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                    <div className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
                       {d.code ? "Airport" : "No code"}
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-0.5">
+                  <div className="flex shrink-0 items-center gap-0.5 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none">
                     <button
                       onClick={() => startEdit(d)}
                       title="Edit"
                       aria-label={`Edit ${d.name}`}
-                      className="rounded-lg p-2 text-slate-400 transition-colors duration-200 ease-out hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                      className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
                     >
                       <EditIcon className="h-4 w-4" />
                     </button>
@@ -220,7 +220,7 @@ export default function FlightDestinationsPage() {
                       onClick={() => setPending(d)}
                       title="Delete"
                       aria-label={`Delete ${d.name}`}
-                      className="rounded-lg p-2 text-slate-400 transition-colors duration-200 ease-out hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
+                      className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </button>
