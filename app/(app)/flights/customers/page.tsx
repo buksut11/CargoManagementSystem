@@ -225,8 +225,7 @@ export default function FlightCustomersPage() {
           <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Name</Th>
-                <Th>Email</Th>
+                <Th>Customer</Th>
                 <Th>Phone</Th>
                 <Th>Outstanding</Th>
                 <Th />
@@ -235,9 +234,19 @@ export default function FlightCustomersPage() {
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
               {filtered.map((c) => (
                 <tr key={c.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
-                  <Td className="font-medium">{c.name}</Td>
-                  <Td>{c.email ?? "—"}</Td>
-                  <Td>{c.phone ?? "—"}</Td>
+                  <Td>
+                    <div className="font-medium text-slate-900 dark:text-slate-100">
+                      {c.name}
+                    </div>
+                    {c.email && (
+                      <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                        {c.email}
+                      </div>
+                    )}
+                  </Td>
+                  <Td className="whitespace-nowrap text-slate-600 dark:text-slate-300">
+                    {c.phone ?? "—"}
+                  </Td>
                   <Td
                     className={`whitespace-nowrap font-medium ${
                       (balances[c.id] ?? 0) > 0
@@ -248,7 +257,7 @@ export default function FlightCustomersPage() {
                     {(balances[c.id] ?? 0) > 0 ? fmtMoney(balances[c.id]) : "—"}
                   </Td>
                   <Td className="text-right">
-                    <span className="inline-flex items-center gap-2">
+                    <div className="inline-flex items-center gap-2 whitespace-nowrap">
                       <Link
                         href={`/flights/customers/${c.id}/statement`}
                         className={rowActionClass}
@@ -261,7 +270,7 @@ export default function FlightCustomersPage() {
                       <button onClick={() => setPending(c)} className={rowDeleteClass}>
                         Delete
                       </button>
-                    </span>
+                    </div>
                   </Td>
                 </tr>
               ))}
