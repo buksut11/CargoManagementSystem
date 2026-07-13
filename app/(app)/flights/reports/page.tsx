@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
 import type { FlightBooking } from "@/lib/types";
-import { fmtMoney } from "@/lib/format";
+import { fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
 import {
   Card,
   EmptyState,
@@ -29,7 +29,7 @@ export default function FlightReportsPage() {
         supabase
           .from("flight_bookings")
           .select("*, flight_customers(id, name)")
-          .neq("status", "void"),
+          .not("status", "in", REVERSED_IN_LIST),
         supabase.from("booking_payments").select("booking_id, amount"),
         supabase.from("booking_refunds").select("booking_id, customer_refund"),
       ]);

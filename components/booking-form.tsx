@@ -385,7 +385,10 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               }
             >
               <option value="booked">Booked</option>
+              <option value="ticketed">Ticketed</option>
               <option value="cancelled">Cancelled</option>
+              <option value="refunded">Refunded</option>
+              <option value="void">Void</option>
             </Select>
           </Field>
         </div>

@@ -112,7 +112,12 @@ export default function BookingDetailPage() {
       />
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <BookingForm booking={booking} />
-        <BookingLedger booking={booking} />
+        <BookingLedger
+          booking={booking}
+          onStatusChange={(status) =>
+            setBooking((b) => (b ? { ...b, status } : b))
+          }
+        />
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   fmtMoney,
   FLIGHT_STATUS_CLASS,
   FLIGHT_STATUS_LABEL,
+  isReversed,
 } from "@/lib/format";
 import { Badge, Card, EmptyState, IconChip, PageHeader } from "@/components/ui";
 import { ChartIcon, TicketIcon } from "@/components/icons";
@@ -60,17 +61,16 @@ export default function FlightDashboardPage() {
       const { data, error } = await supabase.rpc("flight_dashboard_summary");
       if (!error && data) {
         const d = data as Record<string, unknown>;
-        // Money returned to customers reduces both what we've net collected and
-        // what is still owed (a refund is a credit on the customer's balance).
-        const refundsTotal = Number(d.refunds_total ?? 0);
+        // received / receivable already exclude reversed bookings and are net of
+        // customer refunds (migration 0035), so they're taken as-is here.
         setSummary({
           bookingCount: Number(d.booking_count ?? 0),
           salesTotal: Number(d.sales_total ?? 0),
           costTotal: Number(d.cost_total ?? 0),
           profitTotal: Number(d.profit_total ?? 0),
-          received: Number(d.received ?? 0) - refundsTotal,
+          received: Number(d.received ?? 0),
           paidSuppliers: Number(d.paid_suppliers ?? 0),
-          receivable: Number(d.receivable ?? 0) - refundsTotal,
+          receivable: Number(d.receivable ?? 0),
           payable: Number(d.payable ?? 0),
           salesByMonth: (d.sales_by_month as Record<string, number>) ?? {},
           recent: (d.recent as RecentBooking[]) ?? [],
@@ -85,26 +85,29 @@ export default function FlightDashboardPage() {
           .from("flight_bookings")
           .select("*")
           .order("created_at", { ascending: false }),
-        supabase.from("booking_payments").select("amount"),
-        supabase.from("supplier_payments").select("amount"),
-        supabase.from("booking_refunds").select("customer_refund"),
+        supabase.from("booking_payments").select("booking_id, amount"),
+        supabase.from("supplier_payments").select("booking_id, amount"),
+        supabase.from("booking_refunds").select("booking_id, customer_refund"),
       ]);
-      const bookings = ((b.data as FlightBooking[]) ?? []).filter(
-        (r) => r.status !== "void",
-      );
-      const paid = ((p.data as { amount: number }[]) ?? []).reduce(
-        (sum, r) => sum + Number(r.amount),
-        0,
-      );
-      const refundsTotal = ((rf.data as { customer_refund: number }[]) ?? []).reduce(
-        (sum, r) => sum + Number(r.customer_refund),
-        0,
-      );
+      const allBookings = (b.data as FlightBooking[]) ?? [];
+      // Recognised revenue only: reversed (cancelled/refunded/void) bookings and
+      // any money moved against them are left out of every figure below.
+      const bookings = allBookings.filter((r) => !isReversed(r.status));
+      const recognizedIds = new Set(bookings.map((r) => r.id));
+      const paid = ((p.data as { booking_id: number; amount: number }[]) ?? [])
+        .filter((r) => recognizedIds.has(r.booking_id))
+        .reduce((sum, r) => sum + Number(r.amount), 0);
+      const refundsTotal = (
+        (rf.data as { booking_id: number; customer_refund: number }[]) ?? []
+      )
+        .filter((r) => recognizedIds.has(r.booking_id))
+        .reduce((sum, r) => sum + Number(r.customer_refund), 0);
       const received = paid - refundsTotal;
-      const paidSuppliers = ((s.data as { amount: number }[]) ?? []).reduce(
-        (sum, r) => sum + Number(r.amount),
-        0,
-      );
+      const paidSuppliers = (
+        (s.data as { booking_id: number; amount: number }[]) ?? []
+      )
+        .filter((r) => recognizedIds.has(r.booking_id))
+        .reduce((sum, r) => sum + Number(r.amount), 0);
       const salesTotal = bookings.reduce((sum, r) => sum + Number(r.sale_total), 0);
       const costTotal = bookings.reduce((sum, r) => sum + Number(r.net_cost), 0);
       const salesByMonth: Record<string, number> = {};
@@ -122,7 +125,8 @@ export default function FlightDashboardPage() {
         receivable: salesTotal - paid - refundsTotal,
         payable: costTotal - paidSuppliers,
         salesByMonth,
-        recent: bookings.slice(0, 5),
+        // Keep reversed bookings visible in the recent list (with their badge).
+        recent: allBookings.slice(0, 5),
       });
       setLoading(false);
     }
