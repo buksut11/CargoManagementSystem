@@ -152,7 +152,7 @@ export default function FlightDashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Flights" />
+      <PageHeader title="Flight Dashboard" />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
@@ -214,27 +214,41 @@ export default function FlightDashboardPage() {
             </Link>
           </div>
           <div className="mt-2 space-y-3 px-4 pb-4">
-            {recent.map((b) => (
-              <Link
-                key={b.id}
-                href={`/flights/bookings/${b.id}`}
-                className="block rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-blue-600 dark:text-blue-400">
-                    {bookingRef(b.id)}
-                  </span>
-                  <Badge className={FLIGHT_STATUS_CLASS[b.status]}>
-                    {FLIGHT_STATUS_LABEL[b.status]}
-                  </Badge>
-                </div>
-                <div className="mt-1 text-sm">{b.airline ?? "—"}</div>
-                <div className="mt-1 flex flex-wrap justify-between gap-x-3 text-xs text-slate-500 dark:text-slate-400">
-                  <span>{fmtDate(b.travel_date)}</span>
-                  <span>{fmtMoney(Number(b.sale_total))}</span>
-                </div>
-              </Link>
-            ))}
+            {recent.map((b) => {
+              // A refunded booking gives the customer their money back, so show
+              // its sale as a negative amount (e.g. -$130) to reflect the reversal.
+              const refunded = b.status === "refunded";
+              const amount = refunded
+                ? -Math.abs(Number(b.sale_total))
+                : Number(b.sale_total);
+              return (
+                <Link
+                  key={b.id}
+                  href={`/flights/bookings/${b.id}`}
+                  className="block rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] hover:bg-white/60 dark:border-white/10 dark:hover:bg-white/[0.08]"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                      {bookingRef(b.id)}
+                    </span>
+                    <Badge className={FLIGHT_STATUS_CLASS[b.status]}>
+                      {FLIGHT_STATUS_LABEL[b.status]}
+                    </Badge>
+                  </div>
+                  <div className="mt-1 text-sm">{b.airline ?? "—"}</div>
+                  <div className="mt-1 flex flex-wrap justify-between gap-x-3 text-xs text-slate-500 dark:text-slate-400">
+                    <span>{fmtDate(b.travel_date)}</span>
+                    <span
+                      className={
+                        refunded ? "font-medium text-rose-600 dark:text-rose-400" : undefined
+                      }
+                    >
+                      {fmtMoney(amount)}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
             {!loading && recent.length === 0 && (
               <EmptyState message="No bookings yet — create your first from the Bookings page." />
             )}
