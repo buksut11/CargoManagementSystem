@@ -1,5 +1,6 @@
 import type {
   FlightBookingStatus,
+  FlightExpenseCategory,
   ShipmentStatus,
   TransportMode,
   TripType,
@@ -156,6 +157,21 @@ export function displaySaleTotal(status: string, saleTotal: number): number {
 // PostgREST `in` list for filtering reversed bookings out of a query, e.g.
 //   supabase.from("flight_bookings").not("status", "in", REVERSED_IN_LIST)
 export const REVERSED_IN_LIST = `(${REVERSED_STATUSES.join(",")})`;
+
+// Operating-expense categories (migration 0037). Fixed set, with "Other" as the
+// catch-all a free-text note can describe further.
+export const FLIGHT_EXPENSE_CATEGORY_LABEL: Record<FlightExpenseCategory, string> = {
+  staff_salary: "👥 Staff salary",
+  rent: "🏢 Rent",
+  electricity: "💡 Electricity",
+  other: "📦 Other",
+};
+
+export function flightExpenseCategoryLabel(category: string): string {
+  return (
+    (FLIGHT_EXPENSE_CATEGORY_LABEL as Record<string, string>)[category] ?? category
+  );
+}
 
 export const SUPPLIER_TYPE_LABEL: Record<string, string> = {
   airline: "Airline",

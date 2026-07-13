@@ -44,6 +44,7 @@ type Summary = {
   salesTotal: number;
   costTotal: number;
   profitTotal: number;
+  expensesTotal: number;
   received: number;
   paidSuppliers: number;
   receivable: number;
@@ -69,6 +70,7 @@ export default function FlightDashboardPage() {
           salesTotal: Number(d.sales_total ?? 0),
           costTotal: Number(d.cost_total ?? 0),
           profitTotal: Number(d.profit_total ?? 0),
+          expensesTotal: Number(d.expenses_total ?? 0),
           received: Number(d.received ?? 0),
           paidSuppliers: Number(d.paid_suppliers ?? 0),
           receivable: Number(d.receivable ?? 0),
@@ -81,7 +83,7 @@ export default function FlightDashboardPage() {
       }
 
       // Fallback: compute client-side so the page works before the migration.
-      const [b, p, s, rf] = await Promise.all([
+      const [b, p, s, rf, ex] = await Promise.all([
         supabase
           .from("flight_bookings")
           .select("*")
@@ -89,6 +91,7 @@ export default function FlightDashboardPage() {
         supabase.from("booking_payments").select("booking_id, amount"),
         supabase.from("supplier_payments").select("booking_id, amount"),
         supabase.from("booking_refunds").select("booking_id, customer_refund"),
+        supabase.from("flight_expenses").select("amount"),
       ]);
       const allBookings = (b.data as FlightBooking[]) ?? [];
       // Recognised revenue only: reversed (cancelled/refunded/void) bookings and
@@ -111,6 +114,10 @@ export default function FlightDashboardPage() {
         .reduce((sum, r) => sum + Number(r.amount), 0);
       const salesTotal = bookings.reduce((sum, r) => sum + Number(r.sale_total), 0);
       const costTotal = bookings.reduce((sum, r) => sum + Number(r.net_cost), 0);
+      const expensesTotal = ((ex.data as { amount: number }[]) ?? []).reduce(
+        (sum, r) => sum + Number(r.amount),
+        0,
+      );
       const salesByMonth: Record<string, number> = {};
       for (const r of bookings) {
         const m = r.booking_date.slice(0, 7);
@@ -121,6 +128,7 @@ export default function FlightDashboardPage() {
         salesTotal,
         costTotal,
         profitTotal: bookings.reduce((sum, r) => sum + Number(r.profit), 0),
+        expensesTotal,
         received,
         paidSuppliers,
         receivable: salesTotal - paid - refundsTotal,
@@ -140,13 +148,21 @@ export default function FlightDashboardPage() {
     value: summary?.salesByMonth[m.key] ?? 0,
   }));
 
+  // Booking margins (gross) less operating overhead (staff salary, rent, …) =
+  // the agency's true net profit.
+  const grossProfit = summary?.profitTotal ?? 0;
+  const expensesTotal = summary?.expensesTotal ?? 0;
+  const netProfit = grossProfit - expensesTotal;
+
   const stats = [
     { label: "Bookings", value: summary?.bookingCount ?? 0, format: fmtCount },
     { label: "Sales", value: summary?.salesTotal ?? 0, format: fmtMoney },
-    { label: "Net profit", value: summary?.profitTotal ?? 0, format: fmtMoney, accent: (summary?.profitTotal ?? 0) < 0 },
+    { label: "Gross profit", value: grossProfit, format: fmtMoney, accent: grossProfit < 0 },
+    { label: "Op. expenses", value: expensesTotal, format: fmtMoney, accent: expensesTotal > 0 },
+    { label: "Net profit", value: netProfit, format: fmtMoney, accent: netProfit < 0 },
+    { label: "Received", value: summary?.received ?? 0, format: fmtMoney },
     { label: "Receivable", value: Math.max(0, summary?.receivable ?? 0), format: fmtMoney, accent: (summary?.receivable ?? 0) > 0 },
     { label: "Payable", value: Math.max(0, summary?.payable ?? 0), format: fmtMoney, accent: (summary?.payable ?? 0) > 0 },
-    { label: "Received", value: summary?.received ?? 0, format: fmtMoney },
   ];
 
   const recent = summary?.recent ?? [];
@@ -155,7 +171,7 @@ export default function FlightDashboardPage() {
     <div>
       <PageHeader title="Flight Dashboard" />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
           <TiltCard key={s.label} className="h-full">
             <Card className="h-full p-5">

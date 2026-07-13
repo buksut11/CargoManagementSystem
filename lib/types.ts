@@ -277,6 +277,25 @@ export type BookingRefund = {
   created_at: string;
 };
 
+// Operating (overhead) expenses for the flight agency — staff salary, rent,
+// electricity, or anything else that isn't tied to a single booking. Standalone
+// and editor-only (migration 0037). Net profit = booking gross profit − these.
+export type FlightExpenseCategory =
+  | "staff_salary"
+  | "rent"
+  | "electricity"
+  | "other";
+
+export type FlightExpense = {
+  id: number;
+  organization_id: string;
+  expense_date: string;
+  category: FlightExpenseCategory;
+  amount: number;
+  note: string | null;
+  created_at: string;
+};
+
 export type FlightAuditEntry = {
   id: number;
   organization_id: string;

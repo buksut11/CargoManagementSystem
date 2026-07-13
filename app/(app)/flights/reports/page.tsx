@@ -21,18 +21,26 @@ export default function FlightReportsPage() {
   const [bookings, setBookings] = useState<FlightBooking[]>([]);
   const [paid, setPaid] = useState<Record<number, number>>({});
   const [refunded, setRefunded] = useState<Record<number, number>>({});
+  const [expensesTotal, setExpensesTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [b, p, rf] = await Promise.all([
+      const [b, p, rf, ex] = await Promise.all([
         supabase
           .from("flight_bookings")
           .select("*, flight_customers(id, name)")
           .not("status", "in", REVERSED_IN_LIST),
         supabase.from("booking_payments").select("booking_id, amount"),
         supabase.from("booking_refunds").select("booking_id, customer_refund"),
+        supabase.from("flight_expenses").select("amount"),
       ]);
+      setExpensesTotal(
+        ((ex.data as { amount: number }[]) ?? []).reduce(
+          (sum, r) => sum + Number(r.amount),
+          0,
+        ),
+      );
       const paidMap: Record<number, number> = {};
       for (const r of (p.data as { booking_id: number; amount: number }[]) ?? []) {
         paidMap[r.booking_id] = (paidMap[r.booking_id] ?? 0) + Number(r.amount);
@@ -90,7 +98,8 @@ export default function FlightReportsPage() {
   }, [bookings, paid, refunded]);
 
   const totalSales = bookings.reduce((s, b) => s + Number(b.sale_total), 0);
-  const totalProfit = bookings.reduce((s, b) => s + Number(b.profit), 0);
+  const grossProfit = bookings.reduce((s, b) => s + Number(b.profit), 0);
+  const netProfit = grossProfit - expensesTotal;
 
   return (
     <div>
@@ -112,16 +121,21 @@ export default function FlightReportsPage() {
         }
       />
 
-      <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         <Stat label="Bookings" value={loading ? "…" : String(bookings.length)} />
         <Stat label="Sales" value={loading ? "…" : fmtMoney(totalSales)} />
-        <Stat label="Net profit" value={loading ? "…" : fmtMoney(totalProfit)} />
+        <Stat label="Gross profit" value={loading ? "…" : fmtMoney(grossProfit)} />
         <Stat
-          label="Margin"
+          label="Op. expenses"
+          value={loading ? "…" : `−${fmtMoney(expensesTotal)}`}
+        />
+        <Stat label="Net profit" value={loading ? "…" : fmtMoney(netProfit)} />
+        <Stat
+          label="Net margin"
           value={
             loading || totalSales === 0
               ? "—"
-              : `${((totalProfit / totalSales) * 100).toFixed(1)}%`
+              : `${((netProfit / totalSales) * 100).toFixed(1)}%`
           }
         />
       </div>
