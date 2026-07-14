@@ -23,8 +23,8 @@ export const HomeIcon = () => (
   </Base>
 );
 
-export const BoxIcon = () => (
-  <Base>
+export const BoxIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
     <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z" />
     <path d="M3 8l9 5 9-5" />
     <path d="M12 13v8" />

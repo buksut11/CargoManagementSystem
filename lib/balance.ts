@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { REVERSED_IN_LIST, bookingRef } from "./format";
+import { REVERSED_IN_LIST, bookingRef, invoiceRef } from "./format";
 
 // A customer's outstanding balance is the same figure the statement calls
 // "Balance due": the sum of every recognised (non-reversed) booking's
@@ -204,6 +204,91 @@ export async function fetchCargoCustomerBalances(): Promise<
     if (cid != null) balances[cid] = (balances[cid] ?? 0) - Number(pay.amount);
   }
   return balances;
+}
+
+// One invoice's contribution to a cargo customer's balance, kept per-invoice so
+// the customers list can drill into *where* the "balance due" comes from: which
+// invoices are still unpaid and by how much. `remaining = charged − paid`, the
+// same arithmetic fetchCargoCustomerBalances sums per customer, just not
+// collapsed. Cargo has no refunds. A positive `remaining` is money still owed.
+export type CargoCustomerBreakdownLine = {
+  invoiceId: number;
+  ref: string;
+  date: string;
+  label: string; // destinations flown to, e.g. "Mogadishu, Baidoa", or ""
+  charged: number;
+  paid: number;
+  remaining: number;
+};
+
+// Per-invoice breakdown for a single cargo customer, oldest first. Mirrors the
+// cargo statement's shaping (invoice total = sum of its shipments, minus its
+// payments) in three id-scoped queries. Lazy-loaded when a "due" badge opens.
+export async function fetchCargoCustomerBreakdown(
+  customerId: number,
+): Promise<CargoCustomerBreakdownLine[]> {
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("id, issued_date")
+    .eq("customer_id", customerId)
+    .order("issued_date");
+
+  const invoices = (inv as { id: number; issued_date: string }[]) ?? [];
+  const ids = invoices.map((iv) => iv.id);
+  if (ids.length === 0) return [];
+
+  const [s, p] = await Promise.all([
+    supabase
+      .from("shipments")
+      .select("invoice_id, total, destinations(name)")
+      .in("invoice_id", ids),
+    supabase.from("payments").select("invoice_id, amount").in("invoice_id", ids),
+  ]);
+
+  type ShipRow = {
+    invoice_id: number | null;
+    total: number | string;
+    destinations?: { name: string | null } | { name: string | null }[] | null;
+  };
+  const destName = (sh: ShipRow): string => {
+    const rel = sh.destinations;
+    const d = Array.isArray(rel) ? rel[0] : rel;
+    return d?.name?.trim() ?? "";
+  };
+
+  const chargedBy = new Map<number, number>();
+  const destsBy = new Map<number, Set<string>>();
+  for (const sh of (s.data as ShipRow[]) ?? []) {
+    if (sh.invoice_id == null) continue;
+    chargedBy.set(
+      sh.invoice_id,
+      (chargedBy.get(sh.invoice_id) ?? 0) + Number(sh.total),
+    );
+    const name = destName(sh);
+    if (name) {
+      const set = destsBy.get(sh.invoice_id) ?? new Set<string>();
+      set.add(name);
+      destsBy.set(sh.invoice_id, set);
+    }
+  }
+  const paidBy = new Map<number, number>();
+  for (const pay of (p.data as { invoice_id: number; amount: number }[]) ?? []) {
+    paidBy.set(pay.invoice_id, (paidBy.get(pay.invoice_id) ?? 0) + Number(pay.amount));
+  }
+
+  return invoices.map((iv) => {
+    const charged = chargedBy.get(iv.id) ?? 0;
+    const paid = paidBy.get(iv.id) ?? 0;
+    return {
+      invoiceId: iv.id,
+      ref: invoiceRef(iv.id),
+      date: iv.issued_date,
+      label: Array.from(destsBy.get(iv.id) ?? []).join(", "),
+      charged,
+      paid,
+      remaining: charged - paid,
+    };
+  });
 }
 
 // Outstanding balance for a single customer. `excludeBookingId` leaves one
