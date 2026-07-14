@@ -99,7 +99,7 @@ export default function PrintInvoicePage() {
             <img
               src={org.logo_url}
               alt={`${org.name} logo`}
-              className="h-16 w-16 shrink-0 object-contain"
+              className="mb-1 h-24 w-auto max-w-[320px] shrink-0 object-contain"
             />
           )}
           <div className="mt-2 text-2xl font-bold leading-tight">
