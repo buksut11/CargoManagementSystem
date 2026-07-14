@@ -301,11 +301,28 @@ input:-webkit-autofill:focus {
   background-color: rgba(148, 163, 184, 0.5);
 }
 
+/* Printed documents (invoices, shipment labels, statements) target A4 with a
+   comfortable, consistent margin so the sheet fills the page the same way in
+   every browser, rather than each browser applying its own default margin. */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
 @media print {
   .no-print {
     display: none !important;
   }
   body {
     background: white;
+  }
+  /* The document sheet fills the printable width of the page. On screen it sits
+     in a narrow reading column (max-w-2xl/3xl); in print the @page margin above
+     provides the whitespace, so the sheet itself spans the full content width
+     and no longer floats in a narrow band with a large empty right margin. */
+  .print-sheet {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
   }
 }
