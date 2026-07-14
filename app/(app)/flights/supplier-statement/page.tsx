@@ -412,13 +412,13 @@ export default function FlightSupplierStatementPage() {
         <div className="mx-auto max-w-3xl bg-white p-6 text-slate-900 shadow-sm print:max-w-none print:p-0 print:shadow-none sm:p-8">
           <div className="border border-slate-300 p-6 sm:p-10">
             {/* Letterhead */}
-            <div className="flex flex-col items-center text-center">
+            <div className="flex flex-col items-center gap-1 text-center">
               {orgHeader?.logo_url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={orgHeader.logo_url}
                   alt={`${orgHeader.name} logo`}
-                  className="mb-1 h-24 w-auto max-w-[320px] shrink-0 object-contain"
+                  className="h-24 w-auto max-w-[320px] shrink-0 object-contain"
                 />
               )}
               {/* The name is only shown as text when there's no logo — a logo
@@ -429,12 +429,12 @@ export default function FlightSupplierStatementPage() {
                 </div>
               )}
               {orgHeader?.address && (
-                <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
+                <div className="whitespace-pre-line text-xs text-slate-600">
                   {orgHeader.address}
                 </div>
               )}
               {(orgHeader?.phone || orgHeader?.email) && (
-                <div className="mt-0.5 text-xs text-slate-600">
+                <div className="text-xs text-slate-600">
                   {[orgHeader.phone, orgHeader.email].filter(Boolean).join(" · ")}
                 </div>
               )}

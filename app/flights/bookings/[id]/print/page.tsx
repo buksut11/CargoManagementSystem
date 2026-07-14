@@ -104,13 +104,13 @@ export default function PrintBookingPage() {
       </div>
 
       <div className="border border-slate-300 p-10">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center gap-1 text-center">
           {org?.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={org.logo_url}
               alt={`${org.name} logo`}
-              className="mb-1 h-24 w-auto max-w-[320px] shrink-0 object-contain"
+              className="h-24 w-auto max-w-[320px] shrink-0 object-contain"
             />
           )}
           {/* The name is only shown as text when there's no logo — a logo
@@ -121,12 +121,12 @@ export default function PrintBookingPage() {
             </div>
           )}
           {org?.address && (
-            <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
+            <div className="whitespace-pre-line text-xs text-slate-600">
               {org.address}
             </div>
           )}
           {(org?.phone || org?.email) && (
-            <div className="mt-0.5 text-xs text-slate-600">
+            <div className="text-xs text-slate-600">
               {[org.phone, org.email].filter(Boolean).join(" · ")}
             </div>
           )}
