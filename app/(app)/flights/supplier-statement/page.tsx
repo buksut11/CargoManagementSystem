@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useOrg } from "@/components/org-context";
 import type {
-  BookingRefund,
   FlightBooking,
   FlightSupplier,
   Organization,
@@ -18,9 +17,8 @@ import { DatePicker } from "@/components/date-picker";
 import { BuildingIcon, PhoneIcon, StatementIcon } from "@/components/icons";
 
 // One movement on the airline's account, from the agency's payables viewpoint:
-// a charge is what we owe the airline (ticket cost, penalty, ADM); a credit is
-// what reduces it (a payment we made, or a refund/credit note recovered from
-// the airline). `sort` disambiguates entries sharing a date so the running
+// a charge is a ticket cost we owe the airline; a credit is a payment we made
+// against it. `sort` disambiguates entries sharing a date so the running
 // balance is deterministic (charges before the credits that settle them).
 type Line = {
   date: string;
@@ -178,22 +176,15 @@ export default function FlightSupplierStatementPage() {
         .eq("supplier_id", sid);
       const payments = (payData as SupplierPayment[]) ?? [];
 
-      // Refunds / voids / reissues attach to bookings, not to the supplier, so
-      // fetch them by this airline's booking ids. supplier_refund is a credit
-      // note we recover; penalty and ADM are extra costs we owe the airline.
-      let refunds: BookingRefund[] = [];
+      // The itinerary segments for these bookings, used to draw each route.
       let segments: SegmentRow[] = [];
       if (ids.length) {
-        const [r, seg] = await Promise.all([
-          supabase.from("booking_refunds").select("*").in("booking_id", ids),
-          supabase
-            .from("flight_segments")
-            .select("booking_id, segment_no, origin, destination")
-            .in("booking_id", ids)
-            .order("segment_no"),
-        ]);
-        refunds = (r.data as BookingRefund[]) ?? [];
-        segments = (seg.data as SegmentRow[]) ?? [];
+        const { data: seg } = await supabase
+          .from("flight_segments")
+          .select("booking_id, segment_no, origin, destination")
+          .in("booking_id", ids)
+          .order("segment_no");
+        segments = (seg as SegmentRow[]) ?? [];
       }
 
       // The route flown, chained across the booking's segments (already sorted
@@ -251,47 +242,6 @@ export default function FlightSupplierStatementPage() {
           credit: Number(p.amount),
           sort: 1,
         });
-      }
-
-      for (const r of refunds) {
-        const ref = bookingRef(r.booking_id);
-        // Money recovered from the airline reduces what we owe them.
-        if (Number(r.supplier_refund) > 0) {
-          rows.push({
-            date: r.refund_date,
-            ref,
-            description:
-              r.refund_type === "void"
-                ? "Void credit from airline"
-                : r.refund_type === "reissue"
-                  ? "Reissue credit from airline"
-                  : "Refund credit from airline",
-            debit: 0,
-            credit: Number(r.supplier_refund),
-            sort: 1,
-          });
-        }
-        // Airline penalty and Agency Debit Memo are extra amounts we owe.
-        if (Number(r.penalty) > 0) {
-          rows.push({
-            date: r.refund_date,
-            ref,
-            description: "Airline penalty",
-            debit: Number(r.penalty),
-            credit: 0,
-            sort: 0,
-          });
-        }
-        if (Number(r.adm_amount) > 0) {
-          rows.push({
-            date: r.refund_date,
-            ref,
-            description: "Agency Debit Memo (ADM)",
-            debit: Number(r.adm_amount),
-            credit: 0,
-            sort: 0,
-          });
-        }
       }
 
       rows.sort((a, c) => a.date.localeCompare(c.date) || a.sort - c.sort);
@@ -533,7 +483,7 @@ export default function FlightSupplierStatementPage() {
             {view && (
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <SummaryBox label="Opening balance" value={fmtMoney(view.opening)} />
-                <SummaryBox label="Ticket costs & charges" value={fmtMoney(view.charges)} />
+                <SummaryBox label="Ticket costs" value={fmtMoney(view.charges)} />
                 <SummaryBox
                   label="Payments & credits"
                   value={fmtMoney(view.credits)}
