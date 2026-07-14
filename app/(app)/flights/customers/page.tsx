@@ -290,7 +290,7 @@ export default function FlightCustomersPage() {
                         where they sit on their own line with room to spare). */}
                     <div className="flex shrink-0 flex-wrap items-center gap-1.5 pl-[3.875rem] sm:pl-0">
                       <Link
-                        href={`/flights/customers/${c.id}/statement`}
+                        href={`/flights/statement?customer=${c.id}`}
                         title="View statement"
                         aria-label={`View ${c.name}'s statement`}
                         className={`${custActionClass} bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:hover:bg-blue-400/20`}

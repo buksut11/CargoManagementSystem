@@ -1,0 +1,549 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { useOrg } from "@/components/org-context";
+import type {
+  BookingPayment,
+  BookingRefund,
+  FlightBooking,
+  FlightCustomer,
+  Organization,
+} from "@/lib/types";
+import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
+import {
+  Card,
+  Field,
+  Input,
+  PageHeader,
+  Section,
+  Select,
+} from "@/components/ui";
+import { StatementIcon, UsersIcon } from "@/components/icons";
+
+// One movement on the account: a charge (booking) or a credit (payment/refund).
+// `sort` disambiguates several entries that share a date so the running balance
+// is deterministic (charges before the credits that settle them).
+type Line = {
+  date: string;
+  ref: string;
+  description: string;
+  debit: number;
+  credit: number;
+  sort: number;
+};
+
+// Local YYYY-MM-DD (never toISOString, which shifts by timezone and can land a
+// date on the wrong day). Matches how booking/paid/refund dates are stored.
+function isoDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+const TODAY = isoDate(new Date());
+
+// Quick date presets. Each returns [from, to]; "All time" leaves `from` empty so
+// the statement opens with no carried-forward balance and lists everything.
+function presetRange(key: string): [string, string] {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  switch (key) {
+    case "month":
+      return [isoDate(new Date(y, m, 1)), TODAY];
+    case "lastMonth":
+      return [isoDate(new Date(y, m - 1, 1)), isoDate(new Date(y, m, 0))];
+    case "quarter":
+      return [isoDate(new Date(y, Math.floor(m / 3) * 3, 1)), TODAY];
+    case "year":
+      return [isoDate(new Date(y, 0, 1)), TODAY];
+    default:
+      return ["", TODAY];
+  }
+}
+
+const PRESETS: { key: string; label: string }[] = [
+  { key: "month", label: "This month" },
+  { key: "lastMonth", label: "Last month" },
+  { key: "quarter", label: "This quarter" },
+  { key: "year", label: "This year" },
+  { key: "all", label: "All time" },
+];
+
+type OrgHeader = Pick<
+  Organization,
+  "name" | "logo_url" | "address" | "phone" | "email"
+>;
+
+export default function FlightStatementPage() {
+  const router = useRouter();
+  const org = useOrg();
+
+  const [customers, setCustomers] = useState<FlightCustomer[]>([]);
+  const [customerId, setCustomerId] = useState<string>("");
+  const [from, setFrom] = useState<string>("");
+  const [to, setTo] = useState<string>(TODAY);
+
+  const [orgHeader, setOrgHeader] = useState<OrgHeader | null>(null);
+  const [allLines, setAllLines] = useState<Line[] | null>(null);
+  const [loadingLines, setLoadingLines] = useState(false);
+
+  const customer = useMemo(
+    () => customers.find((c) => String(c.id) === customerId) ?? null,
+    [customers, customerId],
+  );
+
+  // Customers (for the picker) and the org letterhead — loaded once. Also
+  // preselects the customer when arriving from a deep link
+  // (/flights/statement?customer=123), e.g. the Customers list.
+  useEffect(() => {
+    async function load() {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        router.replace("/login");
+        return;
+      }
+      const cid = new URLSearchParams(window.location.search).get("customer");
+      if (cid) setCustomerId(cid);
+
+      const { data } = await supabase
+        .from("flight_customers")
+        .select("*")
+        .order("name");
+      setCustomers((data as FlightCustomer[]) ?? []);
+
+      if (org?.orgId) {
+        const { data: o } = await supabase
+          .from("organizations")
+          .select("name, logo_url, address, phone, email")
+          .eq("id", org.orgId)
+          .single();
+        setOrgHeader((o as OrgHeader) ?? null);
+      }
+    }
+    load();
+  }, [router, org?.orgId]);
+
+  // Every recognised movement on the selected customer's account — reloaded
+  // whenever the customer changes. The date range is applied in memory (below)
+  // so switching dates never re-hits the network.
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      if (!customerId) {
+        setAllLines(null);
+        return;
+      }
+      setLoadingLines(true);
+      const { data: b } = await supabase
+        .from("flight_bookings")
+        .select("*")
+        .eq("customer_id", Number(customerId))
+        .not("status", "in", REVERSED_IN_LIST)
+        .order("booking_date");
+      const bookings = (b as FlightBooking[]) ?? [];
+      const ids = bookings.map((r) => r.id);
+
+      let payments: BookingPayment[] = [];
+      let refunds: BookingRefund[] = [];
+      if (ids.length) {
+        const [p, r] = await Promise.all([
+          supabase.from("booking_payments").select("*").in("booking_id", ids),
+          supabase.from("booking_refunds").select("*").in("booking_id", ids),
+        ]);
+        payments = (p.data as BookingPayment[]) ?? [];
+        refunds = (r.data as BookingRefund[]) ?? [];
+      }
+
+      const rows: Line[] = [
+        ...bookings.map((bk) => ({
+          date: bk.booking_date,
+          ref: bookingRef(bk.id),
+          description: `Air ticket${bk.pnr ? ` · PNR ${bk.pnr}` : ""}${
+            bk.airline ? ` · ${bk.airline}` : ""
+          }`,
+          debit: Number(bk.sale_total),
+          credit: 0,
+          sort: 0,
+        })),
+        ...payments.map((p) => ({
+          date: p.paid_date,
+          ref: bookingRef(p.booking_id),
+          description: `Payment received${p.method ? ` (${p.method})` : ""}`,
+          debit: 0,
+          credit: Number(p.amount),
+          sort: 1,
+        })),
+        ...refunds.map((r) => ({
+          date: r.refund_date,
+          ref: bookingRef(r.booking_id),
+          description:
+            r.refund_type === "void"
+              ? "Void credit"
+              : r.refund_type === "reissue"
+                ? "Reissue credit"
+                : "Refund credit",
+          debit: 0,
+          credit: Number(r.customer_refund),
+          sort: 1,
+        })),
+      ].sort((a, c) => a.date.localeCompare(c.date) || a.sort - c.sort);
+
+      if (active) {
+        setAllLines(rows);
+        setLoadingLines(false);
+      }
+    }
+    load();
+    return () => {
+      active = false;
+    };
+  }, [customerId]);
+
+  // Split the full history around the chosen window. Everything before `from`
+  // collapses into a single opening balance so the running balance a customer
+  // sees is correct — not a period total that ignores what they already owed.
+  const view = useMemo(() => {
+    if (!allLines) return null;
+    let opening = 0;
+    const period: Line[] = [];
+    for (const l of allLines) {
+      if (to && l.date > to) continue; // ignore anything after the window
+      if (from && l.date < from) {
+        opening += l.debit - l.credit;
+      } else {
+        period.push(l);
+      }
+    }
+    const charges = period.reduce((s, l) => s + l.debit, 0);
+    const credits = period.reduce((s, l) => s + l.credit, 0);
+    const closing = opening + charges - credits;
+    // Running balance per period line, precomputed so render stays pure.
+    let run = opening;
+    const running = period.map((l) => (run += l.debit - l.credit));
+    return { opening, period, charges, credits, closing, running };
+  }, [allLines, from, to]);
+
+  function applyPreset(key: string) {
+    const [f, t] = presetRange(key);
+    setFrom(f);
+    setTo(t);
+  }
+
+  const periodLabel = from
+    ? `${fmtDate(from)} — ${fmtDate(to || TODAY)}`
+    : `All activity through ${fmtDate(to || TODAY)}`;
+
+  return (
+    <div>
+      {/* Controls — never printed; the sheet below is the document. */}
+      <div className="no-print">
+        <PageHeader title="Customer statement" />
+        <Section
+          icon={<StatementIcon className="h-5 w-5" />}
+          title="Build a statement"
+          subtitle="Pick a customer and a date range, then print or save as PDF."
+          className="mb-6"
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="sm:col-span-2 lg:col-span-2">
+              <Field label="Customer">
+                <Select
+                  value={customerId}
+                  onChange={(e) => setCustomerId(e.target.value)}
+                >
+                  <option value="">Select a customer…</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.name}
+                      {c.phone ? ` · ${c.phone}` : ""}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+            <Field label="From">
+              <Input
+                type="date"
+                value={from}
+                max={to || undefined}
+                onChange={(e) => setFrom(e.target.value)}
+              />
+            </Field>
+            <Field label="To">
+              <Input
+                type="date"
+                value={to}
+                min={from || undefined}
+                onChange={(e) => setTo(e.target.value)}
+              />
+            </Field>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Quick range:
+            </span>
+            {PRESETS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => applyPreset(p.key)}
+                className="rounded-full border border-white/60 bg-white/40 px-3 py-1 text-xs font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/70 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/[0.12]"
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {customerId && (
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                onClick={() => window.print()}
+                className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-700"
+              >
+                🖨 Print / Save as PDF
+              </button>
+              <Link
+                href="/flights/customers"
+                className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.1]"
+              >
+                ← Back to customers
+              </Link>
+            </div>
+          )}
+        </Section>
+      </div>
+
+      {/* Nothing selected yet — a friendly prompt (screen only). */}
+      {!customerId && (
+        <Card className="no-print p-12 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-600 dark:bg-blue-400/15 dark:text-blue-300">
+            <UsersIcon />
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Choose a customer above to build their statement of account.
+          </p>
+        </Card>
+      )}
+
+      {/* The printable document. */}
+      {customerId && customer && (
+        <div className="mx-auto max-w-3xl bg-white p-6 text-slate-900 shadow-sm print:max-w-none print:p-0 print:shadow-none sm:p-8">
+          <div className="border border-slate-300 p-6 sm:p-10">
+            {/* Letterhead */}
+            <div className="flex flex-col items-center text-center">
+              {orgHeader?.logo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={orgHeader.logo_url}
+                  alt={`${orgHeader.name} logo`}
+                  className="h-16 w-16 shrink-0 object-contain"
+                />
+              )}
+              <div className="mt-2 text-2xl font-bold leading-tight">
+                {orgHeader?.name ?? org?.orgName ?? "✈️ CargoBook"}
+              </div>
+              {orgHeader?.address && (
+                <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
+                  {orgHeader.address}
+                </div>
+              )}
+              {(orgHeader?.phone || orgHeader?.email) && (
+                <div className="mt-0.5 text-xs text-slate-600">
+                  {[orgHeader.phone, orgHeader.email].filter(Boolean).join(" · ")}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 text-center text-lg font-bold uppercase tracking-wide text-slate-800">
+              Statement of account
+            </div>
+
+            {/* Bill-to + meta */}
+            <div className="mt-6 flex flex-wrap justify-between gap-4 text-sm">
+              <div className="text-slate-600">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Statement for
+                </div>
+                <div className="mt-1 text-base font-semibold text-slate-900">
+                  {customer.name}
+                </div>
+                {customer.phone && <div>{customer.phone}</div>}
+                {customer.email && <div>{customer.email}</div>}
+                {customer.address && <div>{customer.address}</div>}
+              </div>
+              <div className="text-right text-slate-600">
+                <div>
+                  <span className="text-slate-400">Period: </span>
+                  {periodLabel}
+                </div>
+                <div>
+                  <span className="text-slate-400">Issued: </span>
+                  {fmtDate(TODAY)}
+                </div>
+                {view && (
+                  <div>
+                    <span className="text-slate-400">Entries: </span>
+                    {view.period.length}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Summary strip */}
+            {view && (
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <SummaryBox label="Opening balance" value={fmtMoney(view.opening)} />
+                <SummaryBox label="Charges" value={fmtMoney(view.charges)} />
+                <SummaryBox
+                  label="Payments & credits"
+                  value={fmtMoney(view.credits)}
+                />
+                <SummaryBox
+                  label="Balance due"
+                  value={fmtMoney(Math.max(view.closing, 0))}
+                  strong
+                />
+              </div>
+            )}
+
+            {/* Ledger */}
+            <table className="mt-8 w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-300 text-left text-xs uppercase text-slate-500">
+                  <th className="py-2 pr-2">Date</th>
+                  <th className="py-2 pr-2">Ref</th>
+                  <th className="py-2 pr-2">Description</th>
+                  <th className="py-2 pr-2 text-right">Charge</th>
+                  <th className="py-2 pr-2 text-right">Payment</th>
+                  <th className="py-2 text-right">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Opening balance carried forward (only when a start date trims
+                    off earlier history). */}
+                {view && from && (
+                  <tr className="border-b border-slate-200 text-slate-500">
+                    <td className="py-2 pr-2 whitespace-nowrap">{fmtDate(from)}</td>
+                    <td className="py-2 pr-2">—</td>
+                    <td className="py-2 pr-2 italic">Balance brought forward</td>
+                    <td className="py-2 pr-2 text-right">—</td>
+                    <td className="py-2 pr-2 text-right">—</td>
+                    <td className="py-2 text-right font-medium">
+                      {fmtMoney(view.opening)}
+                    </td>
+                  </tr>
+                )}
+                {view?.period.map((l, i) => (
+                  <tr key={i} className="border-b border-slate-200">
+                    <td className="py-2 pr-2 whitespace-nowrap">
+                      {fmtDate(l.date)}
+                    </td>
+                    <td className="py-2 pr-2 whitespace-nowrap text-slate-500">
+                      {l.ref}
+                    </td>
+                    <td className="py-2 pr-2">{l.description}</td>
+                    <td className="py-2 pr-2 text-right">
+                      {l.debit ? fmtMoney(l.debit) : "—"}
+                    </td>
+                    <td className="py-2 pr-2 text-right">
+                      {l.credit ? fmtMoney(l.credit) : "—"}
+                    </td>
+                    <td className="py-2 text-right font-medium">
+                      {fmtMoney(view.running[i])}
+                    </td>
+                  </tr>
+                ))}
+                {view && view.period.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-slate-400">
+                      {loadingLines
+                        ? "Loading…"
+                        : "No transactions in this date range."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            {/* Totals */}
+            {view && (
+              <div className="mt-6 space-y-1 text-right text-sm">
+                {from && (
+                  <div className="text-slate-600">
+                    Opening balance: {fmtMoney(view.opening)}
+                  </div>
+                )}
+                <div className="text-slate-600">
+                  Total charged: {fmtMoney(view.charges)}
+                </div>
+                <div className="text-slate-600">
+                  Total payments &amp; credits: {fmtMoney(view.credits)}
+                </div>
+                <div className="flex items-baseline justify-end gap-4 pt-1">
+                  <span className="text-sm text-slate-500">Balance due</span>
+                  <span
+                    className={`text-2xl font-bold ${
+                      view.closing > 0 ? "text-slate-900" : "text-emerald-700"
+                    }`}
+                  >
+                    {fmtMoney(Math.max(view.closing, 0))}
+                  </span>
+                </div>
+                {view.closing <= 0 && (
+                  <div className="text-xs text-emerald-700">
+                    Account fully settled
+                    {view.closing < 0
+                      ? ` (credit ${fmtMoney(-view.closing)})`
+                      : ""}
+                    .
+                  </div>
+                )}
+              </div>
+            )}
+
+            <p className="mt-10 text-center text-xs text-slate-400">
+              Generated by {orgHeader?.name ?? org?.orgName ?? "CargoBook"} ·{" "}
+              {fmtDate(TODAY)}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SummaryBox({
+  label,
+  value,
+  strong = false,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-lg border p-3 ${
+        strong
+          ? "border-slate-300 bg-slate-50"
+          : "border-slate-200 bg-white"
+      }`}
+    >
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </div>
+      <div
+        className={`mt-1 ${
+          strong ? "text-lg font-bold text-slate-900" : "text-sm font-semibold text-slate-700"
+        }`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}

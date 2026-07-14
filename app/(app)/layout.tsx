@@ -27,6 +27,7 @@ import {
   PlaneIcon,
   ReceiptIcon,
   SettingsIcon,
+  StatementIcon,
   TicketIcon,
   UsersIcon,
   WalletIcon,
@@ -35,7 +36,7 @@ import {
 type NavItem = {
   href: string;
   label: string;
-  icon: () => React.ReactElement;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   roles: OrgRole[];
 };
 
@@ -61,6 +62,7 @@ const FLIGHT_NAV: NavItem[] = [
   { href: "/flights/bookings", label: "Bookings", icon: TicketIcon, roles: ALL },
   { href: "/flights/booking-seats", label: "Booking Seats", icon: PlaneIcon, roles: EDITORS },
   { href: "/flights/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
+  { href: "/flights/statement", label: "Statement", icon: StatementIcon, roles: EDITORS },
   { href: "/flights/suppliers", label: "Airlines", icon: BuildingIcon, roles: EDITORS },
   { href: "/flights/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },
   { href: "/flights/payments", label: "Receipts", icon: CoinsIcon, roles: EDITORS },
