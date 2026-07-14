@@ -301,11 +301,12 @@ input:-webkit-autofill:focus {
   background-color: rgba(148, 163, 184, 0.5);
 }
 
-/* Printed documents (invoices, shipment labels, statements) target A4 with a
-   comfortable, consistent margin so the sheet fills the page the same way in
-   every browser, rather than each browser applying its own default margin. */
+/* Printed documents (invoices, shipment labels, statements) use a comfortable,
+   consistent page margin. The physical paper size is intentionally NOT fixed
+   here: the sheet fills the printable width of whatever paper the user selects
+   (A4, A5, Letter, Legal…), so the document adapts to the chosen size instead
+   of being laid out for one size and scaled or clipped on the others. */
 @page {
-  size: A4;
   margin: 14mm;
 }
 
