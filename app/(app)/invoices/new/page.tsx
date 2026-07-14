@@ -61,10 +61,39 @@ export default function NewInvoicePage() {
     }
     setBusy(true);
     setError(null);
+
+    // Resolve the free-text bill-to into a durable customer record so the
+    // statement of account can group every invoice for the same customer.
+    // Find-or-create by (org, name): upsert returns the existing row on a name
+    // clash. bill_to stays on the invoice as a point-in-time snapshot.
+    let customerId: number | null = null;
+    const customerName = billTo.trim();
+    if (customerName) {
+      const { data: cust, error: custError } = await supabase
+        .from("cargo_customers")
+        .upsert(
+          {
+            name: customerName,
+            phone: phone.trim() || null,
+            address: address.trim() || null,
+          },
+          { onConflict: "organization_id,name" },
+        )
+        .select("id")
+        .single();
+      if (custError) {
+        setBusy(false);
+        setError(custError.message);
+        return;
+      }
+      customerId = cust?.id ?? null;
+    }
+
     const { data: inv, error: invError } = await supabase
       .from("invoices")
       .insert({
-        bill_to: billTo.trim(),
+        customer_id: customerId,
+        bill_to: customerName,
         phone: phone.trim() || null,
         address: address.trim() || null,
         issued_date: issuedDate,
