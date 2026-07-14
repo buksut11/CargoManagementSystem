@@ -19,6 +19,7 @@ import {
   FLIGHT_STATUS_LABEL,
   TRIP_TYPE_LABEL,
 } from "@/lib/format";
+import { MailIcon, PhoneIcon, UserIcon } from "@/components/icons";
 
 export default function PrintBookingPage() {
   const { id } = useParams<{ id: string }>();
@@ -136,12 +137,21 @@ export default function PrintBookingPage() {
             {booking.flight_customers?.name && (
               <>
                 <div className="font-semibold text-slate-800">Bill to</div>
-                <div>{booking.flight_customers.name}</div>
+                <div className="flex items-center gap-1.5">
+                  <UserIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  {booking.flight_customers.name}
+                </div>
                 {booking.flight_customers.phone && (
-                  <div>{booking.flight_customers.phone}</div>
+                  <div className="flex items-center gap-1.5">
+                    <PhoneIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    {booking.flight_customers.phone}
+                  </div>
                 )}
                 {booking.flight_customers.email && (
-                  <div>{booking.flight_customers.email}</div>
+                  <div className="flex items-center gap-1.5">
+                    <MailIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    {booking.flight_customers.email}
+                  </div>
                 )}
               </>
             )}

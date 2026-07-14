@@ -19,6 +19,7 @@ import {
 } from "@/components/ui";
 import {
   EditIcon,
+  MailIcon,
   PhoneIcon,
   SearchIcon,
   StatementIcon,
@@ -259,8 +260,9 @@ export default function FlightCustomersPage() {
                           {c.name}
                         </div>
                         {c.email && (
-                          <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                            {c.email}
+                          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                            <MailIcon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                            <span className="truncate">{c.email}</span>
                           </div>
                         )}
                       </div>

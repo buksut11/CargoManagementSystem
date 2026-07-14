@@ -46,8 +46,8 @@ export const CoinsIcon = () => (
   </Base>
 );
 
-export const PinIcon = () => (
-  <Base>
+export const PinIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
     <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z" />
     <circle cx={12} cy={10} r={3} />
   </Base>
@@ -74,8 +74,8 @@ export const MoonIcon = () => (
   </Base>
 );
 
-export const MailIcon = () => (
-  <Base>
+export const MailIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
     <rect x={3} y={5} width={18} height={14} rx={2} />
     <path d="M3 7l9 6 9-6" />
   </Base>
@@ -168,8 +168,8 @@ export const CloseIcon = () => (
   </Base>
 );
 
-export const UserIcon = () => (
-  <Base>
+export const UserIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
     <circle cx={12} cy={8} r={4} />
     <path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5" />
   </Base>

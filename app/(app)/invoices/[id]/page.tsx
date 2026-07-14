@@ -28,7 +28,7 @@ import {
   Th,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
-import { CoinsIcon } from "@/components/icons";
+import { CoinsIcon, PhoneIcon, PinIcon } from "@/components/icons";
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -165,13 +165,15 @@ export default function InvoiceDetailPage() {
                   {invoice.bill_to || "—"}
                 </div>
                 {invoice.phone && (
-                  <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    📞 {invoice.phone}
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    <PhoneIcon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                    {invoice.phone}
                   </div>
                 )}
                 {invoice.address && (
-                  <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    📍 {invoice.address}
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    <PinIcon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                    {invoice.address}
                   </div>
                 )}
               </div>

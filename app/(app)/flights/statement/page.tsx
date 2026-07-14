@@ -28,7 +28,14 @@ import {
   Select,
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
-import { StatementIcon, UsersIcon } from "@/components/icons";
+import {
+  MailIcon,
+  PhoneIcon,
+  PinIcon,
+  StatementIcon,
+  UserIcon,
+  UsersIcon,
+} from "@/components/icons";
 
 // One movement on the account: a charge (booking) or a credit (payment/refund).
 // `sort` disambiguates several entries that share a date so the running balance
@@ -476,12 +483,28 @@ export default function FlightStatementPage() {
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Statement for
                 </div>
-                <div className="mt-1 text-base font-semibold text-slate-900">
+                <div className="mt-1 flex items-center gap-1.5 text-base font-semibold text-slate-900">
+                  <UserIcon className="h-4 w-4 shrink-0 text-slate-400" />
                   {customer.name}
                 </div>
-                {customer.phone && <div>{customer.phone}</div>}
-                {customer.email && <div>{customer.email}</div>}
-                {customer.address && <div>{customer.address}</div>}
+                {customer.phone && (
+                  <div className="flex items-center gap-1.5">
+                    <PhoneIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    {customer.phone}
+                  </div>
+                )}
+                {customer.email && (
+                  <div className="flex items-center gap-1.5">
+                    <MailIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    {customer.email}
+                  </div>
+                )}
+                {customer.address && (
+                  <div className="flex items-center gap-1.5">
+                    <PinIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    {customer.address}
+                  </div>
+                )}
               </div>
               <div className="text-right text-slate-600">
                 <div>
