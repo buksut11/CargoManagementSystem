@@ -13,7 +13,13 @@ import type {
   FlightPassenger,
   Organization,
 } from "@/lib/types";
-import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
+import {
+  bookingRef,
+  fmtDate,
+  fmtMoney,
+  passengerTypeLabel,
+  REVERSED_IN_LIST,
+} from "@/lib/format";
 import {
   Card,
   Field,
@@ -167,7 +173,7 @@ export default function FlightStatementPage() {
           supabase.from("booking_refunds").select("*").in("booking_id", ids),
           supabase
             .from("flight_passengers")
-            .select("booking_id, full_name")
+            .select("booking_id, full_name, type")
             .in("booking_id", ids),
         ]);
         payments = (p.data as BookingPayment[]) ?? [];
@@ -175,18 +181,16 @@ export default function FlightStatementPage() {
         passengers = (pax.data as FlightPassenger[]) ?? [];
       }
 
-      // Lead passenger (+N others) per booking, for the ticket detail line.
+      // Every passenger on a booking, each tagged with their type, e.g.
+      // "Amina Yusuf (Adult), Omar Ali (Child)" — the full manifest, not a count.
       const paxByBooking = new Map<number, string[]>();
       for (const px of passengers) {
         const list = paxByBooking.get(px.booking_id) ?? [];
-        list.push(px.full_name);
+        list.push(`${px.full_name} (${passengerTypeLabel(px.type)})`);
         paxByBooking.set(px.booking_id, list);
       }
-      const paxLabel = (bookingId: number): string => {
-        const list = paxByBooking.get(bookingId);
-        if (!list || list.length === 0) return "";
-        return list.length === 1 ? list[0] : `${list[0]} +${list.length - 1}`;
-      };
+      const paxLabel = (bookingId: number): string =>
+        (paxByBooking.get(bookingId) ?? []).join(", ");
 
       const rows: Line[] = [
         ...bookings.map((bk) => {

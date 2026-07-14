@@ -1,6 +1,7 @@
 import type {
   FlightBookingStatus,
   FlightExpenseCategory,
+  PassengerType,
   ShipmentStatus,
   TransportMode,
   TripType,
@@ -130,6 +131,16 @@ export const TRIP_TYPE_LABEL: Record<TripType, string> = {
   oneway: "One-way",
   return: "Round-Trip",
 };
+
+export const PASSENGER_TYPE_LABEL: Record<PassengerType, string> = {
+  adult: "Adult",
+  child: "Child",
+  infant: "Infant",
+};
+
+export function passengerTypeLabel(type: string): string {
+  return (PASSENGER_TYPE_LABEL as Record<string, string>)[type] ?? type;
+}
 
 // A booking in one of these states has been reversed — cancelled, refunded or
 // voided — so its money is not the agency's: it must never count toward sales,
