@@ -14,6 +14,7 @@ import {
   Th,
 } from "@/components/ui";
 import { BuildingIcon, UsersIcon } from "@/components/icons";
+import { FlightBreakdownModal } from "@/components/flight-breakdown-modal";
 
 type Row = { key: string; bookings: number; sales: number; profit: number };
 
@@ -23,6 +24,11 @@ export default function FlightReportsPage() {
   const [refunded, setRefunded] = useState<Record<number, number>>({});
   const [expensesTotal, setExpensesTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  // Customer whose balance drill-down is open (opened from the Outstanding cell).
+  const [breakdownFor, setBreakdownFor] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -78,19 +84,34 @@ export default function FlightReportsPage() {
   const byCustomer = useMemo(() => {
     const map = new Map<
       string,
-      { name: string; sales: number; received: number; outstanding: number }
+      {
+        id: number | null;
+        name: string;
+        sales: number;
+        received: number;
+        outstanding: number;
+      }
     >();
     for (const b of bookings) {
-      const name = b.flight_customers?.name ?? "— No customer —";
+      const cust = b.flight_customers ?? null;
+      // Group by customer id so a drill-down can target the right customer;
+      // bookings with no customer collapse into one "— No customer —" row.
+      const key = cust ? `c${cust.id}` : "none";
       const row =
-        map.get(name) ?? { name, sales: 0, received: 0, outstanding: 0 };
+        map.get(key) ?? {
+          id: cust?.id ?? null,
+          name: cust?.name ?? "— No customer —",
+          sales: 0,
+          received: 0,
+          outstanding: 0,
+        };
       const sale = Number(b.sale_total);
       const p = paid[b.id] ?? 0;
       const rf = refunded[b.id] ?? 0;
       row.sales += sale;
       row.received += p - rf;
       row.outstanding += sale - p - rf;
-      map.set(name, row);
+      map.set(key, row);
     }
     return [...map.values()]
       .filter((r) => r.outstanding > 0.005)
@@ -212,14 +233,27 @@ export default function FlightReportsPage() {
           <div className="space-y-3 p-3 lg:hidden">
             {byCustomer.map((r) => (
               <div
-                key={r.name}
+                key={r.id ?? r.name}
                 className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{r.name}</span>
-                  <span className="font-medium text-amber-600 dark:text-amber-400">
-                    {fmtMoney(r.outstanding)}
-                  </span>
+                  {r.id != null ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBreakdownFor({ id: r.id!, name: r.name })
+                      }
+                      title={`See what makes up ${r.name}'s balance`}
+                      className="-mr-2 rounded-full px-2 py-0.5 font-medium text-amber-600 transition-colors hover:bg-amber-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:text-amber-400 dark:hover:bg-amber-400/15"
+                    >
+                      {fmtMoney(r.outstanding)}
+                    </button>
+                  ) : (
+                    <span className="font-medium text-amber-600 dark:text-amber-400">
+                      {fmtMoney(r.outstanding)}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
                   <span>Sales {fmtMoney(r.sales)}</span>
@@ -239,12 +273,25 @@ export default function FlightReportsPage() {
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
               {byCustomer.map((r) => (
-                <tr key={r.name} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
+                <tr key={r.id ?? r.name} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                   <Td className="font-medium">{r.name}</Td>
                   <Td>{fmtMoney(r.sales)}</Td>
                   <Td>{fmtMoney(r.received)}</Td>
-                  <Td className="font-medium text-amber-600 dark:text-amber-400">
-                    {fmtMoney(r.outstanding)}
+                  <Td className="font-medium">
+                    {r.id != null ? (
+                      <button
+                        type="button"
+                        onClick={() => setBreakdownFor({ id: r.id!, name: r.name })}
+                        title={`See what makes up ${r.name}'s balance`}
+                        className="-mx-2 rounded-full px-2 py-0.5 text-amber-600 transition-colors hover:bg-amber-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:text-amber-400 dark:hover:bg-amber-400/15"
+                      >
+                        {fmtMoney(r.outstanding)}
+                      </button>
+                    ) : (
+                      <span className="text-amber-600 dark:text-amber-400">
+                        {fmtMoney(r.outstanding)}
+                      </span>
+                    )}
                   </Td>
                 </tr>
               ))}
@@ -255,6 +302,14 @@ export default function FlightReportsPage() {
           )}
         </Card>
       </div>
+
+      {breakdownFor && (
+        <FlightBreakdownModal
+          customerId={breakdownFor.id}
+          customerName={breakdownFor.name}
+          onClose={() => setBreakdownFor(null)}
+        />
+      )}
     </div>
   );
 }

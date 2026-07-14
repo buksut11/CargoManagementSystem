@@ -19,6 +19,7 @@ import {
   FLIGHT_STATUS_LABEL,
 } from "@/lib/format";
 import { useRole } from "@/components/role-context";
+import { FlightBreakdownModal } from "@/components/flight-breakdown-modal";
 import {
   Badge,
   Card,
@@ -43,6 +44,11 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  // Customer whose balance drill-down is open (opened from the Receivable cell).
+  const [breakdownFor, setBreakdownFor] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -275,14 +281,32 @@ export default function BookingsPage() {
                   </Td>
                 )}
                 {!isAgent && (
-                  <Td
-                    className={`whitespace-nowrap font-medium ${
-                      receivable(b) > 0
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-emerald-600 dark:text-emerald-400"
-                    }`}
-                  >
-                    {fmtMoney(receivable(b))}
+                  <Td className="whitespace-nowrap font-medium">
+                    {b.flight_customers && receivable(b) > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setBreakdownFor({
+                            id: b.flight_customers!.id,
+                            name: b.flight_customers!.name,
+                          })
+                        }
+                        title={`See what makes up ${b.flight_customers.name}'s balance`}
+                        className="-mx-2 rounded-full px-2 py-0.5 text-amber-600 transition-colors hover:bg-amber-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:text-amber-400 dark:hover:bg-amber-400/15"
+                      >
+                        {fmtMoney(receivable(b))}
+                      </button>
+                    ) : (
+                      <span
+                        className={
+                          receivable(b) > 0
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-emerald-600 dark:text-emerald-400"
+                        }
+                      >
+                        {fmtMoney(receivable(b))}
+                      </span>
+                    )}
                   </Td>
                 )}
               </tr>
@@ -299,6 +323,14 @@ export default function BookingsPage() {
           />
         )}
       </Card>
+
+      {breakdownFor && (
+        <FlightBreakdownModal
+          customerId={breakdownFor.id}
+          customerName={breakdownFor.name}
+          onClose={() => setBreakdownFor(null)}
+        />
+      )}
     </div>
   );
 }
