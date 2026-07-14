@@ -455,7 +455,7 @@ export default function FlightStatementPage() {
                 <img
                   src={orgHeader.logo_url}
                   alt={`${orgHeader.name} logo`}
-                  className="h-16 w-16 shrink-0 object-contain"
+                  className="mb-1 h-24 w-auto max-w-[320px] shrink-0 object-contain"
                 />
               )}
               <div className="mt-2 text-2xl font-bold leading-tight">

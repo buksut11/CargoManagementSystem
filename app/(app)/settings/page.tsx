@@ -118,9 +118,10 @@ export default function SettingsPage() {
     }
     setLogoBusy(true);
     setError(null);
-    // Shrink to a max-300px thumbnail before upload (see lib/image.ts); the
-    // logo only ever renders at ~40px, so this keeps Storage tiny.
-    const resized = await resizeImageFile(file);
+    // Downscale before upload to keep Storage light (see lib/image.ts), but
+    // keep the longest edge at 800px so the logo stays crisp on the printed
+    // invoices/statements, where it renders far larger than the sidebar icon.
+    const resized = await resizeImageFile(file, 800);
     // Path is prefixed with the organization id so storage RLS can scope
     // writes per-tenant: {org_id}/logo-{timestamp}.{ext}
     const ext = resized.name.split(".").pop() ?? "webp";
