@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { FlightSupplier } from "@/lib/types";
 import {
@@ -18,7 +19,7 @@ import {
   Td,
   Th,
 } from "@/components/ui";
-import { BuildingIcon } from "@/components/icons";
+import { BuildingIcon, StatementIcon } from "@/components/icons";
 
 export default function FlightSuppliersPage() {
   const [suppliers, setSuppliers] = useState<FlightSupplier[]>([]);
@@ -156,6 +157,12 @@ export default function FlightSuppliersPage() {
                   </div>
                 )}
                 <div className="mt-2 flex items-center gap-2">
+                  <Link
+                    href={`/flights/supplier-statement?supplier=${s.id}`}
+                    className={rowActionClass}
+                  >
+                    Statement
+                  </Link>
                   <button onClick={() => startEdit(s)} className={rowActionClass}>
                     Edit
                   </button>
@@ -181,6 +188,15 @@ export default function FlightSuppliersPage() {
                   <Td>{s.contact ?? "—"}</Td>
                   <Td className="text-right">
                     <span className="inline-flex items-center gap-2">
+                      <Link
+                        href={`/flights/supplier-statement?supplier=${s.id}`}
+                        title="View statement"
+                        aria-label={`View ${s.name} statement`}
+                        className={`${rowActionClass} inline-flex items-center gap-1.5`}
+                      >
+                        <StatementIcon className="h-4 w-4" />
+                        Statement
+                      </Link>
                       <button onClick={() => startEdit(s)} className={rowActionClass}>
                         Edit
                       </button>

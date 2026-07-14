@@ -66,6 +66,7 @@ const FLIGHT_NAV: NavItem[] = [
   { href: "/flights/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
   { href: "/flights/statement", label: "Statement", icon: StatementIcon, roles: EDITORS },
   { href: "/flights/suppliers", label: "Airlines", icon: BuildingIcon, roles: EDITORS },
+  { href: "/flights/supplier-statement", label: "Airline statement", icon: StatementIcon, roles: EDITORS },
   { href: "/flights/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },
   { href: "/flights/payments", label: "Receipts", icon: CoinsIcon, roles: EDITORS },
   { href: "/flights/payables", label: "Payables", icon: ReceiptIcon, roles: EDITORS },
