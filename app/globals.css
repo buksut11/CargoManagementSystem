@@ -301,11 +301,29 @@ input:-webkit-autofill:focus {
   background-color: rgba(148, 163, 184, 0.5);
 }
 
+/* Printed documents (invoices, shipment labels, statements) use a comfortable,
+   consistent page margin. The physical paper size is intentionally NOT fixed
+   here: the sheet fills the printable width of whatever paper the user selects
+   (A4, A5, Letter, Legal…), so the document adapts to the chosen size instead
+   of being laid out for one size and scaled or clipped on the others. */
+@page {
+  margin: 14mm;
+}
+
 @media print {
   .no-print {
     display: none !important;
   }
   body {
     background: white;
+  }
+  /* The document sheet fills the printable width of the page. On screen it sits
+     in a narrow reading column (max-w-2xl/3xl); in print the @page margin above
+     provides the whitespace, so the sheet itself spans the full content width
+     and no longer floats in a narrow band with a large empty right margin. */
+  .print-sheet {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
   }
 }
