@@ -16,12 +16,10 @@ import {
   Input,
   PageHeader,
   Section,
-  Select,
 } from "@/components/ui";
 import {
   EditIcon,
   MailIcon,
-  MergeIcon,
   PhoneIcon,
   SearchIcon,
   StatementIcon,
@@ -80,11 +78,6 @@ export default function CargoCustomersPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [pending, setPending] = useState<CargoCustomer | null>(null);
   const [deleting, setDeleting] = useState(false);
-  // Merge dialog: `merging` is the source customer being folded into another;
-  // `mergeTargetId` is the customer that keeps everything.
-  const [merging, setMerging] = useState<CargoCustomer | null>(null);
-  const [mergeTargetId, setMergeTargetId] = useState<string>("");
-  const [mergeBusy, setMergeBusy] = useState(false);
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
   const formRef = useRef<HTMLDivElement>(null);
@@ -176,47 +169,6 @@ export default function CargoCustomersPage() {
     else reload();
     setPending(null);
   }
-
-  function startMerge(c: CargoCustomer) {
-    setMerging(c);
-    setMergeTargetId("");
-    setError(null);
-  }
-
-  // Fold the source customer into the target: move every invoice over, then
-  // remove the now-empty source. Two steps (no server transaction), but the
-  // order is safe — if the delete fails after the reassign, invoices already
-  // point at the target and no data is lost.
-  async function confirmMerge() {
-    if (!merging || !mergeTargetId) return;
-    const targetId = Number(mergeTargetId);
-    setMergeBusy(true);
-    setError(null);
-    const { error: moveError } = await supabase
-      .from("invoices")
-      .update({ customer_id: targetId })
-      .eq("customer_id", merging.id);
-    if (moveError) {
-      setMergeBusy(false);
-      setError(moveError.message);
-      return;
-    }
-    const { error: delError } = await supabase
-      .from("cargo_customers")
-      .delete()
-      .eq("id", merging.id);
-    setMergeBusy(false);
-    if (delError) {
-      setError(delError.message);
-      return;
-    }
-    setMerging(null);
-    setMergeTargetId("");
-    reload();
-  }
-
-  const mergeTarget =
-    customers.find((c) => String(c.id) === mergeTargetId) ?? null;
 
   return (
     <div>
@@ -358,16 +310,6 @@ export default function CargoCustomersPage() {
                         <span className="sm:hidden">Edit</span>
                       </button>
                       <button
-                        onClick={() => startMerge(c)}
-                        disabled={customers.length < 2}
-                        title="Merge into another customer"
-                        aria-label={`Merge ${c.name} into another customer`}
-                        className={`${custActionClass} bg-violet-500/[0.08] text-violet-600 hover:bg-violet-500/15 disabled:opacity-40 disabled:hover:bg-violet-500/[0.08] dark:bg-violet-500/10 dark:text-violet-400 dark:hover:bg-violet-500/20`}
-                      >
-                        <MergeIcon className="h-4 w-4" />
-                        <span className="sm:hidden">Merge</span>
-                      </button>
-                      <button
                         onClick={() => setPending(c)}
                         title="Delete"
                         aria-label={`Delete ${c.name}`}
@@ -403,79 +345,6 @@ export default function CargoCustomersPage() {
         onConfirm={confirmRemove}
         onCancel={() => setPending(null)}
       />
-
-      {/* Merge dialog — fold a duplicate into another customer. Bespoke (not
-          ConfirmDialog) because it needs a target picker inside it. */}
-      {merging && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-            onClick={mergeBusy ? undefined : () => setMerging(null)}
-            aria-hidden
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="glass-panel relative z-10 w-full max-w-sm rounded-3xl p-6"
-          >
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-              Merge customer
-            </h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Move every invoice from{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
-                {merging.name}
-              </span>{" "}
-              into the customer you pick, then remove{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
-                {merging.name}
-              </span>
-              . This can’t be undone.
-            </p>
-            <div className="mt-4">
-              <Field label="Merge into">
-                <Select
-                  value={mergeTargetId}
-                  onChange={(e) => setMergeTargetId(e.target.value)}
-                >
-                  <option value="">Select a customer…</option>
-                  {customers
-                    .filter((c) => c.id !== merging.id)
-                    .map((c) => (
-                      <option key={c.id} value={String(c.id)}>
-                        {c.name}
-                        {c.phone ? ` · ${c.phone}` : ""}
-                      </option>
-                    ))}
-                </Select>
-              </Field>
-            </div>
-            <ErrorNote message={error} />
-            <div className="mt-5 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setMerging(null)}
-                disabled={mergeBusy}
-                className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmMerge}
-                disabled={mergeBusy || !mergeTarget}
-                className="rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition-colors hover:bg-violet-700 disabled:opacity-50"
-              >
-                {mergeBusy
-                  ? "Merging…"
-                  : mergeTarget
-                    ? `Merge into ${mergeTarget.name}`
-                    : "Merge"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
