@@ -43,6 +43,14 @@ type Line = {
   sort: number;
 };
 
+// The slice of a flight segment we need to draw a booking's route.
+type SegmentRow = {
+  booking_id: number;
+  segment_no: number;
+  origin: string | null;
+  destination: string | null;
+};
+
 // Whole days between two YYYY-MM-DD dates (UTC so no timezone drift). Used to
 // age each unpaid charge for the receivables summary.
 function ageDays(date: string, asOf: string): number {
@@ -167,18 +175,25 @@ export default function FlightStatementPage() {
       let payments: BookingPayment[] = [];
       let refunds: BookingRefund[] = [];
       let passengers: FlightPassenger[] = [];
+      let segments: SegmentRow[] = [];
       if (ids.length) {
-        const [p, r, pax] = await Promise.all([
+        const [p, r, pax, seg] = await Promise.all([
           supabase.from("booking_payments").select("*").in("booking_id", ids),
           supabase.from("booking_refunds").select("*").in("booking_id", ids),
           supabase
             .from("flight_passengers")
             .select("booking_id, full_name, type")
             .in("booking_id", ids),
+          supabase
+            .from("flight_segments")
+            .select("booking_id, segment_no, origin, destination")
+            .in("booking_id", ids)
+            .order("segment_no"),
         ]);
         payments = (p.data as BookingPayment[]) ?? [];
         refunds = (r.data as BookingRefund[]) ?? [];
         passengers = (pax.data as FlightPassenger[]) ?? [];
+        segments = (seg.data as SegmentRow[]) ?? [];
       }
 
       // Every passenger on a booking, each tagged with their type, e.g.
@@ -192,11 +207,35 @@ export default function FlightStatementPage() {
       const paxLabel = (bookingId: number): string =>
         (paxByBooking.get(bookingId) ?? []).join(", ");
 
+      // The route flown, chained across the booking's segments (already sorted
+      // by segment_no), e.g. "Baidoa → Mogadishu" or "Baidoa → Mogadishu →
+      // Baidoa" for a return. Consecutive duplicate stops are collapsed.
+      const segsByBooking = new Map<number, SegmentRow[]>();
+      for (const s of segments) {
+        const list = segsByBooking.get(s.booking_id) ?? [];
+        list.push(s);
+        segsByBooking.set(s.booking_id, list);
+      }
+      const routeLabel = (bookingId: number): string => {
+        const stops: string[] = [];
+        for (const s of segsByBooking.get(bookingId) ?? []) {
+          for (const p of [s.origin, s.destination]) {
+            const stop = p?.trim();
+            if (stop && stops[stops.length - 1] !== stop) stops.push(stop);
+          }
+        }
+        return stops.join(" → ");
+      };
+
       const rows: Line[] = [
         ...bookings.map((bk) => {
+          const route = routeLabel(bk.id);
           const pax = paxLabel(bk.id);
-          // Secondary detail line: passenger, travel date, airline — the things
-          // a customer scans a ticket charge for, kept out of the main label.
+          // Main label carries the route so the journey reads at a glance;
+          // the secondary line holds passengers, travel date and airline.
+          const description = ["Air ticket", route, bk.pnr ? `PNR ${bk.pnr}` : ""]
+            .filter(Boolean)
+            .join(" · ");
           const detail = [
             pax,
             bk.travel_date ? `Travel ${fmtDate(bk.travel_date)}` : "",
@@ -207,7 +246,7 @@ export default function FlightStatementPage() {
           return {
             date: bk.booking_date,
             ref: bookingRef(bk.id),
-            description: `Air ticket${bk.pnr ? ` · PNR ${bk.pnr}` : ""}`,
+            description,
             sub: detail || undefined,
             debit: Number(bk.sale_total),
             credit: 0,
@@ -475,6 +514,7 @@ export default function FlightStatementPage() {
                   label="Balance due"
                   value={fmtMoney(Math.max(view.closing, 0))}
                   strong
+                  tone={view.closing > 0.005 ? "due" : "settled"}
                 />
               </div>
             )}
@@ -561,7 +601,7 @@ export default function FlightStatementPage() {
                   <span className="text-sm text-slate-500">Balance due</span>
                   <span
                     className={`text-2xl font-bold ${
-                      view.closing > 0 ? "text-slate-900" : "text-emerald-700"
+                      view.closing > 0 ? "text-orange-600" : "text-emerald-700"
                     }`}
                   >
                     {fmtMoney(Math.max(view.closing, 0))}
@@ -610,29 +650,37 @@ function SummaryBox({
   label,
   value,
   strong = false,
+  tone = "default",
 }: {
   label: string;
   value: string;
   strong?: boolean;
+  // "due" tints the box orange (money owed); "settled" tints it green.
+  tone?: "default" | "due" | "settled";
 }) {
-  return (
-    <div
-      className={`rounded-lg border p-3 ${
-        strong
+  const box =
+    tone === "due"
+      ? "border-orange-200 bg-orange-50"
+      : tone === "settled"
+        ? "border-emerald-200 bg-emerald-50"
+        : strong
           ? "border-slate-300 bg-slate-50"
-          : "border-slate-200 bg-white"
-      }`}
-    >
+          : "border-slate-200 bg-white";
+  const size = strong ? "text-lg font-bold" : "text-sm font-semibold";
+  const color =
+    tone === "due"
+      ? "text-orange-600"
+      : tone === "settled"
+        ? "text-emerald-700"
+        : strong
+          ? "text-slate-900"
+          : "text-slate-700";
+  return (
+    <div className={`rounded-lg border p-3 ${box}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
         {label}
       </div>
-      <div
-        className={`mt-1 ${
-          strong ? "text-lg font-bold text-slate-900" : "text-sm font-semibold text-slate-700"
-        }`}
-      >
-        {value}
-      </div>
+      <div className={`mt-1 ${size} ${color}`}>{value}</div>
     </div>
   );
 }
