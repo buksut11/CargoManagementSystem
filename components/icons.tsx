@@ -170,8 +170,8 @@ export const MenuIcon = () => (
   </Base>
 );
 
-export const CloseIcon = () => (
-  <Base>
+export const CloseIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
     <path d="M6 6l12 12M18 6L6 18" />
   </Base>
 );
@@ -209,8 +209,8 @@ export const BuildingIcon = () => (
   </Base>
 );
 
-export const PlaneIcon = () => (
-  <Base>
+export const PlaneIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
     <path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a1 1 0 0 0-.9 1.7L9 11l-2 2H4l-1 1 3 1.5L7.5 20l1-1v-3l2-2 3.6 5.1a1 1 0 0 0 1.7-.9z" />
   </Base>
 );

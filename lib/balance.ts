@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { REVERSED_IN_LIST } from "./format";
+import { REVERSED_IN_LIST, bookingRef } from "./format";
 
 // A customer's outstanding balance is the same figure the statement calls
 // "Balance due": the sum of every recognised (non-reversed) booking's
@@ -49,6 +49,124 @@ export async function fetchCustomerBalances(): Promise<Record<number, number>> {
     if (cid != null) balances[cid] -= Number(ref.customer_refund);
   }
   return balances;
+}
+
+// One booking's contribution to a customer's balance, kept per-booking so a
+// drill-down can show *where* the "balance due" comes from: which tickets are
+// still unpaid and by how much. `remaining = charged − paid − refunded` is the
+// same arithmetic fetchCustomerBalance sums across the whole customer, just not
+// collapsed. A positive `remaining` is money still owed on that ticket.
+export type CustomerBookingBreakdownLine = {
+  bookingId: number;
+  ref: string;
+  date: string;
+  route: string; // "Baidoa → Mogadishu", or "" when no segments recorded
+  pnr: string | null;
+  airline: string | null;
+  charged: number;
+  paid: number;
+  refunded: number;
+  remaining: number;
+};
+
+// Per-booking breakdown for a single customer, newest-owed first. Mirrors the
+// recognised (non-reversed) filter used everywhere else, and pulls payments,
+// refunds and route in three id-scoped queries. Lazy-loaded when a customer's
+// "due" badge is opened, so the customers list itself stays cheap.
+export async function fetchCustomerBookingBreakdown(
+  customerId: number,
+): Promise<CustomerBookingBreakdownLine[]> {
+  const { data: b } = await supabase
+    .from("flight_bookings")
+    .select("id, booking_date, pnr, airline, sale_total, status")
+    .eq("customer_id", customerId)
+    .not("status", "in", REVERSED_IN_LIST)
+    .order("booking_date");
+
+  const bookings =
+    (b as {
+      id: number;
+      booking_date: string;
+      pnr: string | null;
+      airline: string | null;
+      sale_total: number | string;
+    }[]) ?? [];
+  const ids = bookings.map((bk) => bk.id);
+  if (ids.length === 0) return [];
+
+  const [p, r, seg] = await Promise.all([
+    supabase
+      .from("booking_payments")
+      .select("booking_id, amount")
+      .in("booking_id", ids),
+    supabase
+      .from("booking_refunds")
+      .select("booking_id, customer_refund")
+      .in("booking_id", ids),
+    supabase
+      .from("flight_segments")
+      .select("booking_id, segment_no, origin, destination")
+      .in("booking_id", ids)
+      .order("segment_no"),
+  ]);
+
+  const paidBy = new Map<number, number>();
+  for (const pay of (p.data as { booking_id: number; amount: number }[]) ?? []) {
+    paidBy.set(pay.booking_id, (paidBy.get(pay.booking_id) ?? 0) + Number(pay.amount));
+  }
+  const refundBy = new Map<number, number>();
+  for (const ref of (r.data as
+    | { booking_id: number; customer_refund: number }[]
+    | null) ?? []) {
+    refundBy.set(
+      ref.booking_id,
+      (refundBy.get(ref.booking_id) ?? 0) + Number(ref.customer_refund),
+    );
+  }
+
+  // Chain each booking's segments into a route, collapsing repeated stops —
+  // identical to the statement page so both read the same way.
+  const segsBy = new Map<
+    number,
+    { origin: string | null; destination: string | null }[]
+  >();
+  for (const s of (seg.data as {
+    booking_id: number;
+    origin: string | null;
+    destination: string | null;
+  }[]) ?? []) {
+    const list = segsBy.get(s.booking_id) ?? [];
+    list.push(s);
+    segsBy.set(s.booking_id, list);
+  }
+  const routeLabel = (id: number): string => {
+    const stops: string[] = [];
+    for (const s of segsBy.get(id) ?? []) {
+      for (const stop of [s.origin, s.destination]) {
+        const t = stop?.trim();
+        if (t && stops[stops.length - 1] !== t) stops.push(t);
+      }
+    }
+    return stops.join(" → ");
+  };
+
+  return bookings.map((bk) => {
+    const charged = Number(bk.sale_total);
+    const paid = paidBy.get(bk.id) ?? 0;
+    const refunded = refundBy.get(bk.id) ?? 0;
+    return {
+      bookingId: bk.id,
+      ref: bookingRef(bk.id),
+      date: bk.booking_date,
+      route: routeLabel(bk.id),
+      pnr: bk.pnr,
+      airline: bk.airline,
+      charged,
+      paid,
+      refunded,
+      remaining: charged - paid - refunded,
+    };
+  });
 }
 
 // ── Cargo ───────────────────────────────────────────────────────────────────
