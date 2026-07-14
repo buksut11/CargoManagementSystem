@@ -117,6 +117,14 @@ export const TrashIcon = (props: SVGProps<SVGSVGElement>) => (
   </Base>
 );
 
+export const MergeIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <circle cx={18} cy={18} r={3} />
+    <circle cx={6} cy={6} r={3} />
+    <path d="M6 21V9a9 9 0 0 0 9 9" />
+  </Base>
+);
+
 export const LockIcon = () => (
   <Base>
     <rect x={5} y={11} width={14} height={10} rx={2} />
