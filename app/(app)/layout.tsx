@@ -49,6 +49,7 @@ const CARGO_NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: HomeIcon, roles: EDITORS },
   { href: "/shipments", label: "Shipments", icon: BoxIcon, roles: ALL },
   { href: "/invoices", label: "Invoices", icon: InvoiceIcon, roles: EDITORS },
+  { href: "/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
   { href: "/statement", label: "Statement", icon: StatementIcon, roles: EDITORS },
   { href: "/payments", label: "Payments", icon: CoinsIcon, roles: EDITORS },
   { href: "/expenses", label: "Expenses", icon: WalletIcon, roles: EDITORS },
@@ -115,6 +116,7 @@ function navFor(role: OrgRole, modules: string[]): NavSection[] {
 const CARGO_PATHS = [
   "/shipments",
   "/invoices",
+  "/customers",
   "/statement",
   "/payments",
   "/expenses",

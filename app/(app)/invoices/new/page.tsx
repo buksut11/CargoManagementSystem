@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Shipment } from "@/lib/types";
+import type { CargoCustomer, Shipment } from "@/lib/types";
 import { fmtKg, fmtMoney, shipmentRef } from "@/lib/format";
 import {
   Button,
@@ -21,6 +21,7 @@ export default function NewInvoicePage() {
   const router = useRouter();
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [customers, setCustomers] = useState<CargoCustomer[]>([]);
   const [billTo, setBillTo] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -38,7 +39,32 @@ export default function NewInvoicePage() {
       .is("invoice_id", null)
       .order("created_at", { ascending: false })
       .then(({ data }) => setShipments((data as Shipment[]) ?? []));
+    supabase
+      .from("cargo_customers")
+      .select("*")
+      .order("name")
+      .then(({ data }) => setCustomers((data as CargoCustomer[]) ?? []));
   }, []);
+
+  // Whether the typed name already exists — drives the contact prefill and the
+  // "existing vs new" hint. Matched case-insensitively on the trimmed name.
+  const matchedCustomer =
+    customers.find(
+      (c) => c.name.toLowerCase() === billTo.trim().toLowerCase(),
+    ) ?? null;
+
+  // Picking (or typing) an existing customer's exact name fills in their saved
+  // contact details, so an invoice for a repeat customer needs no re-typing.
+  function onBillToChange(value: string) {
+    setBillTo(value);
+    const match = customers.find(
+      (c) => c.name.toLowerCase() === value.trim().toLowerCase(),
+    );
+    if (match) {
+      setPhone(match.phone ?? "");
+      setAddress(match.address ?? "");
+    }
+  }
 
   function toggle(id: number) {
     setSelected((prev) => {
@@ -128,14 +154,37 @@ export default function NewInvoicePage() {
           subtitle="Who this invoice is for"
         >
           <div className="space-y-4">
-            <Field label="Bill to" hint="Name of the person or company paying.">
+            <Field
+              label="Bill to"
+              hint="Pick a saved customer or type a new name."
+            >
               <Input
                 value={billTo}
-                onChange={(e) => setBillTo(e.target.value)}
+                onChange={(e) => onBillToChange(e.target.value)}
                 placeholder="e.g. Ali Trading Co."
+                list="cargo-customers"
+                autoComplete="off"
                 required
                 autoFocus
               />
+              <datalist id="cargo-customers">
+                {customers.map((c) => (
+                  <option key={c.id} value={c.name} />
+                ))}
+              </datalist>
+              {billTo.trim() && (
+                <p
+                  className={`mt-1.5 text-xs ${
+                    matchedCustomer
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  {matchedCustomer
+                    ? "✓ Existing customer — details filled in."
+                    : "New customer — will be added to your customer list."}
+                </p>
+              )}
             </Field>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Phone (optional)">

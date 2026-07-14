@@ -378,10 +378,10 @@ export default function CargoStatementPage() {
                 🖨 Print / Save as PDF
               </button>
               <Link
-                href="/invoices"
+                href="/customers"
                 className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.1]"
               >
-                ← Back to invoices
+                ← Back to customers
               </Link>
             </div>
           )}

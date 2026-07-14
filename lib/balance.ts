@@ -51,6 +51,43 @@ export async function fetchCustomerBalances(): Promise<Record<number, number>> {
   return balances;
 }
 
+// ── Cargo ───────────────────────────────────────────────────────────────────
+// A cargo customer's outstanding balance is the same figure the cargo statement
+// calls "Balance due": the sum of every shipment total on their invoices, minus
+// every payment recorded against those invoices. Cargo has no refunds. Invoices
+// with no customer (customer_id null) drop out. A negative result means the
+// customer is in credit.
+export async function fetchCargoCustomerBalances(): Promise<
+  Record<number, number>
+> {
+  const [inv, s, p] = await Promise.all([
+    supabase.from("invoices").select("id, customer_id"),
+    supabase.from("shipments").select("invoice_id, total"),
+    supabase.from("payments").select("invoice_id, amount"),
+  ]);
+
+  // Map each invoice to its customer so shipments/payments, which are keyed by
+  // invoice, can be attributed to the right customer.
+  const invoiceCustomer = new Map<number, number>();
+  for (const iv of (inv.data as { id: number; customer_id: number | null }[]) ??
+    []) {
+    if (iv.customer_id != null) invoiceCustomer.set(iv.id, iv.customer_id);
+  }
+
+  const balances: Record<number, number> = {};
+  for (const sh of (s.data as { invoice_id: number | null; total: number }[]) ??
+    []) {
+    if (sh.invoice_id == null) continue;
+    const cid = invoiceCustomer.get(sh.invoice_id);
+    if (cid != null) balances[cid] = (balances[cid] ?? 0) + Number(sh.total);
+  }
+  for (const pay of (p.data as { invoice_id: number; amount: number }[]) ?? []) {
+    const cid = invoiceCustomer.get(pay.invoice_id);
+    if (cid != null) balances[cid] = (balances[cid] ?? 0) - Number(pay.amount);
+  }
+  return balances;
+}
+
 // Outstanding balance for a single customer. `excludeBookingId` leaves one
 // booking out of the total — used by the booking form so the figure it shows is
 // the "existing" balance from the customer's *other* tickets, which the ticket
