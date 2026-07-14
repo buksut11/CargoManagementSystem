@@ -17,11 +17,11 @@ import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
 import {
   Card,
   Field,
-  Input,
   PageHeader,
   Section,
   Select,
 } from "@/components/ui";
+import { DatePicker } from "@/components/date-picker";
 import { StatementIcon, UsersIcon } from "@/components/icons";
 
 // One movement on the account: a charge (booking) or a credit (payment/refund).
@@ -336,20 +336,14 @@ export default function FlightStatementPage() {
               </Field>
             </div>
             <Field label="From">
-              <Input
-                type="date"
+              <DatePicker
                 value={from}
-                max={to || undefined}
-                onChange={(e) => setFrom(e.target.value)}
+                onChange={setFrom}
+                placeholder="Beginning"
               />
             </Field>
             <Field label="To">
-              <Input
-                type="date"
-                value={to}
-                min={from || undefined}
-                onChange={(e) => setTo(e.target.value)}
-              />
+              <DatePicker value={to} onChange={setTo} placeholder="Today" />
             </Field>
           </div>
 
