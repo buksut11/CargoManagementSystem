@@ -10,6 +10,7 @@ import type {
   BookingRefund,
   FlightBooking,
   FlightCustomer,
+  FlightPassenger,
   Organization,
 } from "@/lib/types";
 import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
@@ -30,10 +31,20 @@ type Line = {
   date: string;
   ref: string;
   description: string;
+  sub?: string; // secondary detail (travel date · passenger · airline)
   debit: number;
   credit: number;
   sort: number;
 };
+
+// Whole days between two YYYY-MM-DD dates (UTC so no timezone drift). Used to
+// age each unpaid charge for the receivables summary.
+function ageDays(date: string, asOf: string): number {
+  const a = Date.parse(`${date}T00:00:00Z`);
+  const b = Date.parse(`${asOf}T00:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return 0;
+  return Math.floor((b - a) / 86_400_000);
+}
 
 // Local YYYY-MM-DD (never toISOString, which shifts by timezone and can land a
 // date on the wrong day). Matches how booking/paid/refund dates are stored.
@@ -149,26 +160,56 @@ export default function FlightStatementPage() {
 
       let payments: BookingPayment[] = [];
       let refunds: BookingRefund[] = [];
+      let passengers: FlightPassenger[] = [];
       if (ids.length) {
-        const [p, r] = await Promise.all([
+        const [p, r, pax] = await Promise.all([
           supabase.from("booking_payments").select("*").in("booking_id", ids),
           supabase.from("booking_refunds").select("*").in("booking_id", ids),
+          supabase
+            .from("flight_passengers")
+            .select("booking_id, full_name")
+            .in("booking_id", ids),
         ]);
         payments = (p.data as BookingPayment[]) ?? [];
         refunds = (r.data as BookingRefund[]) ?? [];
+        passengers = (pax.data as FlightPassenger[]) ?? [];
       }
 
+      // Lead passenger (+N others) per booking, for the ticket detail line.
+      const paxByBooking = new Map<number, string[]>();
+      for (const px of passengers) {
+        const list = paxByBooking.get(px.booking_id) ?? [];
+        list.push(px.full_name);
+        paxByBooking.set(px.booking_id, list);
+      }
+      const paxLabel = (bookingId: number): string => {
+        const list = paxByBooking.get(bookingId);
+        if (!list || list.length === 0) return "";
+        return list.length === 1 ? list[0] : `${list[0]} +${list.length - 1}`;
+      };
+
       const rows: Line[] = [
-        ...bookings.map((bk) => ({
-          date: bk.booking_date,
-          ref: bookingRef(bk.id),
-          description: `Air ticket${bk.pnr ? ` · PNR ${bk.pnr}` : ""}${
-            bk.airline ? ` · ${bk.airline}` : ""
-          }`,
-          debit: Number(bk.sale_total),
-          credit: 0,
-          sort: 0,
-        })),
+        ...bookings.map((bk) => {
+          const pax = paxLabel(bk.id);
+          // Secondary detail line: passenger, travel date, airline — the things
+          // a customer scans a ticket charge for, kept out of the main label.
+          const detail = [
+            pax,
+            bk.travel_date ? `Travel ${fmtDate(bk.travel_date)}` : "",
+            bk.airline || "",
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          return {
+            date: bk.booking_date,
+            ref: bookingRef(bk.id),
+            description: `Air ticket${bk.pnr ? ` · PNR ${bk.pnr}` : ""}`,
+            sub: detail || undefined,
+            debit: Number(bk.sale_total),
+            credit: 0,
+            sort: 0,
+          };
+        }),
         ...payments.map((p) => ({
           date: p.paid_date,
           ref: bookingRef(p.booking_id),
@@ -224,7 +265,36 @@ export default function FlightStatementPage() {
     // Running balance per period line, precomputed so render stays pure.
     let run = opening;
     const running = period.map((l) => (run += l.debit - l.credit));
-    return { opening, period, charges, credits, closing, running };
+
+    // Receivables aging: what makes up the balance due, by how long each unpaid
+    // charge has gone unsettled. Age the *whole* account as of the statement
+    // date (the balance due includes the opening balance), applying every
+    // credit to the oldest charges first (FIFO). Buckets sum to the balance due.
+    const asOf = to || TODAY;
+    const chargesUpTo = allLines
+      .filter((l) => l.debit > 0 && l.date <= asOf)
+      .map((l) => ({ date: l.date, amount: l.debit }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    let creditPool = allLines
+      .filter((l) => l.credit > 0 && l.date <= asOf)
+      .reduce((s, l) => s + l.credit, 0);
+    const aging = { current: 0, d31: 0, d61: 0, d90: 0 };
+    for (const c of chargesUpTo) {
+      let owed = c.amount;
+      if (creditPool > 0) {
+        const applied = Math.min(creditPool, owed);
+        owed -= applied;
+        creditPool -= applied;
+      }
+      if (owed <= 0.005) continue;
+      const age = ageDays(c.date, asOf);
+      if (age <= 30) aging.current += owed;
+      else if (age <= 60) aging.d31 += owed;
+      else if (age <= 90) aging.d61 += owed;
+      else aging.d90 += owed;
+    }
+
+    return { opening, period, charges, credits, closing, running, aging };
   }, [allLines, from, to]);
 
   function applyPreset(key: string) {
@@ -439,14 +509,19 @@ export default function FlightStatementPage() {
                   </tr>
                 )}
                 {view?.period.map((l, i) => (
-                  <tr key={i} className="border-b border-slate-200">
+                  <tr key={i} className="border-b border-slate-200 align-top">
                     <td className="py-2 pr-2 whitespace-nowrap">
                       {fmtDate(l.date)}
                     </td>
                     <td className="py-2 pr-2 whitespace-nowrap text-slate-500">
                       {l.ref}
                     </td>
-                    <td className="py-2 pr-2">{l.description}</td>
+                    <td className="py-2 pr-2">
+                      {l.description}
+                      {l.sub && (
+                        <div className="text-xs text-slate-500">{l.sub}</div>
+                      )}
+                    </td>
                     <td className="py-2 pr-2 text-right">
                       {l.debit ? fmtMoney(l.debit) : "—"}
                     </td>
@@ -506,6 +581,22 @@ export default function FlightStatementPage() {
               </div>
             )}
 
+            {/* Aging — how the balance due breaks down by how overdue it is.
+                Only meaningful when the customer actually owes money. */}
+            {view && view.closing > 0.005 && (
+              <div className="mt-8">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Balance due by age
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <AgingBox label="Current" hint="0–30 days" value={view.aging.current} />
+                  <AgingBox label="31–60 days" value={view.aging.d31} />
+                  <AgingBox label="61–90 days" value={view.aging.d61} />
+                  <AgingBox label="Over 90 days" value={view.aging.d90} overdue />
+                </div>
+              </div>
+            )}
+
             <p className="mt-10 text-center text-xs text-slate-400">
               Generated by {orgHeader?.name ?? org?.orgName ?? "CargoBook"} ·{" "}
               {fmtDate(TODAY)}
@@ -543,6 +634,45 @@ function SummaryBox({
         }`}
       >
         {value}
+      </div>
+    </div>
+  );
+}
+
+// One aging bucket. An empty bucket stays muted; anything in the "Over 90 days"
+// bucket is tinted red so a genuinely overdue chunk stands out at a glance.
+function AgingBox({
+  label,
+  hint,
+  value,
+  overdue = false,
+}: {
+  label: string;
+  hint?: string;
+  value: number;
+  overdue?: boolean;
+}) {
+  const has = value > 0.005;
+  return (
+    <div
+      className={`rounded-lg border p-3 ${
+        has && overdue
+          ? "border-red-200 bg-red-50"
+          : has
+            ? "border-slate-200 bg-white"
+            : "border-slate-100 bg-slate-50/50"
+      }`}
+    >
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+        {hint && <span className="ml-1 normal-case tracking-normal">· {hint}</span>}
+      </div>
+      <div
+        className={`mt-1 text-sm font-semibold ${
+          has ? (overdue ? "text-red-700" : "text-slate-800") : "text-slate-400"
+        }`}
+      >
+        {fmtMoney(value)}
       </div>
     </div>
   );
