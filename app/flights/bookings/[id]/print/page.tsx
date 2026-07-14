@@ -113,9 +113,13 @@ export default function PrintBookingPage() {
               className="mb-1 h-24 w-auto max-w-[320px] shrink-0 object-contain"
             />
           )}
-          <div className="mt-2 text-2xl font-bold leading-tight">
-            {org?.name ?? "✈️ CargoBook"}
-          </div>
+          {/* The name is only shown as text when there's no logo — a logo
+              typically already includes the organization's name. */}
+          {!org?.logo_url && (
+            <div className="text-2xl font-bold leading-tight">
+              {org?.name ?? "✈️ CargoBook"}
+            </div>
+          )}
           {org?.address && (
             <div className="mt-2 whitespace-pre-line text-xs text-slate-600">
               {org.address}
