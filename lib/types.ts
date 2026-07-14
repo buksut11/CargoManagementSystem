@@ -76,9 +76,24 @@ export type Shipment = {
   invoices?: Pick<Invoice, "id" | "bill_to" | "phone" | "address"> | null;
 };
 
+// A cargo billing party — the canonical customer behind an invoice's bill_to.
+// Mirrors flight_customers (migration 0040); bill_to is kept on the invoice as a
+// point-in-time snapshot, while customer_id is the durable link used for the
+// statement of account.
+export type CargoCustomer = {
+  id: number;
+  organization_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  created_at: string;
+};
+
 export type Invoice = {
   id: number;
   organization_id: string | null;
+  customer_id: number | null;
   bill_to: string;
   phone: string | null;
   address: string | null;
