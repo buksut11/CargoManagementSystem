@@ -10,7 +10,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 
 // Price charged for the Pro plan, provider-agnostic. Keep in step with the
 // plans.ts price label shown on the cards (default 5 USD).
-export const PLAN_AMOUNT = Number(process.env.BILLING_PLAN_AMOUNT ?? "5");
+export const PLAN_AMOUNT = Number(process.env.BILLING_PLAN_AMOUNT ?? "25");
 export const PLAN_CURRENCY = process.env.BILLING_CURRENCY ?? "USD";
 
 export type BillingProvider = "evc" | "edahab" | "premier";
