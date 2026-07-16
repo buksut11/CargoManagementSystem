@@ -240,17 +240,39 @@ export function Select({
 }: SelectHTMLAttributes<HTMLSelectElement>) {
   const rootRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
   const [pos, setPos] = useState({ left: 0, top: 0, bottom: 0, width: 0 });
   const [highlight, setHighlight] = useState(-1);
+  const [search, setSearch] = useState("");
 
-  const options = collectOptions(children);
+  const allOptions = collectOptions(children);
+  // Show the type-to-filter box only once a list is long enough to be worth
+  // searching — tiny yes/no style dropdowns stay clutter-free.
+  const searchable = allOptions.length > 6;
+  const q = search.trim().toLowerCase();
+  // The open list is filtered as the user types; scrolling still works on the
+  // filtered results, so users can scroll *or* type to narrow things down.
+  const options =
+    q && searchable
+      ? allOptions.filter((o) => o.label.toLowerCase().includes(q))
+      : allOptions;
+  // Keep the latest (possibly filtered) options for the document-level keyboard
+  // handler, whose closure would otherwise go stale as the query changes.
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    optionsRef.current = options;
+  });
+
   const current = value != null ? String(value) : "";
   const selectedIdx = options.findIndex((o) => o.value === current);
-  // Like a native select, fall back to showing the first option.
+  // The trigger label always reflects the chosen value from the full list,
+  // even while the open popover is filtered by a search query. Like a native
+  // select, fall back to showing the first option.
   const label =
-    selectedIdx >= 0 ? options[selectedIdx].label : (options[0]?.label ?? "");
+    allOptions.find((o) => o.value === current)?.label ??
+    (allOptions[0]?.label ?? "");
 
   const updatePos = useCallback(() => {
     const rect = rootRef.current?.getBoundingClientRect();
@@ -267,6 +289,9 @@ export function Select({
   function openList() {
     if (disabled) return;
     updatePos();
+    // Reset the query each time so the list opens showing everything, with the
+    // current value highlighted.
+    setSearch("");
     setHighlight(selectedIdx >= 0 ? selectedIdx : 0);
     setOpen(true);
   }
@@ -292,14 +317,16 @@ export function Select({
     }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
+      const opts = optionsRef.current;
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault();
+        if (opts.length === 0) return;
         setHighlight((h) => {
           const dir = e.key === "ArrowDown" ? 1 : -1;
           let next = h;
-          for (let i = 0; i < options.length; i++) {
-            next = (next + dir + options.length) % options.length;
-            if (!options[next].disabled) break;
+          for (let i = 0; i < opts.length; i++) {
+            next = (next + dir + opts.length) % opts.length;
+            if (!opts[next].disabled) break;
           }
           return next;
         });
@@ -307,7 +334,9 @@ export function Select({
       if (e.key === "Enter") {
         e.preventDefault();
         setHighlight((h) => {
-          const opt = options[h];
+          // Fall back to the first enabled match so pressing Enter after typing
+          // selects the obvious result without arrowing to it first.
+          const opt = opts[h] ?? opts.find((o) => !o.disabled);
           if (opt && !opt.disabled) pick(opt.value);
           return h;
         });
@@ -335,6 +364,12 @@ export function Select({
       ?.querySelector(`[data-idx="${highlight}"]`)
       ?.scrollIntoView({ block: "nearest" });
   }, [open, highlight]);
+
+  // Focus the filter box as soon as the list opens so the user can just start
+  // typing — no extra click needed.
+  useEffect(() => {
+    if (open && searchable) searchRef.current?.focus();
+  }, [open, searchable]);
 
   return (
     <div ref={rootRef} className="relative min-w-0">
@@ -392,8 +427,47 @@ export function Select({
               maxWidth: `calc(100vw - ${pos.left + 8}px)`,
               ...(dropUp ? { bottom: pos.bottom } : { top: pos.top }),
             }}
-            className="glass-popover animate-pop-in fixed z-50 max-h-64 w-max overflow-y-auto rounded-xl p-1.5"
+            className="glass-popover animate-pop-in fixed z-50 flex max-h-72 w-max flex-col rounded-xl p-1.5"
           >
+            {searchable && (
+              <div className="sticky top-0 z-10 p-1 pb-1.5">
+                <div className="relative">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                    aria-hidden
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.3-4.3" />
+                  </svg>
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      // Jump the highlight back to the top of the new results so
+                      // Enter picks the best match.
+                      setHighlight(0);
+                    }}
+                    placeholder="Type to search…"
+                    aria-label="Filter options"
+                    className={`${inputClass} pl-8`}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="min-h-0 flex-1 overflow-y-auto">
+            {options.length === 0 && (
+              <div className="px-3 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                No matches
+              </div>
+            )}
             {options.map((o, i) => {
               const isSelected = o.value === current;
               return (
@@ -434,6 +508,7 @@ export function Select({
                 </button>
               );
             })}
+            </div>
           </div>,
           document.body,
         )}
