@@ -132,38 +132,46 @@ export default function FlightCustomersPage() {
   return (
     <div>
       <PageHeader title="Customers" />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="space-y-6">
         <Section
           icon={<UsersIcon />}
           title={editingId ? "Edit customer" : "New customer"}
           subtitle="People or agencies you sell tickets to"
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
-          <form onSubmit={save} className="space-y-3">
-            <Field label="Name">
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Acme Travel"
-                required
-              />
-            </Field>
-            <Field label="Email">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Field>
-            <Field label="Phone">
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </Field>
-            <Field label="Address">
-              <Input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </Field>
+          <form onSubmit={save} className="flex flex-wrap items-end gap-3">
+            <div className="min-w-40 flex-1">
+              <Field label="Name">
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Acme Travel"
+                  required
+                />
+              </Field>
+            </div>
+            <div className="min-w-40 flex-1">
+              <Field label="Email">
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+            </div>
+            <div className="min-w-40 flex-1">
+              <Field label="Phone">
+                <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+              </Field>
+            </div>
+            <div className="min-w-40 flex-1">
+              <Field label="Address">
+                <Input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              </Field>
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
                 {busy ? "Saving…" : editingId ? "Save changes" : "Add customer"}
@@ -174,8 +182,10 @@ export default function FlightCustomersPage() {
                 </Button>
               )}
             </div>
-            <ErrorNote message={error} />
           </form>
+          <div className="mt-3">
+            <ErrorNote message={error} />
+          </div>
         </Section>
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
