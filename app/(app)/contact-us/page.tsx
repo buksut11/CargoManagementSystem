@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useOrg } from "@/components/org-context";
 import { Field, Section, Textarea } from "@/components/ui";
-import { ClockIcon, MailIcon, PhoneIcon, WhatsAppIcon } from "@/components/icons";
+import {
+  ClockIcon,
+  ContactCardIcon,
+  MailIcon,
+  PhoneIcon,
+  WhatsAppIcon,
+} from "@/components/icons";
 
 // Staff → developer contact page. Messages don't go through the database at
 // all: the form composes a WhatsApp message to the app owner, pre-filled with
@@ -178,7 +184,7 @@ export default function ContactUsPage() {
         {/* Right: contact information + business hours */}
         <div className="grid gap-6">
           <Section
-            icon={<PhoneIcon />}
+            icon={<ContactCardIcon />}
             title="Contact information"
             subtitle="Reach us directly"
           >
