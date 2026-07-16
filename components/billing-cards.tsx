@@ -13,7 +13,16 @@ type Accent = {
   chip: string; // logo tile
   price: string; // price tag text
   button: string; // CTA fill + shadow
+  focus: string; // input focus border + ring
 };
+
+// The shared input style, minus its built-in blue focus colours, so each
+// provider can tint the field's focus border/ring with its own brand colour.
+// (`focus:ring-2` — the ring width — has no "blue" in it and is kept.)
+const fieldBase = inputClass
+  .split(" ")
+  .filter((c) => !c.includes("blue"))
+  .join(" ");
 
 // Real brand colours, sampled from each provider's official logo:
 //   EVC Plus (Hormuud)  green  #009048
@@ -28,6 +37,7 @@ const ACCENTS: Record<string, Accent> = {
     price: "text-[#009048] dark:text-[#2fbf74]",
     button:
       "bg-[#009048] hover:bg-[#00753a] shadow-[#009048]/30 focus-visible:ring-[#009048]",
+    focus: "focus:border-[#009048] focus:ring-[#009048]/30",
   },
   gold: {
     bar: "bg-[#f0c000]",
@@ -35,6 +45,7 @@ const ACCENTS: Record<string, Accent> = {
     price: "text-[#a67c00] dark:text-[#e0b400]",
     button:
       "bg-[#b8860b] hover:bg-[#9a7009] shadow-[#f0c000]/30 focus-visible:ring-[#f0c000]",
+    focus: "focus:border-[#f0c000] focus:ring-[#f0c000]/35",
   },
   navy: {
     bar: "bg-[#003078]",
@@ -42,6 +53,7 @@ const ACCENTS: Record<string, Accent> = {
     price: "text-[#003078] dark:text-[#7b9fe0]",
     button:
       "bg-[#003078] hover:bg-[#00265e] shadow-[#003078]/30 focus-visible:ring-[#003078]",
+    focus: "focus:border-[#003078] focus:ring-[#003078]/35",
   },
 };
 
@@ -222,7 +234,7 @@ function ProviderCard({
                 inputMode="tel"
                 autoComplete="tel"
                 placeholder={provider.placeholder}
-                className={`${inputClass} pl-9`}
+                className={`${fieldBase} pl-9 ${accent.focus}`}
                 value={account}
                 onChange={(e) => {
                   setAccount(e.target.value);
