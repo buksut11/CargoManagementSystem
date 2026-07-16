@@ -51,7 +51,10 @@ export default function SettingsPage() {
   const [detailsSaved, setDetailsSaved] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  // EVC Plus (WaafiPay) upgrade.
+  const [evcPhone, setEvcPhone] = useState("");
+  const [evcBusy, setEvcBusy] = useState(false);
+  const [evcDone, setEvcDone] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -165,26 +168,34 @@ export default function SettingsPage() {
     setSidebarLogo(null);
   }
 
-  async function startCheckout() {
-    setCheckoutBusy(true);
+  // Charge the Pro plan through EVC Plus / ZAAD / Sahal via WaafiPay. The server
+  // sends a USSD push to this number; the admin approves with their mobile-money
+  // PIN and the plan flips to Pro in the same request (no redirect).
+  async function payWithEvc(e: React.FormEvent) {
+    e.preventDefault();
+    setEvcBusy(true);
     setError(null);
+    setEvcDone(false);
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
-    const res = await fetch("/api/stripe/checkout", {
+    const res = await fetch("/api/evc/charge", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token ?? ""}`,
       },
-      body: JSON.stringify({ orgId }),
+      body: JSON.stringify({ orgId, phone: evcPhone.trim() }),
     });
-    const data = await res.json();
-    setCheckoutBusy(false);
-    if (!res.ok || !data.url) {
-      setError(data.error ?? "Billing is not available right now.");
+    const data = await res.json().catch(() => ({}));
+    setEvcBusy(false);
+    if (!res.ok || !data.ok) {
+      setError(data.error ?? "The payment could not be completed.");
       return;
     }
-    window.location.href = data.url;
+    setPlan("pro");
+    setSubStatus("active");
+    setEvcDone(true);
+    setEvcPhone("");
   }
 
   async function makeBackup() {
@@ -385,17 +396,42 @@ export default function SettingsPage() {
                 </span>
               </div>
               {!paid && (
-                <Button
-                  onClick={startCheckout}
-                  disabled={checkoutBusy}
-                  className="mt-4 w-full"
-                >
-                  {checkoutBusy ? "Starting…" : "Upgrade"}
-                </Button>
+                <form onSubmit={payWithEvc} className="mt-4 space-y-3">
+                  <Field label="EVC / ZAAD / Sahal number">
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="0615000000"
+                      value={evcPhone}
+                      onChange={(e) => {
+                        setEvcPhone(e.target.value);
+                        setEvcDone(false);
+                      }}
+                      required
+                    />
+                  </Field>
+                  <Button
+                    type="submit"
+                    disabled={evcBusy || !evcPhone.trim()}
+                    className="w-full"
+                  >
+                    {evcBusy ? "Check your phone…" : "Pay with EVC"}
+                  </Button>
+                  {evcBusy && (
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      Approve the payment prompt on your phone with your PIN.
+                    </p>
+                  )}
+                </form>
+              )}
+              {evcDone && (
+                <p className="mt-3 text-sm text-emerald-600 dark:text-emerald-400">
+                  Payment received — your organization is now on the Pro plan.
+                </p>
               )}
               <p className="mt-3 text-xs text-slate-400">
-                Billing runs on Stripe. It activates once Stripe keys are
-                configured on the server.
+                Pay with EVC Plus, ZAAD or Sahal via WaafiPay. Activates once the
+                WaafiPay merchant keys are configured on the server.
               </p>
             </>
           )}
