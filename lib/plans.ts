@@ -24,11 +24,13 @@ export const PLANS: Record<PlanId, Plan> = {
   pro: {
     id: "pro",
     name: "Pro",
-    priceLabel: "Contact us",
+    // Display price. Keep in step with WAAFI_PLAN_AMOUNT / WAAFI_CURRENCY, which
+    // set what the EVC upgrade actually charges (default 5 USD).
+    priceLabel: "$5 / mo",
     maxShipments: Infinity,
     features: [
       "Unlimited shipments",
-      "Everything in Free",
+      "Invoices, payments & statements",
       "Priority support",
     ],
   },
