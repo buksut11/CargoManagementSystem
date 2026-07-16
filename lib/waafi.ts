@@ -1,16 +1,16 @@
 import "server-only";
+import type { ChargeResult } from "@/lib/billing";
 
-// WaafiPay is Hormuud's official payment gateway. One merchant account exposes
-// EVC Plus (Hormuud), ZAAD (Telesom) and Sahal (Golis) through the same API.
-// Unlike Stripe there is no redirect and no webhook: we call the gateway with
-// the customer's phone number, they approve on their handset with a USSD PIN
-// prompt, and the result comes back synchronously in the same HTTP response.
+// EVC Plus is Hormuud's mobile money. It's charged through WaafiPay, Hormuud's
+// official gateway (api.waafipay.net). Unlike Stripe there is no redirect and no
+// webhook: we call the gateway with the customer's phone number, they approve on
+// their handset with a USSD PIN prompt, and the result comes back synchronously
+// in the same HTTP response.
 //
-// Configure it with three SERVER-ONLY secrets (no NEXT_PUBLIC_ prefix), issued
-// when you register as a WaafiPay merchant:
+// Configure with three SERVER-ONLY secrets (no NEXT_PUBLIC_ prefix), issued when
+// you register as a WaafiPay merchant:
 //   WAAFI_MERCHANT_UID, WAAFI_API_USER_ID, WAAFI_API_KEY
-// Optional: WAAFI_API_URL (defaults to the live endpoint; point at the sandbox
-// endpoint from your merchant onboarding while testing).
+// Optional WAAFI_API_URL points at the sandbox endpoint while testing.
 
 const DEFAULT_API_URL = "https://api.waafipay.net/asm";
 
@@ -21,8 +21,8 @@ export type WaafiConfig = {
   apiKey: string;
 };
 
-// Returns the config only when every required secret is present, so callers can
-// respond "not configured yet" (501) exactly like the Stripe routes do.
+// Returns the config only when every required secret is present, so the route
+// can respond "not configured yet" (501).
 export function getWaafiConfig(): WaafiConfig | null {
   const merchantUid = process.env.WAAFI_MERCHANT_UID;
   const apiUserId = process.env.WAAFI_API_USER_ID;
@@ -36,37 +36,7 @@ export function getWaafiConfig(): WaafiConfig | null {
   };
 }
 
-// Normalises a Somali mobile number to WaafiPay's expected form: full
-// international, digits only, no leading "+" or "0" (e.g. "252615000000").
-// Accepts "0615…", "615…", "+252615…" and "252615…". Returns null if it
-// can't produce a plausible 12-digit 252 number.
-export function normalizeSomaliPhone(input: string): string | null {
-  let digits = (input || "").replace(/\D/g, "");
-  if (digits.startsWith("00")) digits = digits.slice(2);
-  if (digits.startsWith("252")) {
-    // already international
-  } else if (digits.startsWith("0")) {
-    digits = "252" + digits.slice(1);
-  } else if (digits.length === 9) {
-    // bare subscriber number like 615000000
-    digits = "252" + digits;
-  } else {
-    return null;
-  }
-  // 252 + 9-digit subscriber number.
-  return /^252\d{9}$/.test(digits) ? digits : null;
-}
-
-export type WaafiPurchaseResult = {
-  ok: boolean;
-  transactionId?: string;
-  referenceId?: string;
-  // WaafiPay's human-readable message (e.g. "RCS_SUCCESS" or a decline reason).
-  message?: string;
-  code?: string;
-};
-
-// Runs an API_PURCHASE against a customer's mobile wallet and waits for the
+// Runs an API_PURCHASE against a customer's EVC wallet and waits for the
 // synchronous result. responseCode "2001" is success; anything else is a
 // decline/error whose reason is surfaced to the caller.
 export async function waafiPurchase(
@@ -74,13 +44,13 @@ export async function waafiPurchase(
   args: {
     accountNo: string; // normalised phone, e.g. "252615000000"
     amount: number;
-    currency?: string; // "USD" (default) or "SOS"
-    referenceId: string; // unique per attempt — guards against double charges
+    currency?: string;
+    referenceId: string;
     invoiceId?: string;
     description?: string;
     timeoutMs?: number;
   },
-): Promise<WaafiPurchaseResult> {
+): Promise<ChargeResult> {
   const controller = new AbortController();
   // The USSD prompt can take a while as the customer finds their phone and
   // types their PIN, so allow a generous window before giving up.
@@ -122,17 +92,13 @@ export async function waafiPurchase(
         }
       | null;
 
-    if (!data) {
-      return { ok: false, message: "No response from WaafiPay." };
-    }
+    if (!data) return { ok: false, message: "No response from WaafiPay." };
 
-    const ok = data.responseCode === "2001";
     return {
-      ok,
+      ok: data.responseCode === "2001",
       code: data.responseCode,
       message: data.responseMsg,
       transactionId: data.params?.transactionId,
-      referenceId: data.params?.referenceId,
     };
   } catch (err) {
     const aborted = err instanceof Error && err.name === "AbortError";

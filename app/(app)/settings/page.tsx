@@ -28,7 +28,7 @@ import {
   DashboardIcon,
   WalletIcon,
 } from "@/components/icons";
-import { EvcBillingCard } from "@/components/evc-billing-card";
+import { BillingCards } from "@/components/billing-cards";
 
 export default function SettingsPage() {
   const org = useOrg();
@@ -345,7 +345,7 @@ export default function SettingsPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
           </Section>
         ) : (
-          <EvcBillingCard
+          <BillingCards
             orgId={orgId}
             plan={current}
             paid={paid}

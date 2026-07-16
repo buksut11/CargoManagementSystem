@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getWaafiConfig, waafiPurchase } from "@/lib/waafi";
-import { normalizeSomaliPhone } from "@/lib/phone";
+import { getPremierConfig, premierPurchase } from "@/lib/premier";
 import {
   finalizeCharge,
   newReferenceId,
@@ -11,13 +10,13 @@ import {
 
 export const runtime = "nodejs";
 
-// Upgrade an organization to the Pro plan by charging EVC Plus (Hormuud) through
-// WaafiPay. Returns 501 until the WaafiPay merchant keys are configured.
+// Upgrade an organization to the Pro plan by charging Premier Bank. Returns 501
+// until the Premier Bank merchant keys are configured.
 export async function POST(request: Request) {
-  const cfg = getWaafiConfig();
+  const cfg = getPremierConfig();
   if (!cfg) {
     return NextResponse.json(
-      { error: "EVC Plus payments are not configured yet." },
+      { error: "Premier Bank payments are not configured yet." },
       { status: 501 },
     );
   }
@@ -25,28 +24,28 @@ export async function POST(request: Request) {
   const ctx = await requireBillingAdmin(request);
   if ("error" in ctx) return ctx.error;
 
-  const phone = normalizeSomaliPhone(ctx.account);
-  if (!phone) {
+  // Premier accepts a phone or an account number, so we don't force the Somali
+  // mobile format — just require something was entered.
+  if (!ctx.account) {
     return NextResponse.json(
-      { error: "Enter a valid EVC number, e.g. 0615000000." },
+      { error: "Enter your Premier Bank account or phone number." },
       { status: 400 },
     );
   }
 
   const referenceId = newReferenceId(ctx.orgId);
-  const result = await waafiPurchase(cfg, {
-    accountNo: phone,
+  const result = await premierPurchase(cfg, {
+    accountNo: ctx.account,
     amount: PLAN_AMOUNT,
     currency: PLAN_CURRENCY,
     referenceId,
-    invoiceId: `PRO-${ctx.orgId}`,
     description: "CargoBook Pro plan",
   });
 
   return finalizeCharge(ctx.admin, {
-    provider: "evc",
+    provider: "premier",
     orgId: ctx.orgId,
-    account: phone,
+    account: ctx.account,
     referenceId,
     result,
   });
