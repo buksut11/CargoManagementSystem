@@ -12,9 +12,11 @@ import {
   Field,
   Input,
   PageHeader,
+  rowActionClass,
+  rowDeleteClass,
   Section,
 } from "@/components/ui";
-import { EditIcon, PinIcon, TrashIcon } from "@/components/icons";
+import { EditIcon, PinIcon, PlaneIcon, TrashIcon } from "@/components/icons";
 
 // A tasteful, deterministic gradient per destination so the code badges carry
 // a bit of colour variety instead of a wall of identical blue.
@@ -40,11 +42,11 @@ function CodeBadge({ name, code }: { name: string; code: string | null }) {
   const gradient = gradientFor(code || name);
   return (
     <span
-      className={`flex h-9 w-9 shrink-0 transform-gpu items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out will-change-transform group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
+      className={`flex h-10 w-10 shrink-0 transform-gpu items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out will-change-transform group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
       aria-hidden
     >
       {code ? (
-        <span className="font-mono text-[11px] font-bold tracking-tight">
+        <span className="font-mono text-xs font-bold tracking-tight">
           {code}
         </span>
       ) : (
@@ -142,30 +144,34 @@ export default function FlightDestinationsPage() {
   return (
     <div>
       <PageHeader title="Destinations" />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="space-y-6">
         <Section
           icon={<PinIcon />}
           title={editingId ? "Edit destination" : "New destination"}
           subtitle="Airports or cities you fly to"
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
-          <form onSubmit={save} className="space-y-3">
-            <Field label="Name">
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Istanbul"
-                required
-              />
-            </Field>
-            <Field label="Code" hint="Optional IATA / airport code.">
-              <Input
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="e.g. IST"
-                maxLength={4}
-              />
-            </Field>
+          <form onSubmit={save} className="flex flex-wrap items-end gap-3">
+            <div className="min-w-40 flex-1">
+              <Field label="Name">
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Istanbul"
+                  required
+                />
+              </Field>
+            </div>
+            <div className="min-w-40 flex-1">
+              <Field label="Code" hint="Optional IATA / airport code.">
+                <Input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="e.g. IST"
+                  maxLength={4}
+                />
+              </Field>
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
                 {busy ? "Saving…" : editingId ? "Save changes" : "Add destination"}
@@ -176,8 +182,10 @@ export default function FlightDestinationsPage() {
                 </Button>
               )}
             </div>
-            <ErrorNote message={error} />
           </form>
+          <div className="mt-3">
+            <ErrorNote message={error} />
+          </div>
         </Section>
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
@@ -191,20 +199,49 @@ export default function FlightDestinationsPage() {
             )}
           </div>
 
+          {/* Compact list on phones, a lively card board on tablets and up. */}
+          <div className="space-y-2 p-3 sm:hidden">
+            {destinations.map((d) => (
+              <div
+                key={d.id}
+                className="flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-white/40 p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
+              >
+                <CodeBadge name={d.name} code={d.code ?? null} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{d.name}</div>
+                  <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                    {d.code ? "Airport" : "No code"}
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button onClick={() => startEdit(d)} className={rowActionClass}>
+                    Edit
+                  </button>
+                  <button onClick={() => setPending(d)} className={rowDeleteClass}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {destinations.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 p-3 sm:[grid-template-columns:repeat(auto-fill,minmax(12rem,1fr))]">
+            <div className="hidden gap-2.5 p-3 sm:grid sm:[grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]">
               {destinations.map((d) => (
                 <div
                   key={d.id}
-                  className="group flex transform-gpu items-center gap-2.5 rounded-xl border border-white/60 bg-white/40 px-2.5 py-2 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
+                  className="group flex transform-gpu items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
                 >
                   <CodeBadge name={d.name} code={d.code ?? null} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">
                       {d.name}
                     </div>
-                    <div className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                      {d.code ? "Airport" : "No code"}
+                    <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                      <PlaneIcon className="h-3 w-3 shrink-0 opacity-70" />
+                      <span className="truncate">
+                        {d.code ? "Airport" : "No code"}
+                      </span>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-0.5 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none">
