@@ -15,27 +15,33 @@ type Accent = {
   button: string; // CTA fill + shadow
 };
 
+// Real brand colours, sampled from each provider's official logo:
+//   EVC Plus (Hormuud)  green  #009048
+//   eDahab (Somtel)     gold   #f0c000  (deeper #b8860b fill keeps white text legible)
+//   Premier Bank        navy   #003078
+// Dark-mode text uses a lighter tint of each so it stays readable on the dark
+// card. Arbitrary hex values are literal strings so Tailwind can compile them.
 const ACCENTS: Record<string, Accent> = {
-  emerald: {
-    bar: "bg-emerald-500",
-    chip: "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300",
-    price: "text-emerald-600 dark:text-emerald-400",
+  green: {
+    bar: "bg-[#009048]",
+    chip: "bg-[#009048]/15 text-[#009048] dark:text-[#2fbf74]",
+    price: "text-[#009048] dark:text-[#2fbf74]",
     button:
-      "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/30 focus-visible:ring-emerald-400",
+      "bg-[#009048] hover:bg-[#00753a] shadow-[#009048]/30 focus-visible:ring-[#009048]",
   },
-  sky: {
-    bar: "bg-sky-500",
-    chip: "bg-sky-500/15 text-sky-600 dark:bg-sky-400/15 dark:text-sky-300",
-    price: "text-sky-600 dark:text-sky-400",
+  gold: {
+    bar: "bg-[#f0c000]",
+    chip: "bg-[#f0c000]/15 text-[#a67c00] dark:text-[#e0b400]",
+    price: "text-[#a67c00] dark:text-[#e0b400]",
     button:
-      "bg-sky-600 hover:bg-sky-700 shadow-sky-500/30 focus-visible:ring-sky-400",
+      "bg-[#b8860b] hover:bg-[#9a7009] shadow-[#f0c000]/30 focus-visible:ring-[#f0c000]",
   },
-  violet: {
-    bar: "bg-violet-500",
-    chip: "bg-violet-500/15 text-violet-600 dark:bg-violet-400/15 dark:text-violet-300",
-    price: "text-violet-600 dark:text-violet-400",
+  navy: {
+    bar: "bg-[#003078]",
+    chip: "bg-[#003078]/15 text-[#003078] dark:text-[#7b9fe0]",
+    price: "text-[#003078] dark:text-[#7b9fe0]",
     button:
-      "bg-violet-600 hover:bg-violet-700 shadow-violet-500/30 focus-visible:ring-violet-400",
+      "bg-[#003078] hover:bg-[#00265e] shadow-[#003078]/30 focus-visible:ring-[#003078]",
   },
 };
 
@@ -62,7 +68,7 @@ const PROVIDERS: Provider[] = [
     label: "EVC number",
     placeholder: "0615714971",
     hint: "You'll approve the payment with your PIN on this phone.",
-    accent: "emerald",
+    accent: "green",
     icon: <WalletIcon />,
   },
   {
@@ -73,7 +79,7 @@ const PROVIDERS: Provider[] = [
     label: "eDahab number",
     placeholder: "0625714971",
     hint: "You'll approve the payment with your PIN on this phone.",
-    accent: "sky",
+    accent: "gold",
     icon: <WalletIcon />,
   },
   {
@@ -84,7 +90,7 @@ const PROVIDERS: Provider[] = [
     label: "Account or phone",
     placeholder: "0615714971",
     hint: "You'll confirm the payment through Premier Bank.",
-    accent: "violet",
+    accent: "navy",
     icon: <BuildingIcon />,
   },
 ];
