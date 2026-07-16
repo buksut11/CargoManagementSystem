@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Destination } from "@/lib/types";
 import {
@@ -11,6 +11,7 @@ import {
   ErrorNote,
   Input,
   PageHeader,
+  rowActionClass,
   rowDeleteClass,
   Section,
   Td,
@@ -25,11 +26,28 @@ export default function DestinationsPage() {
   const [country, setCountry] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [pending, setPending] = useState<Destination | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const [version, setVersion] = useState(0);
   const reload = () => setVersion((v) => v + 1);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  function resetForm() {
+    setEditingId(null);
+    setName("");
+    setCountry("");
+    setError(null);
+  }
+
+  function startEdit(d: Destination) {
+    setEditingId(d.id);
+    setName(d.name);
+    setCountry(d.country ?? "");
+    setError(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   useEffect(() => {
     let active = true;
@@ -47,14 +65,17 @@ export default function DestinationsPage() {
     };
   }, [version]);
 
-  async function add(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await supabase.from("destinations").insert({
+    const payload = {
       name: name.trim(),
       country: country.trim() || null,
-    });
+    };
+    const { error } = editingId
+      ? await supabase.from("destinations").update(payload).eq("id", editingId)
+      : await supabase.from("destinations").insert(payload);
     setBusy(false);
     if (error) {
       setError(
@@ -64,8 +85,7 @@ export default function DestinationsPage() {
       );
       return;
     }
-    setName("");
-    setCountry("");
+    resetForm();
     reload();
   }
 
@@ -78,7 +98,10 @@ export default function DestinationsPage() {
       .eq("id", pending.id);
     setDeleting(false);
     if (error) setError(error.message);
-    else reload();
+    else {
+      if (editingId === pending.id) resetForm();
+      reload();
+    }
     setPending(null);
   }
 
@@ -88,10 +111,11 @@ export default function DestinationsPage() {
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
       <Section
         icon={<PinIcon />}
-        title="Add a destination"
+        title={editingId ? "Edit destination" : "Add a destination"}
         subtitle="Places you ship to"
       >
-        <form onSubmit={add} className="flex flex-wrap items-end gap-3">
+        <div ref={formRef} className="-mt-2 scroll-mt-6" />
+        <form onSubmit={save} className="flex flex-wrap items-end gap-3">
           <div className="min-w-40 flex-1">
             <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
               City / place
@@ -113,9 +137,16 @@ export default function DestinationsPage() {
               placeholder="e.g. Türkiye"
             />
           </div>
-          <Button type="submit" disabled={busy}>
-            Add
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={busy}>
+              {busy ? "Saving…" : editingId ? "Save changes" : "Add"}
+            </Button>
+            {editingId && (
+              <Button type="button" variant="secondary" onClick={resetForm}>
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
         <div className="mt-3">
           <ErrorNote message={error} />
@@ -136,12 +167,20 @@ export default function DestinationsPage() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => setPending(d)}
-                className={`${rowDeleteClass} shrink-0`}
-              >
-                Delete
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  onClick={() => startEdit(d)}
+                  className={rowActionClass}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setPending(d)}
+                  className={rowDeleteClass}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -159,9 +198,20 @@ export default function DestinationsPage() {
                 <Td className="font-medium">{d.name}</Td>
                 <Td>{d.country ?? "—"}</Td>
                 <Td className="text-right">
-                  <button onClick={() => setPending(d)} className={rowDeleteClass}>
-                    Delete
-                  </button>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => startEdit(d)}
+                      className={rowActionClass}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setPending(d)}
+                      className={rowDeleteClass}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </Td>
               </tr>
             ))}
