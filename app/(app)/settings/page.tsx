@@ -29,6 +29,7 @@ import {
   WalletIcon,
 } from "@/components/icons";
 import { BillingCards } from "@/components/billing-cards";
+import { BillingHistory } from "@/components/billing-history";
 
 export default function SettingsPage() {
   const org = useOrg();
@@ -345,16 +346,19 @@ export default function SettingsPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
           </Section>
         ) : (
-          <BillingCards
-            orgId={orgId}
-            plan={current}
-            paid={paid}
-            subStatus={subStatus}
-            onUpgraded={() => {
-              setPlan("pro");
-              setSubStatus("active");
-            }}
-          />
+          <div>
+            <BillingCards
+              orgId={orgId}
+              plan={current}
+              paid={paid}
+              subStatus={subStatus}
+              onUpgraded={() => {
+                setPlan("pro");
+                setSubStatus("active");
+              }}
+            />
+            <BillingHistory orgId={orgId} />
+          </div>
         )}
 
         <Section
