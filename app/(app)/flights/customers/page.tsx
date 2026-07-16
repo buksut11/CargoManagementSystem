@@ -238,14 +238,96 @@ export default function FlightCustomersPage() {
             </div>
           </div>
 
+          {/* Compact list on phones, a lively card board on tablets and up —
+              mirrors the Destinations layout while keeping every field. */}
           {filtered.length > 0 && (
-            <div className="divide-y divide-slate-200/50 dark:divide-white/[0.06]">
+            <div className="space-y-2 p-3 sm:hidden">
               {filtered.map((c) => {
                 const due = balances[c.id] ?? 0;
                 return (
                   <div
                     key={c.id}
-                    className="group relative flex flex-col gap-3 px-4 py-4 transition-colors duration-300 ease-out hover:bg-gradient-to-r hover:from-white/60 hover:to-transparent sm:flex-row sm:items-center sm:gap-4 dark:hover:from-white/[0.06]"
+                    className="flex flex-col gap-3 rounded-2xl border border-slate-200/60 bg-white/40 p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar name={c.name} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-medium">{c.name}</div>
+                        {c.email ? (
+                          <div className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                            <MailIcon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                            <span className="truncate">{c.email}</span>
+                          </div>
+                        ) : (
+                          <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                            No email
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {c.phone && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/[0.06] px-3 py-1.5 text-xs font-medium tabular-nums text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">
+                          <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+                          {c.phone}
+                        </span>
+                      )}
+                      {due > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setBreakdownFor(c)}
+                          aria-label={`See what makes up ${c.name}'s balance of ${fmtMoney(due)}`}
+                          className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600 transition-colors duration-200 ease-out hover:bg-amber-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25"
+                        >
+                          {fmtMoney(due)} due
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Settled
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Link
+                        href={`/flights/statement?customer=${c.id}`}
+                        aria-label={`View ${c.name}'s statement`}
+                        className={`${custActionClass} bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:hover:bg-blue-400/20`}
+                      >
+                        <StatementIcon className="h-4 w-4" />
+                        Statement
+                      </Link>
+                      <button
+                        onClick={() => startEdit(c)}
+                        aria-label={`Edit ${c.name}`}
+                        className={`${custActionClass} bg-slate-500/[0.07] text-slate-600 hover:bg-slate-500/15 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/[0.12]`}
+                      >
+                        <EditIcon className="h-4 w-4" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setPending(c)}
+                        aria-label={`Delete ${c.name}`}
+                        className={`${custActionClass} bg-red-500/[0.08] text-red-600 hover:bg-red-500/15 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20`}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {filtered.length > 0 && (
+            <div className="hidden gap-2.5 p-3 sm:grid sm:[grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]">
+              {filtered.map((c) => {
+                const due = balances[c.id] ?? 0;
+                return (
+                  <div
+                    key={c.id}
+                    className="group relative flex transform-gpu flex-col gap-3 overflow-hidden rounded-2xl border border-white/60 bg-white/40 p-3.5 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
                   >
                     {/* Accent bar for customers who owe money — a quick visual cue. */}
                     <span
@@ -257,24 +339,48 @@ export default function FlightCustomersPage() {
                       aria-hidden
                     />
 
-                    {/* Identity */}
-                    <div className="flex min-w-0 flex-1 items-center gap-3.5">
+                    {/* Identity + hover-revealed actions, like the Destinations card. */}
+                    <div className="flex items-center gap-3">
                       <Avatar name={c.name} />
-                      <div className="min-w-0">
-                        <div className="truncate font-semibold text-slate-900 dark:text-slate-100">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">
                           {c.name}
                         </div>
-                        {c.email && (
-                          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                            <MailIcon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
-                            <span className="truncate">{c.email}</span>
-                          </div>
-                        )}
+                        <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                          <MailIcon className="h-3 w-3 shrink-0 opacity-70" />
+                          <span className="truncate">{c.email || "No email"}</span>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-0.5 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none">
+                        <Link
+                          href={`/flights/statement?customer=${c.id}`}
+                          title="View statement"
+                          aria-label={`View ${c.name}'s statement`}
+                          className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-blue-500/10 hover:text-blue-600 dark:hover:bg-blue-400/10 dark:hover:text-blue-400"
+                        >
+                          <StatementIcon className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => startEdit(c)}
+                          title="Edit"
+                          aria-label={`Edit ${c.name}`}
+                          className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                        >
+                          <EditIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setPending(c)}
+                          title="Delete"
+                          aria-label={`Delete ${c.name}`}
+                          className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
 
-                    {/* Phone + status */}
-                    <div className="flex items-center gap-2 pl-[3.875rem] sm:gap-3 sm:pl-0">
+                    {/* Phone + balance status. */}
+                    <div className="flex flex-wrap items-center gap-2">
                       {c.phone && (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/[0.06] px-3 py-1.5 text-xs font-medium tabular-nums text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">
                           <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
@@ -297,38 +403,6 @@ export default function FlightCustomersPage() {
                           Settled
                         </span>
                       )}
-                    </div>
-
-                    {/* Actions — icon-only on desktop (labels appear on mobile,
-                        where they sit on their own line with room to spare). */}
-                    <div className="flex shrink-0 flex-wrap items-center gap-1.5 pl-[3.875rem] sm:pl-0">
-                      <Link
-                        href={`/flights/statement?customer=${c.id}`}
-                        title="View statement"
-                        aria-label={`View ${c.name}'s statement`}
-                        className={`${custActionClass} bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:hover:bg-blue-400/20`}
-                      >
-                        <StatementIcon className="h-4 w-4" />
-                        <span className="sm:hidden">Statement</span>
-                      </Link>
-                      <button
-                        onClick={() => startEdit(c)}
-                        title="Edit"
-                        aria-label={`Edit ${c.name}`}
-                        className={`${custActionClass} bg-slate-500/[0.07] text-slate-600 hover:bg-slate-500/15 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/[0.12]`}
-                      >
-                        <EditIcon className="h-4 w-4" />
-                        <span className="sm:hidden">Edit</span>
-                      </button>
-                      <button
-                        onClick={() => setPending(c)}
-                        title="Delete"
-                        aria-label={`Delete ${c.name}`}
-                        className={`${custActionClass} bg-red-500/[0.08] text-red-600 hover:bg-red-500/15 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20`}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                        <span className="sm:hidden">Delete</span>
-                      </button>
                     </div>
                   </div>
                 );
