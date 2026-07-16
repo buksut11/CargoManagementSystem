@@ -48,10 +48,6 @@ export default function PricingPage() {
           <Link href="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
             Sign in
           </Link>
-          {" "}· Questions?{" "}
-          <Link href="/contact" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
-            Contact us
-          </Link>
         </p>
       </div>
     </main>

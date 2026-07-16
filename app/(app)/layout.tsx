@@ -22,6 +22,7 @@ import {
   HomeIcon,
   InvoiceIcon,
   LogoutIcon,
+  MailIcon,
   MenuIcon,
   PinIcon,
   PlaneIcon,
@@ -84,6 +85,8 @@ const FLIGHT_NAV: NavItem[] = [
 const ACCOUNT_NAV: NavItem[] = [
   { href: "/members", label: "Members", icon: UsersIcon, roles: ADMINS },
   { href: "/settings", label: "Settings", icon: SettingsIcon, roles: ADMINS },
+  // Every role can message the app owner (feature requests, problem reports).
+  { href: "/contact-us", label: "Contact Us", icon: MailIcon, roles: ALL },
 ];
 
 // Remembers which organization the user last acted in (for multi-org accounts).
@@ -152,7 +155,8 @@ function pathAllowed(role: OrgRole, path: string, modules: string[]) {
       /^\/flights\/bookings\/\d+$/.test(path) ||
       path === "/payments" ||
       path === "/invoices" ||
-      /^\/invoices\/\d+$/.test(path)
+      /^\/invoices\/\d+$/.test(path) ||
+      path === "/contact-us"
     );
   }
   if (role === "manager") {
