@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
+import { appBaseUrl } from "@/lib/app-url";
 
 export const runtime = "nodejs";
 
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
       .eq("id", orgId);
   }
 
-  const origin = request.headers.get("origin") ?? new URL(request.url).origin;
+  const origin = appBaseUrl(request);
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,

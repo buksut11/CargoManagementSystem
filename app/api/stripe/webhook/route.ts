@@ -37,7 +37,12 @@ export async function POST(request: Request) {
   switch (event.type) {
     case "checkout.session.completed": {
       const s = event.data.object as Stripe.Checkout.Session;
-      if (s.customer) {
+      // A session can complete while payment is still pending (async payment
+      // methods). Only grant the paid plan once money actually moved — the
+      // subscription.* events below reconcile every later state change.
+      const paid =
+        s.payment_status === "paid" || s.payment_status === "no_payment_required";
+      if (s.customer && paid) {
         await updateByCustomer(String(s.customer), {
           plan: "pro",
           subscription_status: "active",

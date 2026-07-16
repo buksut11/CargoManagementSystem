@@ -1,7 +1,30 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
+import { hashInviteToken } from "@/lib/invite-token";
 
 export const runtime = "nodejs";
+
+// Look up an invite by the token from the link. Tokens are stored as SHA-256
+// digests (lib/invite-token.ts); the plain-text fallback keeps invites issued
+// before hashing redeemable — those rows age out within the 7-day expiry.
+async function findInvite(
+  admin: ReturnType<typeof createServiceClient>,
+  columns: string,
+  rawToken: string,
+) {
+  const { data } = await admin
+    .from("invitations")
+    .select(columns)
+    .eq("token", hashInviteToken(rawToken))
+    .maybeSingle();
+  if (data) return data;
+  const { data: legacy } = await admin
+    .from("invitations")
+    .select(columns)
+    .eq("token", rawToken)
+    .maybeSingle();
+  return legacy;
+}
 
 // GET /api/invitations/accept?token=... → details about an invite so the
 // accept page can show who it's for. Uses the service role because invitees
@@ -19,11 +42,17 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false, reason: "server" }, { status: 500 });
   }
 
-  const { data: invite } = await admin
-    .from("invitations")
-    .select("email, role, accepted_at, expires_at, organizations(name)")
-    .eq("token", token)
-    .maybeSingle();
+  const invite = (await findInvite(
+    admin,
+    "email, role, accepted_at, expires_at, organizations(name)",
+    token,
+  )) as {
+    email: string;
+    role: string;
+    accepted_at: string | null;
+    expires_at: string;
+    organizations: { name?: string } | { name?: string }[] | null;
+  } | null;
 
   if (!invite) {
     return NextResponse.json({ valid: false, reason: "not_found" });
@@ -35,10 +64,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false, reason: "expired" });
   }
 
-  const orgRel = invite.organizations as
-    | { name?: string }
-    | { name?: string }[]
-    | null;
+  const orgRel = invite.organizations;
   const orgName = Array.isArray(orgRel) ? orgRel[0]?.name : orgRel?.name;
 
   return NextResponse.json({
@@ -76,11 +102,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: invite } = await admin
-    .from("invitations")
-    .select("id, org_id, email, role, accepted_at, expires_at")
-    .eq("token", token)
-    .maybeSingle();
+  const invite = (await findInvite(
+    admin,
+    "id, org_id, email, role, accepted_at, expires_at",
+    token,
+  )) as {
+    id: string;
+    org_id: string;
+    email: string;
+    role: string;
+    accepted_at: string | null;
+    expires_at: string;
+  } | null;
 
   if (!invite || invite.accepted_at) {
     return NextResponse.json(
