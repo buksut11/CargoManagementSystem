@@ -163,7 +163,7 @@ export default function FlightDestinationsPage() {
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Code" hint="Optional IATA / airport code.">
+              <Field label="Code">
                 <Input
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
@@ -182,6 +182,12 @@ export default function FlightDestinationsPage() {
                 </Button>
               )}
             </div>
+            {/* Full-width helper line: keeping this inside the Code column
+                pushed its input above the row's shared baseline (items-end),
+                breaking the Name / Code / button alignment. */}
+            <p className="w-full text-xs text-slate-500 dark:text-slate-400">
+              Code is optional — the IATA / airport code.
+            </p>
           </form>
           <div className="mt-3">
             <ErrorNote message={error} />
