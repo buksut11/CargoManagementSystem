@@ -265,6 +265,48 @@ input:-webkit-autofill:focus {
   display: none; /* WebKit */
 }
 
+/* App-wide scrollbar skin. Browsers paint their default chunky, opaque OS
+   scrollbar on every overflowing surface — the page, dropdown popovers, date
+   pickers, dialogs — which clashes with the frosted glass look. Slim every
+   scrollbar down to the same subtle, rounded, theme-tinted thumb used by the
+   tables, so scrollbars read as part of the app rather than the OS. The thumb
+   is inset with a transparent border + padding-box clip so it floats with a
+   little breathing room inside the track.
+   `.no-scrollbar` (display:none) and `.table-scroll` (its own sizing) are more
+   specific and keep overriding this where they're applied. */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgba(100, 116, 139, 0.35); /* slate-500 */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.55);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+.dark * {
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+.dark *::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3); /* slate-400 */
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+
 /* Horizontal scroll for wide tables. A table with many columns can't shrink to
    fit a phone or tablet, so it scrolls sideways inside its card — but the OS's
    default scrollbar is a thick opaque bar that sits across the card's rounded
