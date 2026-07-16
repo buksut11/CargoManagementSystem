@@ -312,6 +312,9 @@ export type FlightExpense = {
   category: string;
   amount: number;
   note: string | null;
+  // Only set for staff-salary expenses (migration 0041); null otherwise. May be
+  // undefined on rows read before the migration is applied.
+  staff_name?: string | null;
   created_at: string;
 };
 
