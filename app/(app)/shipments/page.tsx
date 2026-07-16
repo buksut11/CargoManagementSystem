@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type { Payment, Shipment, ShipmentStatus } from "@/lib/types";
+import type { Shipment, ShipmentStatus } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
@@ -29,12 +29,14 @@ import {
 } from "@/components/ui";
 import { useRole } from "@/components/role-context";
 
+type InvoiceTotals = { invoiced: number; paid: number };
+
 export default function ShipmentsPage() {
   const role = useRole();
   const isAdmin = role === "admin";
   const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [payments, setPayments] = useState<Pick<Payment, "invoice_id" | "amount">[]>(
-    [],
+  const [invoiceTotals, setInvoiceTotals] = useState<Map<number, InvoiceTotals>>(
+    () => new Map(),
   );
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -43,53 +45,69 @@ export default function ShipmentsPage() {
   useEffect(() => {
     // Both admins and agents read the shipments (with destination + invoice
     // info). Agents can see the details but the database still lets them
-    // change only the status and notes. Payments come along too so the list
-    // can show a Paid / Partial / Unpaid badge (agents may read, not write,
-    // payments — see migration 0020).
+    // change only the status and notes. The Paid / Partial / Unpaid badge
+    // comes from the invoice_payment_totals() rollup (migration 0032) — one
+    // row per invoice instead of every payment row (agents may read, not
+    // write, payments — see migration 0020).
     async function load() {
-      const [s, p] = await Promise.all([
+      const [s, t] = await Promise.all([
         supabase
           .from("shipments")
           .select(
             "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
           )
           .order("created_at", { ascending: false }),
-        supabase.from("payments").select("invoice_id, amount"),
+        supabase.rpc("invoice_payment_totals"),
       ]);
-      setShipments((s.data as Shipment[]) ?? []);
-      setPayments(
-        (p.data as Pick<Payment, "invoice_id" | "amount">[]) ?? [],
-      );
+      const shipmentRows = (s.data as Shipment[]) ?? [];
+      setShipments(shipmentRows);
+      if (!t.error && t.data) {
+        setInvoiceTotals(
+          new Map(
+            (t.data as { invoice_id: number; invoiced: number; paid: number }[]).map(
+              (r) => [
+                r.invoice_id,
+                { invoiced: Number(r.invoiced), paid: Number(r.paid) },
+              ],
+            ),
+          ),
+        );
+      } else {
+        // Fallback (function not present yet): aggregate in the browser from
+        // the raw payment rows, exactly as before the migration.
+        const { data: pay } = await supabase
+          .from("payments")
+          .select("invoice_id, amount");
+        const map = new Map<number, InvoiceTotals>();
+        for (const row of shipmentRows) {
+          if (row.invoice_id == null) continue;
+          const cur = map.get(row.invoice_id) ?? { invoiced: 0, paid: 0 };
+          cur.invoiced += Number(row.total);
+          map.set(row.invoice_id, cur);
+        }
+        for (const p of (pay as { invoice_id: number; amount: number }[]) ?? []) {
+          const cur = map.get(p.invoice_id) ?? { invoiced: 0, paid: 0 };
+          cur.paid += Number(p.amount);
+          map.set(p.invoice_id, cur);
+        }
+        setInvoiceTotals(map);
+      }
       setLoading(false);
     }
     load();
   }, []);
 
-  // Roll shipment totals and payments up per invoice so each shipment can show
-  // whether its invoice is paid, partially paid, or unpaid. An invoice can hold
-  // several shipments, so the status reflects the whole invoice, not one line.
+  // Each shipment shows whether its invoice is paid, partially paid, or
+  // unpaid. An invoice can hold several shipments, so the status reflects the
+  // whole invoice, not one line.
   const payStateByInvoice = useMemo(() => {
-    const totalByInvoice = new Map<number, number>();
-    for (const s of shipments) {
-      if (s.invoice_id == null) continue;
-      totalByInvoice.set(
-        s.invoice_id,
-        (totalByInvoice.get(s.invoice_id) ?? 0) + Number(s.total),
-      );
-    }
-    const paidByInvoice = new Map<number, number>();
-    for (const p of payments) {
-      paidByInvoice.set(
-        p.invoice_id,
-        (paidByInvoice.get(p.invoice_id) ?? 0) + Number(p.amount),
-      );
-    }
     const state = new Map<number, ReturnType<typeof paymentState>>();
-    for (const [invoiceId, total] of totalByInvoice) {
-      state.set(invoiceId, paymentState(total, paidByInvoice.get(invoiceId) ?? 0));
+    for (const [invoiceId, t] of invoiceTotals) {
+      if (t.invoiced === 0 && t.paid === 0) continue;
+      state.set(invoiceId, paymentState(t.invoiced, t.paid));
     }
     return state;
-  }, [shipments, payments]);
+  }, [invoiceTotals]);
 
   function payBadge(s: Shipment) {
     if (s.invoice_id == null) return null;

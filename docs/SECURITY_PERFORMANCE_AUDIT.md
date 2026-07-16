@@ -226,21 +226,20 @@ Also narrow `select("*")` to the columns each page renders — several pages joi
 As an interim one-liner, add a defensive `.limit(1000)` to every unpaginated list
 so a large tenant degrades instead of stalling.
 
-### P-2 (Medium) — Per-invoice payment status computed by shipping all payment rows to the browser
+### P-2 (Medium) — Per-invoice payment status computed by shipping all payment rows to the browser — ✅ Fixed in this branch
 
-`shipments/page.tsx` downloads the whole `payments` table (per org) to compute
-Paid/Partial/Unpaid badges. Follow the `dashboard_summary` precedent (migration
-0023) and aggregate in SQL:
+`shipments/page.tsx` downloaded the whole `payments` table (per org) to compute
+Paid/Partial/Unpaid badges, and `invoices/page.tsx` downloaded every shipment
+*and* payment row for its Total/Paid/Balance columns.
 
-```sql
-create or replace function public.invoice_payment_totals()
-returns table (invoice_id bigint, paid numeric)
-language sql stable security invoker as $$
-  select invoice_id, sum(amount) from public.payments group by invoice_id;
-$$;
-```
-
-One row per invoice instead of one per payment.
+**Fix applied.** Migration `0032_invoice_payment_totals.sql` adds an
+`invoice_payment_totals()` RPC (SECURITY INVOKER, so RLS still applies) that
+returns one `(invoice_id, invoiced, paid)` row per invoice, following the
+`dashboard_summary` precedent. Both pages now call it, keeping the old
+client-side aggregation as a fallback until the migration is run — ship the code
+first, then run the migration, same as 0023. A side benefit: badge correctness no
+longer depends on having every shipment row in the browser, which unblocks the
+P-1 pagination work.
 
 ### P-3 (Low) — Dashboard fallback path
 
@@ -282,10 +281,14 @@ pair it with the P-1 pagination work rather than doing it piecemeal.
 | 5 | Invite email validation (S-5) | Low | ✅ Fixed |
 | 6 | Edge rate limiting on `/api/*` (S-6) | Medium | Recommended |
 | 7 | Server-side pagination + column narrowing (P-1) | High at scale | Recommended |
-| 8 | Payment-totals RPC (P-2) | Medium | Recommended |
+| 8 | Payment-totals RPC (P-2) | Medium | ✅ Fixed |
 | 9 | Nonce-based CSP (S-7) | Low | Optional |
 | 10 | Next.js upgrade to clear postcss advisory (S-9) | Low | When available |
 | 11 | RSC migration for list pages (P-5) | Perf/UX | Long-term |
 
-**Deployment note:** set `NEXT_PUBLIC_APP_URL` in production (see `.env.example`).
-No database migration is required for any fix in this branch.
+**Deployment notes:**
+
+- Set `NEXT_PUBLIC_APP_URL` in production (see `.env.example`).
+- Run `supabase/migrations/0032_invoice_payment_totals.sql` after deploying the
+  app code (the pages fall back to the old client-side aggregation until it
+  exists, so order is not critical). All other fixes need no migration.
