@@ -227,6 +227,7 @@ export default function SettingsPage() {
       <PageHeader title="Settings" />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
         <Section
           icon={<BuildingIcon />}
           title="Organization"
@@ -340,27 +341,6 @@ export default function SettingsPage() {
             <ErrorNote message={error} />
           </div>
         </Section>
-
-        {loading ? (
-          <Section icon={<WalletIcon />} title="Billing">
-            <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
-          </Section>
-        ) : (
-          <div>
-            <BillingCards
-              orgId={orgId}
-              plan={current}
-              paid={paid}
-              subStatus={subStatus}
-              onUpgraded={() => {
-                setPlan("pro");
-                setSubStatus("active");
-              }}
-            />
-            <BillingHistory orgId={orgId} />
-          </div>
-        )}
-
         <Section
           icon={<DashboardIcon />}
           title="Modules"
@@ -399,7 +379,27 @@ export default function SettingsPage() {
             })}
           </div>
         </Section>
-
+        </div>
+        <div className="space-y-6">
+        {loading ? (
+          <Section icon={<WalletIcon />} title="Billing">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+          </Section>
+        ) : (
+          <div>
+            <BillingCards
+              orgId={orgId}
+              plan={current}
+              paid={paid}
+              subStatus={subStatus}
+              onUpgraded={() => {
+                setPlan("pro");
+                setSubStatus("active");
+              }}
+            />
+            <BillingHistory orgId={orgId} />
+          </div>
+        )}
         <Section
           icon={<BookIcon />}
           title="Backup & restore"
@@ -451,6 +451,7 @@ export default function SettingsPage() {
             same backup twice will duplicate shipments, invoices and bookings.
           </p>
         </Section>
+        </div>
       </div>
 
       <ConfirmDialog
