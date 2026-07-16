@@ -22,12 +22,16 @@ import {
   Td,
   Th,
 } from "@/components/ui";
+import { useRole } from "@/components/role-context";
 
 type InvoiceTotals = { invoiced: number; paid: number };
 
 const PAGE_SIZE = 100;
 
 export default function InvoicesPage() {
+  // Agents get read-only invoices (they open one to record a payment), so the
+  // "New invoice" action is hidden from them.
+  const isAgent = useRole() === "agent";
   const [invoiceTotals, setInvoiceTotals] = useState<Map<number, InvoiceTotals>>(
     () => new Map(),
   );
@@ -124,12 +128,14 @@ export default function InvoicesPage() {
       <PageHeader
         title="Invoices"
         action={
-          <Link
-            href="/invoices/new"
-            className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
-          >
-            + New invoice
-          </Link>
+          isAgent ? undefined : (
+            <Link
+              href="/invoices/new"
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
+            >
+              + New invoice
+            </Link>
+          )
         }
       />
       <div className="mb-4 flex flex-wrap gap-3">

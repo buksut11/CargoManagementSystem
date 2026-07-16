@@ -25,9 +25,11 @@ import {
 import {
   BookIcon,
   BuildingIcon,
-  CoinsIcon,
   DashboardIcon,
+  WalletIcon,
 } from "@/components/icons";
+import { BillingCards } from "@/components/billing-cards";
+import { BillingHistory } from "@/components/billing-history";
 
 export default function SettingsPage() {
   const org = useOrg();
@@ -51,7 +53,6 @@ export default function SettingsPage() {
   const [detailsSaved, setDetailsSaved] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checkoutBusy, setCheckoutBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -165,28 +166,6 @@ export default function SettingsPage() {
     setSidebarLogo(null);
   }
 
-  async function startCheckout() {
-    setCheckoutBusy(true);
-    setError(null);
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
-    const res = await fetch("/api/stripe/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token ?? ""}`,
-      },
-      body: JSON.stringify({ orgId }),
-    });
-    const data = await res.json();
-    setCheckoutBusy(false);
-    if (!res.ok || !data.url) {
-      setError(data.error ?? "Billing is not available right now.");
-      return;
-    }
-    window.location.href = data.url;
-  }
-
   async function makeBackup() {
     setBackupBusy(true);
     setError(null);
@@ -248,6 +227,7 @@ export default function SettingsPage() {
       <PageHeader title="Settings" />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
         <Section
           icon={<BuildingIcon />}
           title="Organization"
@@ -361,46 +341,6 @@ export default function SettingsPage() {
             <ErrorNote message={error} />
           </div>
         </Section>
-
-        <Section icon={<CoinsIcon />} title="Billing">
-          {loading ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
-          ) : (
-            <>
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white">
-                    {current.name} plan
-                  </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    {paid
-                      ? `Subscription ${subStatus}`
-                      : current.maxShipments === Infinity
-                        ? "Unlimited shipments"
-                        : `Up to ${current.maxShipments} shipments`}
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  {current.priceLabel}
-                </span>
-              </div>
-              {!paid && (
-                <Button
-                  onClick={startCheckout}
-                  disabled={checkoutBusy}
-                  className="mt-4 w-full"
-                >
-                  {checkoutBusy ? "Starting…" : "Upgrade"}
-                </Button>
-              )}
-              <p className="mt-3 text-xs text-slate-400">
-                Billing runs on Stripe. It activates once Stripe keys are
-                configured on the server.
-              </p>
-            </>
-          )}
-        </Section>
-
         <Section
           icon={<DashboardIcon />}
           title="Modules"
@@ -439,7 +379,27 @@ export default function SettingsPage() {
             })}
           </div>
         </Section>
-
+        </div>
+        <div className="space-y-6">
+        {loading ? (
+          <Section icon={<WalletIcon />} title="Billing">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+          </Section>
+        ) : (
+          <div>
+            <BillingCards
+              orgId={orgId}
+              plan={current}
+              paid={paid}
+              subStatus={subStatus}
+              onUpgraded={() => {
+                setPlan("pro");
+                setSubStatus("active");
+              }}
+            />
+            <BillingHistory orgId={orgId} />
+          </div>
+        )}
         <Section
           icon={<BookIcon />}
           title="Backup & restore"
@@ -491,6 +451,7 @@ export default function SettingsPage() {
             same backup twice will duplicate shipments, invoices and bookings.
           </p>
         </Section>
+        </div>
       </div>
 
       <ConfirmDialog

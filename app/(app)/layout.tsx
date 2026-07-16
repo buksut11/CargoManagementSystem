@@ -22,6 +22,7 @@ import {
   HomeIcon,
   InvoiceIcon,
   LogoutIcon,
+  MailIcon,
   MenuIcon,
   PinIcon,
   PlaneIcon,
@@ -48,10 +49,14 @@ const ADMINS: OrgRole[] = ["owner", "admin"];
 const CARGO_NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: HomeIcon, roles: EDITORS },
   { href: "/shipments", label: "Shipments", icon: BoxIcon, roles: ALL },
-  { href: "/invoices", label: "Invoices", icon: InvoiceIcon, roles: EDITORS },
+  // Agents get read-only invoices so they can open an invoice to record a
+  // payment (they cannot create or delete invoices — see the invoice pages).
+  { href: "/invoices", label: "Invoices", icon: InvoiceIcon, roles: ALL },
   { href: "/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
   { href: "/statement", label: "Statement", icon: StatementIcon, roles: EDITORS },
-  { href: "/payments", label: "Payments", icon: CoinsIcon, roles: EDITORS },
+  // Agents may add payments (recorded from an invoice); editing/deleting them
+  // stays editor-only.
+  { href: "/payments", label: "Payments", icon: CoinsIcon, roles: ALL },
   { href: "/expenses", label: "Expenses", icon: WalletIcon, roles: EDITORS },
   { href: "/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },
   { href: "/audit", label: "Audit trail", icon: ClockIcon, roles: EDITORS },
@@ -80,6 +85,8 @@ const FLIGHT_NAV: NavItem[] = [
 const ACCOUNT_NAV: NavItem[] = [
   { href: "/members", label: "Members", icon: UsersIcon, roles: ADMINS },
   { href: "/settings", label: "Settings", icon: SettingsIcon, roles: ADMINS },
+  // Every role can message the app owner (feature requests, problem reports).
+  { href: "/contact-us", label: "Contact Us", icon: MailIcon, roles: ALL },
 ];
 
 // Remembers which organization the user last acted in (for multi-org accounts).
@@ -138,12 +145,18 @@ function pathAllowed(role: OrgRole, path: string, modules: string[]) {
   if (isCargoPath && !on.includes("cargo")) return false;
 
   if (role === "agent") {
-    // Read-only: cargo shipments and flight bookings only.
+    // Cargo shipments and flight bookings (read-only), plus the payment flow:
+    // the Payments list and read-only invoices so an agent can open an invoice
+    // and record a payment. Invoice creation (/invoices/new) stays blocked.
     return (
       path === "/shipments" ||
       /^\/shipments\/\d+$/.test(path) ||
       path === "/flights/bookings" ||
-      /^\/flights\/bookings\/\d+$/.test(path)
+      /^\/flights\/bookings\/\d+$/.test(path) ||
+      path === "/payments" ||
+      path === "/invoices" ||
+      /^\/invoices\/\d+$/.test(path) ||
+      path === "/contact-us"
     );
   }
   if (role === "manager") {
@@ -243,7 +256,7 @@ function SidebarContent({
                 onClick={onNavigate}
                 className={`${itemBase} ${
                   active
-                    ? "bg-white/60 text-blue-700 shadow-sm ring-1 ring-white/70 dark:bg-white/[0.12] dark:text-blue-300 dark:ring-white/10"
+                    ? "nav-tab text-blue-700 dark:text-blue-300"
                     : itemIdle
                 }`}
               >
@@ -435,7 +448,9 @@ export default function AppLayout({
         {/* overflow-y-auto: with both modules enabled the nav can be taller
             than the screen — it must scroll inside the frosted panel instead
             of spilling past it (which painted items on the page background). */}
-        <aside className="no-print no-scrollbar sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/25 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/30 md:flex">
+        {/* rounded-r-3xl: only the corners facing the content curve — the
+            panel stays flush with the screen's left edge and full height. */}
+        <aside className="no-print no-scrollbar sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 overflow-y-auto rounded-r-3xl border-y border-r border-white/50 bg-white/25 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/30 md:flex">
           <SidebarContent
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
@@ -462,7 +477,7 @@ export default function AppLayout({
             aria-hidden
           />
           <aside
-            className={`no-scrollbar absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto border-r border-white/50 bg-white/55 px-4 py-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-slate-900/70 ${
+            className={`no-scrollbar absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto rounded-r-3xl border-y border-r border-white/50 bg-white/55 px-4 py-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-slate-900/70 ${
               menuOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >

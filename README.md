@@ -9,7 +9,7 @@ A simple app to track your cargo shipments and get paid:
 - **Payments** — record payments against invoices, see paid / partial / unpaid status and remaining balances
 - **Expenses & profit** — record what each delivery cost you (airplane, car, motorcycle, or any type you add yourself via the dropdown's "➕ Add new type…"); the app subtracts those costs from the customer's price to show the **net profit per shipment** and overall
 - **Dashboard** — total shipments, total kg, invoiced amount, outstanding balance, expenses, net profit
-- **Admin & Agent roles** — admins have full access; agents see the shipments list and details (item, who it's billed to, the total price, and whether the invoice is **paid / partial / unpaid**) and can only update the shipment status and notes
+- **Admin & Agent roles** — admins have full access; agents see the shipments list and details (item, who it's billed to, the total price, and whether the invoice is **paid / partial / unpaid**), can only update the shipment status and notes, and can **record payments** against an invoice (they cannot edit or delete payments, or create/delete invoices)
 - **Audit trail** — admins can see who created, updated, or deleted every shipment (with the exact old → new values), recorded by a database trigger that agents cannot bypass
 
 Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.com) (free tier is plenty).
@@ -39,7 +39,7 @@ Open [http://localhost:3000](http://localhost:3000) and sign in with the user yo
 Migration `0003` adds a `profiles` table with a `role` per user:
 
 - **Admin** — full access to everything (shipments, invoices, payments, expenses, destinations).
-- **Agent** — sees the shipments list and shipment details, including who each shipment is billed to, the **total price**, and the invoice's **payment status** (paid / partial / unpaid), and can only change a shipment's **status** (Pending / Shipped / Delivered) and its **notes**. The write restriction is enforced in the database (row-level security + a trigger), not just hidden in the UI — agents can read payments but cannot record or change them.
+- **Agent** — sees the shipments list and shipment details, including who each shipment is billed to, the **total price**, and the invoice's **payment status** (paid / partial / unpaid), and can only change a shipment's **status** (Pending / Shipped / Delivered) and its **notes**. The write restriction is enforced in the database (row-level security + a trigger), not just hidden in the UI. Agents can also open an invoice (read-only) to **record a payment** on it; recording is allowed by an RLS insert policy, while editing or deleting payments and creating or deleting invoices stay editor-only.
 
 Users that existed before the migration become **admins** automatically; users added afterwards default to **agent**. To change a user's role, run this in the SQL Editor:
 

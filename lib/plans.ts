@@ -24,11 +24,13 @@ export const PLANS: Record<PlanId, Plan> = {
   pro: {
     id: "pro",
     name: "Pro",
-    priceLabel: "Contact us",
+    // Display price. Keep in step with BILLING_PLAN_AMOUNT / BILLING_CURRENCY,
+    // which set what the upgrade actually charges (default 25 USD).
+    priceLabel: "$25 / mo",
     maxShipments: Infinity,
     features: [
       "Unlimited shipments",
-      "Everything in Free",
+      "Invoices, payments & statements",
       "Priority support",
     ],
   },

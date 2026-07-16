@@ -57,6 +57,51 @@
     0 16px 40px -18px rgba(0, 0, 0, 0.6);
 }
 
+/* Scooped "folder tab" for the ACTIVE sidebar item: the pill keeps its round
+   left side but runs flush to the sidebar's right edge, where two concave
+   quarter-circle scoops (::before above, ::after below) make the sidebar
+   background appear to flow around it — so the item melts into the page like
+   a file-folder tab. Tab and scoops share --tab-fill so the three shapes read
+   as one piece; the fill stays the app's frosted white, never a new color. */
+.nav-tab {
+  --tab-fill: rgba(255, 255, 255, 0.8);
+  --tab-scoop: 18px;
+  position: relative;
+  /* Reach across the sidebar's 1rem right padding to touch its edge. */
+  width: calc(100% + 1rem);
+  margin-right: -1rem;
+  border-radius: 9999px 0 0 9999px;
+  background: var(--tab-fill);
+}
+.dark .nav-tab {
+  --tab-fill: rgba(255, 255, 255, 0.14);
+}
+.nav-tab::before,
+.nav-tab::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: var(--tab-scoop);
+  height: var(--tab-scoop);
+  pointer-events: none;
+}
+.nav-tab::before {
+  bottom: 100%;
+  background: radial-gradient(
+    circle at 0 0,
+    transparent calc(var(--tab-scoop) - 1px),
+    var(--tab-fill) var(--tab-scoop)
+  );
+}
+.nav-tab::after {
+  top: 100%;
+  background: radial-gradient(
+    circle at 0 100%,
+    transparent calc(var(--tab-scoop) - 1px),
+    var(--tab-fill) var(--tab-scoop)
+  );
+}
+
 /* Tailwind v4's preflight resets interactive elements to the default arrow
    cursor. Restore the hand (pointer) cursor on every clickable control, and
    show the disabled cursor when a button can't be pressed. */
