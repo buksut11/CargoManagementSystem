@@ -91,6 +91,20 @@ export async function POST(request: Request) {
     description: "CargoBook Pro plan",
   });
 
+  // Log every attempt (approved or declined) for reconciliation. Best-effort:
+  // a logging failure must never block a successful upgrade.
+  await admin.from("evc_transactions").insert({
+    organization_id: orgId,
+    reference_id: referenceId,
+    transaction_id: result.transactionId ?? null,
+    phone,
+    amount: PLAN_AMOUNT,
+    currency: CURRENCY,
+    status: result.ok ? "approved" : "failed",
+    response_code: result.code ?? null,
+    response_msg: result.message ?? null,
+  });
+
   if (!result.ok) {
     return NextResponse.json(
       { error: result.message ?? "The payment was declined." },
