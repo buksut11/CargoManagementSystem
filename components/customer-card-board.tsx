@@ -14,6 +14,10 @@ import {
 // a compact stacked list on phones and a dense auto-fill card grid on tablets
 // and up, with hover-lift cards and hover-revealed corner actions. Used by
 // both the cargo and flight Customers pages so the two always match.
+//
+// Card anatomy: identity (badge · name · email) with the balance status pinned
+// top-right, and a footer row that gives the phone number its own space next
+// to the actions — so nothing wraps or fights for width on narrow columns.
 
 export type CustomerCardItem = {
   id: number;
@@ -78,14 +82,14 @@ function StatusPill({
         onClick={onShowBreakdown}
         title={`See what makes up ${name}'s balance`}
         aria-label={`See what makes up ${name}'s balance of ${fmtMoney(due)}`}
-        className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-600 transition-colors duration-200 ease-out hover:bg-amber-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25"
+        className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-600 transition-colors duration-200 ease-out hover:bg-amber-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25"
       >
         {fmtMoney(due)} due
       </button>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
       Settled
     </span>
@@ -109,7 +113,7 @@ function CardActions<T extends CustomerCardItem>({
     <div
       className={`flex shrink-0 items-center gap-0.5 ${
         revealOnHover
-          ? "transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none"
+          ? "transition-opacity duration-200 sm:opacity-60 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none"
           : ""
       }`}
     >
@@ -141,6 +145,78 @@ function CardActions<T extends CustomerCardItem>({
   );
 }
 
+// One customer card. The identical structure serves the phone list and the
+// desktop grid; only the hover behaviour of the actions differs.
+function CustomerCard<T extends CustomerCardItem>({
+  customer,
+  due,
+  statementHref,
+  onShowBreakdown,
+  onEdit,
+  onDelete,
+  interactive,
+}: {
+  customer: T;
+  due: number;
+  statementHref: (c: T) => string;
+  onShowBreakdown: (c: T) => void;
+  onEdit: (c: T) => void;
+  onDelete: (c: T) => void;
+  interactive: boolean;
+}) {
+  return (
+    <div
+      className={`group flex flex-col rounded-2xl border p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04] ${
+        interactive
+          ? "transform-gpu border-white/60 bg-white/40 transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:hover:bg-white/[0.07]"
+          : "border-slate-200/60 bg-white/40"
+      }`}
+    >
+      {/* Identity row: badge, name + email, status pinned top-right. */}
+      <div className="flex items-start gap-3">
+        <AvatarBadge name={customer.name} />
+        <div className="min-w-0 flex-1">
+          <div
+            className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100"
+            title={customer.name}
+          >
+            {customer.name}
+          </div>
+          <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+            <MailIcon className="h-3 w-3 shrink-0 opacity-70" />
+            <span className="truncate" title={customer.email ?? undefined}>
+              {customer.email || "No email"}
+            </span>
+          </div>
+        </div>
+        <StatusPill
+          name={customer.name}
+          due={due}
+          onShowBreakdown={() => onShowBreakdown(customer)}
+        />
+      </div>
+
+      {/* Footer: the phone gets its own row beside the actions, so numbers
+          never truncate against the status pill. */}
+      <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-200/50 pt-1.5 dark:border-white/[0.06]">
+        <span className="flex min-w-0 items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <PhoneIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
+          <span className="truncate tabular-nums" title={customer.phone ?? undefined}>
+            {customer.phone || "No phone"}
+          </span>
+        </span>
+        <CardActions
+          customer={customer}
+          statementHref={statementHref}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          revealOnHover={interactive}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function CustomerCardBoard<T extends CustomerCardItem>({
   customers,
   balances,
@@ -161,79 +237,34 @@ export function CustomerCardBoard<T extends CustomerCardItem>({
     <>
       {/* Compact list on phones, exactly like the Destinations pages. */}
       <div className="space-y-2 p-3 sm:hidden">
-        {customers.map((c) => {
-          const due = balances[c.id] ?? 0;
-          return (
-            <div
-              key={c.id}
-              className="flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-white/40 p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
-            >
-              <AvatarBadge name={c.name} />
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{c.name}</div>
-                <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500 dark:text-slate-400">
-                  <PhoneIcon className="h-3 w-3 shrink-0 opacity-70" />
-                  <span className="truncate">{c.phone || "No phone"}</span>
-                  <StatusPill
-                    name={c.name}
-                    due={due}
-                    onShowBreakdown={() => onShowBreakdown(c)}
-                  />
-                </div>
-              </div>
-              <CardActions
-                customer={c}
-                statementHref={statementHref}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                revealOnHover={false}
-              />
-            </div>
-          );
-        })}
+        {customers.map((c) => (
+          <CustomerCard
+            key={c.id}
+            customer={c}
+            due={balances[c.id] ?? 0}
+            statementHref={statementHref}
+            onShowBreakdown={onShowBreakdown}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            interactive={false}
+          />
+        ))}
       </div>
 
-      {/* Dense card board on tablets and up, same card anatomy as Destinations:
-          badge · name · icon subtitle lines · hover-revealed corner actions. */}
-      <div className="hidden gap-2.5 p-3 sm:grid sm:[grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))]">
-        {customers.map((c) => {
-          const due = balances[c.id] ?? 0;
-          return (
-            <div
-              key={c.id}
-              className="group flex transform-gpu items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
-            >
-              <AvatarBadge name={c.name} />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">
-                  {c.name}
-                </div>
-                <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500 dark:text-slate-400">
-                  <MailIcon className="h-3 w-3 shrink-0 opacity-70" />
-                  <span className="truncate">{c.email || "No email"}</span>
-                </div>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <PhoneIcon className="h-3 w-3 shrink-0 opacity-70" />
-                  <span className="truncate tabular-nums">
-                    {c.phone || "No phone"}
-                  </span>
-                  <StatusPill
-                    name={c.name}
-                    due={due}
-                    onShowBreakdown={() => onShowBreakdown(c)}
-                  />
-                </div>
-              </div>
-              <CardActions
-                customer={c}
-                statementHref={statementHref}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                revealOnHover
-              />
-            </div>
-          );
-        })}
+      {/* Dense card board on tablets and up, same feel as Destinations. */}
+      <div className="hidden gap-2.5 p-3 sm:grid sm:[grid-template-columns:repeat(auto-fill,minmax(19rem,1fr))]">
+        {customers.map((c) => (
+          <CustomerCard
+            key={c.id}
+            customer={c}
+            due={balances[c.id] ?? 0}
+            statementHref={statementHref}
+            onShowBreakdown={onShowBreakdown}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            interactive
+          />
+        ))}
       </div>
     </>
   );
