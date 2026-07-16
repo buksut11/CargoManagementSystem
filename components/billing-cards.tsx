@@ -75,7 +75,7 @@ const PROVIDERS: Provider[] = [
   {
     id: "evc",
     name: "EVC Plus",
-    tag: "Hormuud · via WaafiPay",
+    tag: "Hormuud",
     endpoint: "/api/evc/charge",
     label: "EVC number",
     placeholder: "0615714971",
