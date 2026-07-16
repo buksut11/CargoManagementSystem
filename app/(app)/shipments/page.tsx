@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
-import type { Payment, Shipment, ShipmentStatus } from "@/lib/types";
+import { usePagedRows } from "@/lib/use-paged-rows";
+import type { Shipment, ShipmentStatus } from "@/lib/types";
 import {
   fmtDate,
   fmtKg,
@@ -29,67 +30,99 @@ import {
 } from "@/components/ui";
 import { useRole } from "@/components/role-context";
 
+type InvoiceTotals = { invoiced: number; paid: number };
+
+const SHIPMENT_COLUMNS =
+  "*, destinations(id, name, country), invoices(id, bill_to, phone, address)";
+const PAGE_SIZE = 100;
+
 export default function ShipmentsPage() {
   const role = useRole();
   const isAdmin = role === "admin";
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [payments, setPayments] = useState<Pick<Payment, "invoice_id" | "amount">[]>(
-    [],
+  const [invoiceTotals, setInvoiceTotals] = useState<Map<number, InvoiceTotals>>(
+    () => new Map(),
   );
-  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"" | ShipmentStatus>("");
 
+  // Both admins and agents read the shipments (with destination + invoice
+  // info). Agents can see the details but the database still lets them change
+  // only the status and notes. The list loads newest-first a page at a time,
+  // so the payload no longer grows with the whole shipment history.
+  const {
+    rows: shipments,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+  } = usePagedRows<Shipment>(
+    (from, to) =>
+      supabase
+        .from("shipments")
+        .select(SHIPMENT_COLUMNS)
+        .order("created_at", { ascending: false })
+        .range(from, to)
+        .then(({ data }) => ({ data: data as Shipment[] | null })),
+    PAGE_SIZE,
+  );
+
   useEffect(() => {
-    // Both admins and agents read the shipments (with destination + invoice
-    // info). Agents can see the details but the database still lets them
-    // change only the status and notes. Payments come along too so the list
-    // can show a Paid / Partial / Unpaid badge (agents may read, not write,
-    // payments — see migration 0020).
-    async function load() {
+    // The Paid / Partial / Unpaid badge comes from the
+    // invoice_payment_totals() rollup (migration 0032) — one row per invoice
+    // instead of every payment row, and correct regardless of how many
+    // shipment pages are loaded (agents may read, not write, payments — see
+    // migration 0020).
+    async function loadTotals() {
+      const { data, error } = await supabase.rpc("invoice_payment_totals");
+      if (!error && data) {
+        setInvoiceTotals(
+          new Map(
+            (data as { invoice_id: number; invoiced: number; paid: number }[]).map(
+              (r) => [
+                r.invoice_id,
+                { invoiced: Number(r.invoiced), paid: Number(r.paid) },
+              ],
+            ),
+          ),
+        );
+        return;
+      }
+      // Fallback (function not present yet): aggregate in the browser from
+      // the raw rows, exactly as before the migration.
       const [s, p] = await Promise.all([
-        supabase
-          .from("shipments")
-          .select(
-            "*, destinations(id, name, country), invoices(id, bill_to, phone, address)",
-          )
-          .order("created_at", { ascending: false }),
+        supabase.from("shipments").select("total, invoice_id"),
         supabase.from("payments").select("invoice_id, amount"),
       ]);
-      setShipments((s.data as Shipment[]) ?? []);
-      setPayments(
-        (p.data as Pick<Payment, "invoice_id" | "amount">[]) ?? [],
-      );
-      setLoading(false);
+      const map = new Map<number, InvoiceTotals>();
+      for (const row of (s.data as { total: number; invoice_id: number | null }[]) ??
+        []) {
+        if (row.invoice_id == null) continue;
+        const cur = map.get(row.invoice_id) ?? { invoiced: 0, paid: 0 };
+        cur.invoiced += Number(row.total);
+        map.set(row.invoice_id, cur);
+      }
+      for (const row of (p.data as { invoice_id: number; amount: number }[]) ?? []) {
+        const cur = map.get(row.invoice_id) ?? { invoiced: 0, paid: 0 };
+        cur.paid += Number(row.amount);
+        map.set(row.invoice_id, cur);
+      }
+      setInvoiceTotals(map);
     }
-    load();
+    loadTotals();
   }, []);
 
-  // Roll shipment totals and payments up per invoice so each shipment can show
-  // whether its invoice is paid, partially paid, or unpaid. An invoice can hold
-  // several shipments, so the status reflects the whole invoice, not one line.
+  // Each shipment shows whether its invoice is paid, partially paid, or
+  // unpaid. An invoice can hold several shipments, so the status reflects the
+  // whole invoice, not one line.
   const payStateByInvoice = useMemo(() => {
-    const totalByInvoice = new Map<number, number>();
-    for (const s of shipments) {
-      if (s.invoice_id == null) continue;
-      totalByInvoice.set(
-        s.invoice_id,
-        (totalByInvoice.get(s.invoice_id) ?? 0) + Number(s.total),
-      );
-    }
-    const paidByInvoice = new Map<number, number>();
-    for (const p of payments) {
-      paidByInvoice.set(
-        p.invoice_id,
-        (paidByInvoice.get(p.invoice_id) ?? 0) + Number(p.amount),
-      );
-    }
     const state = new Map<number, ReturnType<typeof paymentState>>();
-    for (const [invoiceId, total] of totalByInvoice) {
-      state.set(invoiceId, paymentState(total, paidByInvoice.get(invoiceId) ?? 0));
+    for (const [invoiceId, t] of invoiceTotals) {
+      if (t.invoiced === 0 && t.paid === 0) continue;
+      state.set(invoiceId, paymentState(t.invoiced, t.paid));
     }
     return state;
-  }, [shipments, payments]);
+  }, [invoiceTotals]);
 
   function payBadge(s: Shipment) {
     if (s.invoice_id == null) return null;
@@ -100,7 +133,37 @@ export default function ShipmentsPage() {
     );
   }
 
-  function exportCsv() {
+  const matchesFilters = useCallback(
+    (s: Shipment) => {
+      const q = query.trim().toLowerCase();
+      if (statusFilter && s.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        s.description.toLowerCase().includes(q) ||
+        (s.destinations?.name ?? "").toLowerCase().includes(q) ||
+        (s.invoices?.bill_to ?? "").toLowerCase().includes(q) ||
+        shipmentRef(s.id).toLowerCase().includes(q)
+      );
+    },
+    [query, statusFilter],
+  );
+
+  const filtered = useMemo(
+    () => shipments.filter(matchesFilters),
+    [shipments, matchesFilters],
+  );
+
+  async function exportCsv() {
+    // The list on screen is loaded a page at a time, but a CSV export must
+    // cover every matching shipment — so re-fetch the full set just for the
+    // file, applying the same search/status filter as the visible list.
+    setExporting(true);
+    const { data } = await supabase
+      .from("shipments")
+      .select(SHIPMENT_COLUMNS)
+      .order("created_at", { ascending: false });
+    setExporting(false);
+    const all = ((data as Shipment[]) ?? []).filter(matchesFilters);
     downloadCsv("shipments.csv", [
       [
         "Ref",
@@ -113,7 +176,7 @@ export default function ShipmentsPage() {
         "Invoice",
         "Ship date",
       ],
-      ...filtered.map((s) => [
+      ...all.map((s) => [
         shipmentRef(s.id),
         s.description,
         s.destinations?.name ?? "",
@@ -126,20 +189,6 @@ export default function ShipmentsPage() {
       ]),
     ]);
   }
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return shipments.filter((s) => {
-      if (statusFilter && s.status !== statusFilter) return false;
-      if (!q) return true;
-      return (
-        s.description.toLowerCase().includes(q) ||
-        (s.destinations?.name ?? "").toLowerCase().includes(q) ||
-        (s.invoices?.bill_to ?? "").toLowerCase().includes(q) ||
-        shipmentRef(s.id).toLowerCase().includes(q)
-      );
-    });
-  }, [shipments, query, statusFilter]);
 
   return (
     <div>
@@ -180,10 +229,10 @@ export default function ShipmentsPage() {
         {isAdmin && (
           <button
             onClick={exportCsv}
-            disabled={filtered.length === 0}
+            disabled={filtered.length === 0 || exporting}
             className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
           >
-            ⬇ Export CSV
+            {exporting ? "Exporting…" : "⬇ Export CSV"}
           </button>
         )}
       </div>
@@ -299,11 +348,27 @@ export default function ShipmentsPage() {
                 ? isAdmin
                   ? "No shipments yet — click “New shipment” to add your first."
                   : "No shipments yet."
-                : "No shipments match your search."
+                : hasMore
+                  ? "No match in the loaded shipments — “Load older shipments” below widens the search."
+                  : "No shipments match your search."
             }
           />
         )}
       </Card>
+      {hasMore && (
+        <div className="mt-4 flex flex-col items-center gap-1.5">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
+          >
+            {loadingMore ? "Loading…" : "Load older shipments"}
+          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Showing the {shipments.length} most recent — search covers what’s loaded.
+          </span>
+        </div>
+      )}
     </div>
   );
 }

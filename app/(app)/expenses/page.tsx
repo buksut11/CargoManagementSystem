@@ -25,9 +25,13 @@ import {
 import { DatePicker } from "@/components/date-picker";
 import { ChartIcon, WalletIcon } from "@/components/icons";
 
+// The dropdown and the profit table only render these three fields, so the
+// query fetches just them instead of every shipment column.
+type ShipmentLite = Pick<Shipment, "id" | "description" | "total">;
+
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [shipments, setShipments] = useState<ShipmentLite[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [shipmentId, setShipmentId] = useState("");
@@ -53,12 +57,12 @@ export default function ExpensesPage() {
           .order("expense_date", { ascending: false }),
         supabase
           .from("shipments")
-          .select("*")
+          .select("id, description, total")
           .order("created_at", { ascending: false }),
       ]);
       if (!active) return;
       setExpenses((e.data as Expense[]) ?? []);
-      setShipments((s.data as Shipment[]) ?? []);
+      setShipments((s.data as ShipmentLite[]) ?? []);
       setLoading(false);
     }
     load();

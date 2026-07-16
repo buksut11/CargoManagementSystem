@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
+import { appBaseUrl } from "@/lib/app-url";
+import { hashInviteToken } from "@/lib/invite-token";
 
 export const runtime = "nodejs";
+
+// Deliberately loose shape check — Supabase Auth is the real authority on what
+// it will deliver to. This just rejects values that plainly aren't an address
+// before one is persisted and mailed.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Escape values interpolated into the invitation email's HTML body so an
 // org name like `<a href="…">` can't inject markup (phishing) into a message
@@ -34,6 +41,12 @@ export async function POST(request: Request) {
   if (!token || !orgId || !email) {
     return NextResponse.json({ error: "Missing email or organization." }, { status: 400 });
   }
+  if (!EMAIL_RE.test(email)) {
+    return NextResponse.json(
+      { error: "That doesn't look like a valid email address." },
+      { status: 400 },
+    );
+  }
 
   let admin;
   try {
@@ -62,20 +75,21 @@ export async function POST(request: Request) {
     );
   }
 
+  // The raw token goes only into the shared link; the database keeps its
+  // SHA-256 digest (see lib/invite-token.ts).
   const inviteToken = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "");
   const { error: insErr } = await admin.from("invitations").insert({
     org_id: orgId,
     email,
     role,
-    token: inviteToken,
+    token: hashInviteToken(inviteToken),
     invited_by: user.id,
   });
   if (insErr) {
     return NextResponse.json({ error: insErr.message }, { status: 500 });
   }
 
-  const origin = request.headers.get("origin") ?? new URL(request.url).origin;
-  const link = `${origin}/invite/${inviteToken}`;
+  const link = `${appBaseUrl(request)}/invite/${inviteToken}`;
 
   // Fetch the org name for a friendlier email (best-effort).
   const { data: orgRow } = await admin

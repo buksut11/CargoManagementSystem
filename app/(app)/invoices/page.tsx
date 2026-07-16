@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import type { Invoice, Payment, Shipment } from "@/lib/types";
+import { usePagedRows } from "@/lib/use-paged-rows";
+import type { Invoice } from "@/lib/types";
 import {
   fmtDate,
   fmtMoney,
@@ -22,53 +23,83 @@ import {
   Th,
 } from "@/components/ui";
 
+type InvoiceTotals = { invoiced: number; paid: number };
+
+const PAGE_SIZE = 100;
+
 export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [invoiceTotals, setInvoiceTotals] = useState<Map<number, InvoiceTotals>>(
+    () => new Map(),
+  );
   const [query, setQuery] = useState("");
 
+  // Newest-first, a page at a time — the payload no longer grows with the
+  // whole invoice history.
+  const {
+    rows: invoices,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+  } = usePagedRows<Invoice>(
+    (from, to) =>
+      supabase
+        .from("invoices")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, to)
+        .then(({ data }) => ({ data: data as Invoice[] | null })),
+    PAGE_SIZE,
+  );
+
   useEffect(() => {
-    async function load() {
-      const [i, s, p] = await Promise.all([
-        supabase
-          .from("invoices")
-          .select("*")
-          .order("created_at", { ascending: false }),
-        supabase.from("shipments").select("id, total, invoice_id"),
-        supabase.from("payments").select("id, invoice_id, amount"),
+    // The per-invoice total/paid/balance columns come from the
+    // invoice_payment_totals() rollup (migration 0032) — one row per invoice
+    // instead of downloading every shipment and payment row, and correct
+    // regardless of how many invoice pages are loaded.
+    async function loadTotals() {
+      const { data, error } = await supabase.rpc("invoice_payment_totals");
+      if (!error && data) {
+        setInvoiceTotals(
+          new Map(
+            (data as { invoice_id: number; invoiced: number; paid: number }[]).map(
+              (r) => [
+                r.invoice_id,
+                { invoiced: Number(r.invoiced), paid: Number(r.paid) },
+              ],
+            ),
+          ),
+        );
+        return;
+      }
+      // Fallback (function not present yet): aggregate in the browser from
+      // the raw rows, exactly as before the migration.
+      const [s, p] = await Promise.all([
+        supabase.from("shipments").select("total, invoice_id"),
+        supabase.from("payments").select("invoice_id, amount"),
       ]);
-      setInvoices((i.data as Invoice[]) ?? []);
-      setShipments((s.data as Shipment[]) ?? []);
-      setPayments((p.data as Payment[]) ?? []);
-      setLoading(false);
+      const map = new Map<number, InvoiceTotals>();
+      for (const row of (s.data as { total: number; invoice_id: number | null }[]) ??
+        []) {
+        if (row.invoice_id == null) continue;
+        const cur = map.get(row.invoice_id) ?? { invoiced: 0, paid: 0 };
+        cur.invoiced += Number(row.total);
+        map.set(row.invoice_id, cur);
+      }
+      for (const row of (p.data as { invoice_id: number; amount: number }[]) ?? []) {
+        const cur = map.get(row.invoice_id) ?? { invoiced: 0, paid: 0 };
+        cur.paid += Number(row.amount);
+        map.set(row.invoice_id, cur);
+      }
+      setInvoiceTotals(map);
     }
-    load();
+    loadTotals();
   }, []);
 
-  // Roll up shipment totals and payments per invoice in a single pass each,
-  // then look them up by id — avoids re-scanning every shipment and payment
-  // for every invoice row on every render (was O(invoices × rows)).
-  const totalsByInvoice = useMemo(() => {
-    const totals = new Map<number, number>();
-    for (const s of shipments) {
-      if (s.invoice_id == null) continue;
-      totals.set(s.invoice_id, (totals.get(s.invoice_id) ?? 0) + Number(s.total));
-    }
-    const paidByInvoice = new Map<number, number>();
-    for (const p of payments) {
-      paidByInvoice.set(
-        p.invoice_id,
-        (paidByInvoice.get(p.invoice_id) ?? 0) + Number(p.amount),
-      );
-    }
-    return { totals, paidByInvoice };
-  }, [shipments, payments]);
-
   function totals(inv: Invoice) {
-    const total = totalsByInvoice.totals.get(inv.id) ?? 0;
-    const paid = totalsByInvoice.paidByInvoice.get(inv.id) ?? 0;
+    const t = invoiceTotals.get(inv.id);
+    const total = t?.invoiced ?? 0;
+    const paid = t?.paid ?? 0;
     return { total, paid, balance: total - paid, state: paymentState(total, paid) };
   }
 
@@ -182,11 +213,27 @@ export default function InvoicesPage() {
             message={
               invoices.length === 0
                 ? "No invoices yet — create one from your uninvoiced shipments."
-                : "No invoices match your search."
+                : hasMore
+                  ? "No match in the loaded invoices — “Load older invoices” below widens the search."
+                  : "No invoices match your search."
             }
           />
         )}
       </Card>
+      {hasMore && (
+        <div className="mt-4 flex flex-col items-center gap-1.5">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
+          >
+            {loadingMore ? "Loading…" : "Load older invoices"}
+          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Showing the {invoices.length} most recent — search covers what’s loaded.
+          </span>
+        </div>
+      )}
     </div>
   );
 }
