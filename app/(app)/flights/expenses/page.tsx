@@ -33,6 +33,9 @@ import { ChartIcon, WalletIcon } from "@/components/icons";
 
 type BookingProfit = Pick<FlightBooking, "profit" | "booking_date">;
 
+// The one category that is tied to a person, so it gets a dedicated name field.
+const STAFF_SALARY = "staff_salary";
+
 // "2026-06" → "Jun 2026" for the period dropdown.
 function monthLabel(ym: string): string {
   const [y, m] = ym.split("-").map(Number);
@@ -50,7 +53,8 @@ export default function FlightExpensesPage() {
   // "" = all time; otherwise a "YYYY-MM" period.
   const [month, setMonth] = useState("");
 
-  const [category, setCategory] = useState<string>("staff_salary");
+  const [category, setCategory] = useState<string>(STAFF_SALARY);
+  const [staffName, setStaffName] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
@@ -111,7 +115,8 @@ export default function FlightExpensesPage() {
 
   function resetForm() {
     setEditingId(null);
-    setCategory("staff_salary");
+    setCategory(STAFF_SALARY);
+    setStaffName("");
     setAmount("");
     setDate("");
     setNote("");
@@ -121,11 +126,19 @@ export default function FlightExpensesPage() {
   function startEdit(exp: FlightExpense) {
     setEditingId(exp.id);
     setCategory(exp.category);
+    setStaffName(exp.staff_name ?? "");
     setAmount(String(exp.amount));
     setDate(exp.expense_date);
     setNote(exp.note ?? "");
     setError(null);
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Staff name belongs to staff-salary expenses only — clear it the moment the
+  // category changes to anything else so a stray name can't be saved.
+  function changeCategory(next: string) {
+    setCategory(next);
+    if (next !== STAFF_SALARY) setStaffName("");
   }
 
   async function save(e: React.FormEvent) {
@@ -137,13 +150,22 @@ export default function FlightExpensesPage() {
       amount: parseFloat(amount),
       expense_date: date || undefined,
       note: note.trim() || null,
+      // Only staff-salary expenses carry a name; everything else stores null.
+      staff_name: category === STAFF_SALARY ? staffName.trim() || null : null,
     };
-    const { error } = editingId
-      ? await supabase
-          .from("flight_expenses")
-          .update(payload)
-          .eq("id", editingId)
-      : await supabase.from("flight_expenses").insert(payload);
+    const run = (body: typeof payload | Omit<typeof payload, "staff_name">) =>
+      editingId
+        ? supabase.from("flight_expenses").update(body).eq("id", editingId)
+        : supabase.from("flight_expenses").insert(body);
+
+    let { error } = await run(payload);
+    // Gracefully handle a database that hasn't run migration 0041 yet: retry
+    // once without staff_name so the expense still saves.
+    if (error && (error.code === "PGRST204" || error.code === "42703")) {
+      const rest = { ...payload };
+      delete (rest as Partial<typeof payload>).staff_name;
+      ({ error } = await run(rest));
+    }
     setBusy(false);
     if (error) {
       setError(error.message);
@@ -205,10 +227,11 @@ export default function FlightExpensesPage() {
                 downloadCsv(
                   `flight-operating-expenses${month ? `-${month}` : ""}.csv`,
                   [
-                    ["Date", "Category", "Note", "Amount"],
+                    ["Date", "Category", "Staff", "Note", "Amount"],
                     ...filteredExpenses.map((e) => [
                       e.expense_date,
                       flightExpenseCategoryLabel(e.category),
+                      e.staff_name ?? "",
                       e.note ?? "",
                       Number(e.amount),
                     ]),
@@ -255,8 +278,18 @@ export default function FlightExpensesPage() {
           className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-5"
         >
           <Field label="Category">
-            <FlightExpenseSelect value={category} onChange={setCategory} />
+            <FlightExpenseSelect value={category} onChange={changeCategory} />
           </Field>
+          {category === STAFF_SALARY && (
+            <Field label="Staff name">
+              <Input
+                value={staffName}
+                onChange={(e) => setStaffName(e.target.value)}
+                placeholder="e.g. Sara Ahmed"
+                required
+              />
+            </Field>
+          )}
           <Field label="Amount">
             <Input
               type="number"
@@ -316,7 +349,15 @@ export default function FlightExpensesPage() {
                 className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span>{flightExpenseCategoryLabel(exp.category)}</span>
+                  <span>
+                    {flightExpenseCategoryLabel(exp.category)}
+                    {exp.staff_name && (
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {" · "}
+                        {exp.staff_name}
+                      </span>
+                    )}
+                  </span>
                   <span className="font-semibold text-red-600 dark:text-red-400">
                     −{fmtMoney(Number(exp.amount))}
                   </span>
@@ -355,6 +396,12 @@ export default function FlightExpensesPage() {
                   <Td className="whitespace-nowrap">{fmtDate(exp.expense_date)}</Td>
                   <Td className="whitespace-nowrap">
                     {flightExpenseCategoryLabel(exp.category)}
+                    {exp.staff_name && (
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {" · "}
+                        {exp.staff_name}
+                      </span>
+                    )}
                   </Td>
                   <Td>{exp.note ?? "—"}</Td>
                   <Td className="whitespace-nowrap font-medium text-red-600 dark:text-red-400">
