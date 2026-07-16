@@ -29,11 +29,15 @@ import {
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 import { CoinsIcon, PhoneIcon, PinIcon } from "@/components/icons";
+import { useRole } from "@/components/role-context";
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const invoiceId = Number(id);
+  // Agents may only add payments — they cannot delete the invoice or remove
+  // existing payments, so those controls are hidden from them.
+  const isAgent = useRole() === "agent";
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -148,9 +152,11 @@ export default function InvoiceDetailPage() {
             >
               🖨 Print
             </Link>
-            <Button variant="danger" onClick={() => setConfirmInvoiceOpen(true)}>
-              Delete
-            </Button>
+            {!isAgent && (
+              <Button variant="danger" onClick={() => setConfirmInvoiceOpen(true)}>
+                Delete
+              </Button>
+            )}
           </div>
         }
       />
@@ -295,12 +301,14 @@ export default function InvoiceDetailPage() {
                       {p.method ? ` · ${p.method}` : ""}
                     </div>
                   </div>
-                  <button
-                    onClick={() => setPendingPayment(p)}
-                    className={rowDeleteClass}
-                  >
-                    Delete
-                  </button>
+                  {!isAgent && (
+                    <button
+                      onClick={() => setPendingPayment(p)}
+                      className={rowDeleteClass}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               ))}
               {payments.length === 0 && (
@@ -327,12 +335,14 @@ export default function InvoiceDetailPage() {
                     </Td>
                     <Td>{p.method ?? "—"}</Td>
                     <Td className="text-right">
-                      <button
-                        onClick={() => setPendingPayment(p)}
-                        className={rowDeleteClass}
-                      >
-                        Delete
-                      </button>
+                      {!isAgent && (
+                        <button
+                          onClick={() => setPendingPayment(p)}
+                          className={rowDeleteClass}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </Td>
                   </tr>
                 ))}

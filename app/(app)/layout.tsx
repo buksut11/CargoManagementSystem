@@ -48,10 +48,14 @@ const ADMINS: OrgRole[] = ["owner", "admin"];
 const CARGO_NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: HomeIcon, roles: EDITORS },
   { href: "/shipments", label: "Shipments", icon: BoxIcon, roles: ALL },
-  { href: "/invoices", label: "Invoices", icon: InvoiceIcon, roles: EDITORS },
+  // Agents get read-only invoices so they can open an invoice to record a
+  // payment (they cannot create or delete invoices — see the invoice pages).
+  { href: "/invoices", label: "Invoices", icon: InvoiceIcon, roles: ALL },
   { href: "/customers", label: "Customers", icon: UsersIcon, roles: EDITORS },
   { href: "/statement", label: "Statement", icon: StatementIcon, roles: EDITORS },
-  { href: "/payments", label: "Payments", icon: CoinsIcon, roles: EDITORS },
+  // Agents may add payments (recorded from an invoice); editing/deleting them
+  // stays editor-only.
+  { href: "/payments", label: "Payments", icon: CoinsIcon, roles: ALL },
   { href: "/expenses", label: "Expenses", icon: WalletIcon, roles: EDITORS },
   { href: "/destinations", label: "Destinations", icon: PinIcon, roles: EDITORS },
   { href: "/audit", label: "Audit trail", icon: ClockIcon, roles: EDITORS },
@@ -138,12 +142,17 @@ function pathAllowed(role: OrgRole, path: string, modules: string[]) {
   if (isCargoPath && !on.includes("cargo")) return false;
 
   if (role === "agent") {
-    // Read-only: cargo shipments and flight bookings only.
+    // Cargo shipments and flight bookings (read-only), plus the payment flow:
+    // the Payments list and read-only invoices so an agent can open an invoice
+    // and record a payment. Invoice creation (/invoices/new) stays blocked.
     return (
       path === "/shipments" ||
       /^\/shipments\/\d+$/.test(path) ||
       path === "/flights/bookings" ||
-      /^\/flights\/bookings\/\d+$/.test(path)
+      /^\/flights\/bookings\/\d+$/.test(path) ||
+      path === "/payments" ||
+      path === "/invoices" ||
+      /^\/invoices\/\d+$/.test(path)
     );
   }
   if (role === "manager") {
