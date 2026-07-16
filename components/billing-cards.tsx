@@ -70,65 +70,27 @@ export function BillingCards({
   subStatus: string | null;
   onUpgraded: () => void;
 }) {
+  if (paid) {
+    return (
+      <div className="glass-panel flex items-center gap-2 rounded-2xl p-4 text-sm text-emerald-600 dark:text-emerald-400 sm:p-5">
+        <CheckMark />
+        Your organization is on the Pro plan
+        {subStatus ? ` · ${subStatus}` : ""}.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {/* Pro-plan summary. */}
-      <div className="glass-panel rounded-2xl p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-slate-900 dark:text-white">
-                Pro plan
-              </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  paid
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
-                    : "bg-slate-100 text-slate-500 dark:bg-white/[0.08] dark:text-slate-300"
-                }`}
-              >
-                {paid ? `Active${subStatus ? ` · ${subStatus}` : ""}` : "Not active"}
-              </span>
-            </div>
-            <ul className="mt-2 space-y-1">
-              {plan.features.map((f) => (
-                <li
-                  key={f}
-                  className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300"
-                >
-                  <CheckMark />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="shrink-0 text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            {plan.priceLabel}
-          </div>
-        </div>
-      </div>
-
-      {paid ? (
-        <div className="glass-panel flex items-center gap-2 rounded-2xl p-4 text-sm text-emerald-600 dark:text-emerald-400 sm:p-5">
-          <CheckMark />
-          Your organization is on the Pro plan.
-        </div>
-      ) : (
-        <>
-          <p className="px-1 text-xs text-slate-500 dark:text-slate-400">
-            Choose how to pay for Pro:
-          </p>
-          {PROVIDERS.map((p) => (
-            <ProviderCard
-              key={p.id}
-              provider={p}
-              orgId={orgId}
-              priceLabel={plan.priceLabel}
-              onUpgraded={onUpgraded}
-            />
-          ))}
-        </>
-      )}
+      {PROVIDERS.map((p) => (
+        <ProviderCard
+          key={p.id}
+          provider={p}
+          orgId={orgId}
+          priceLabel={plan.priceLabel}
+          onUpgraded={onUpgraded}
+        />
+      ))}
     </div>
   );
 }
