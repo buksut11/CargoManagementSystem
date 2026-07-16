@@ -195,7 +195,24 @@ upgrading Next when a release past `16.3.0` ships the patched bundle.
 
 ## 4. Performance findings
 
-### P-1 (High impact at scale) — Unbounded list queries with client-side filtering
+### P-1 (High impact at scale) — Unbounded list queries with client-side filtering — ✅ Partially fixed in this branch
+
+**Fix applied (cargo module).** `lib/use-paged-rows.ts` adds a "Load more" hook:
+lists load their newest 100 rows and fetch older pages on demand, so the initial
+payload stays constant regardless of history. Applied to the two heaviest pure
+lists — **Shipments** and **Invoices** (safe now that their badges come from the
+P-2 rollup instead of the full row set). The Shipments CSV export re-fetches the
+complete set on demand so exports still cover every matching row, and the
+Expenses page's shipment dropdown now fetches 3 columns instead of `*`.
+
+**Deliberately not paginated:** pages whose on-screen figures are summed from
+their rows — Payments ("Total received"), Expenses (income/expenses/net-profit
+stats), and the statement/report pages. Truncating those lists would display
+wrong financial totals. Paginate them only after their sums move to database
+aggregates (the `invoice_payment_totals` pattern). The flight-module lists can
+adopt the same hook mechanically when needed.
+
+**Original finding (kept for the remaining pages):**
 
 **Where:** every list page (`shipments`, `invoices`, `payments`, `expenses`,
 `customers`, `flights/*`, statement pages). Example —
@@ -280,7 +297,7 @@ pair it with the P-1 pagination work rather than doing it piecemeal.
 | 4 | Webhook unpaid-checkout upgrade (S-4) | Low | ✅ Fixed |
 | 5 | Invite email validation (S-5) | Low | ✅ Fixed |
 | 6 | Edge rate limiting on `/api/*` (S-6) | Medium | Recommended |
-| 7 | Server-side pagination + column narrowing (P-1) | High at scale | Recommended |
+| 7 | List pagination + column narrowing (P-1) | High at scale | ✅ Shipments/Invoices done; sum-pages need aggregates first |
 | 8 | Payment-totals RPC (P-2) | Medium | ✅ Fixed |
 | 9 | Nonce-based CSP (S-7) | Low | Optional |
 | 10 | Next.js upgrade to clear postcss advisory (S-9) | Low | When available |
