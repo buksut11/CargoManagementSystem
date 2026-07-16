@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Field, Input } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { BuildingIcon, PhoneIcon, WalletIcon } from "@/components/icons";
 import { PLANS, type Plan } from "@/lib/plans";
 
@@ -211,12 +211,12 @@ function ProviderCard({
           <Field label={provider.label} hint={provider.hint}>
             <div className="relative">
               <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
+              <input
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
                 placeholder={provider.placeholder}
-                className="pl-9"
+                className={`${inputClass} pl-9`}
                 value={account}
                 onChange={(e) => {
                   setAccount(e.target.value);
