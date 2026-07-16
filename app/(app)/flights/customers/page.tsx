@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { fetchCustomerBalances } from "@/lib/balance";
-import { fmtMoney } from "@/lib/format";
 import type { FlightCustomer } from "@/lib/types";
 import { FlightBreakdownModal } from "@/components/flight-breakdown-modal";
+import { CustomerCardBoard } from "@/components/customer-card-board";
 import {
   Button,
   Card,
@@ -18,52 +17,7 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui";
-import {
-  EditIcon,
-  MailIcon,
-  PhoneIcon,
-  SearchIcon,
-  StatementIcon,
-  TrashIcon,
-  UsersIcon,
-} from "@/components/icons";
-
-// Deterministic gradient for a customer avatar so each person keeps a stable,
-// tasteful colour instead of everything looking identical.
-const AVATAR_GRADIENTS = [
-  "from-blue-500 to-indigo-500",
-  "from-emerald-500 to-teal-500",
-  "from-amber-500 to-orange-500",
-  "from-rose-500 to-pink-500",
-  "from-violet-500 to-purple-500",
-  "from-cyan-500 to-sky-500",
-];
-
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? "";
-  const second = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-  return (first + second).toUpperCase() || "?";
-}
-
-function Avatar({ name }: { name: string }) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0;
-  const gradient = AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
-  return (
-    <span
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-sm font-bold tracking-wide text-white shadow-md shadow-black/10 ring-1 ring-white/40 transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transform-none dark:ring-white/10`}
-      aria-hidden
-    >
-      {initials(name)}
-    </span>
-  );
-}
-
-// Filled-tint action pill used only on this page, so the redesign stays
-// contained to the flight Customers list and no other table is affected.
-const custActionClass =
-  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 ease-out";
+import { SearchIcon, UsersIcon } from "@/components/icons";
 
 export default function FlightCustomersPage() {
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
@@ -224,6 +178,16 @@ export default function FlightCustomersPage() {
           </form>
         </Section>
         <Card className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              All customers
+            </h2>
+            {customers.length > 0 && (
+              <span className="rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-white/[0.08] dark:text-slate-300">
+                {customers.length}
+              </span>
+            )}
+          </div>
           <div className="border-b border-slate-200/50 p-3 dark:border-white/[0.08]">
             <div className="relative">
               <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
@@ -238,177 +202,14 @@ export default function FlightCustomersPage() {
             </div>
           </div>
 
-          {/* Compact list on phones, a lively card board on tablets and up —
-              mirrors the Destinations layout while keeping every field. */}
-          {filtered.length > 0 && (
-            <div className="space-y-2 p-3 sm:hidden">
-              {filtered.map((c) => {
-                const due = balances[c.id] ?? 0;
-                return (
-                  <div
-                    key={c.id}
-                    className="flex flex-col gap-3 rounded-2xl border border-slate-200/60 bg-white/40 p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar name={c.name} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate font-medium">{c.name}</div>
-                        {c.email ? (
-                          <div className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                            <MailIcon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
-                            <span className="truncate">{c.email}</span>
-                          </div>
-                        ) : (
-                          <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                            No email
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {c.phone && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/[0.06] px-3 py-1.5 text-xs font-medium tabular-nums text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">
-                          <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                          {c.phone}
-                        </span>
-                      )}
-                      {due > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => setBreakdownFor(c)}
-                          aria-label={`See what makes up ${c.name}'s balance of ${fmtMoney(due)}`}
-                          className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600 transition-colors duration-200 ease-out hover:bg-amber-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25"
-                        >
-                          {fmtMoney(due)} due
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Settled
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Link
-                        href={`/flights/statement?customer=${c.id}`}
-                        aria-label={`View ${c.name}'s statement`}
-                        className={`${custActionClass} bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:hover:bg-blue-400/20`}
-                      >
-                        <StatementIcon className="h-4 w-4" />
-                        Statement
-                      </Link>
-                      <button
-                        onClick={() => startEdit(c)}
-                        aria-label={`Edit ${c.name}`}
-                        className={`${custActionClass} bg-slate-500/[0.07] text-slate-600 hover:bg-slate-500/15 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/[0.12]`}
-                      >
-                        <EditIcon className="h-4 w-4" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setPending(c)}
-                        aria-label={`Delete ${c.name}`}
-                        className={`${custActionClass} bg-red-500/[0.08] text-red-600 hover:bg-red-500/15 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20`}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {filtered.length > 0 && (
-            <div className="hidden gap-2.5 p-3 sm:grid sm:[grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]">
-              {filtered.map((c) => {
-                const due = balances[c.id] ?? 0;
-                return (
-                  <div
-                    key={c.id}
-                    className="group relative flex transform-gpu flex-col gap-3 overflow-hidden rounded-2xl border border-white/60 bg-white/40 p-3.5 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-lg hover:shadow-black/5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
-                  >
-                    {/* Accent bar for customers who owe money — a quick visual cue. */}
-                    <span
-                      className={`absolute inset-y-2 left-0 w-1 rounded-full transition-opacity duration-300 ease-out ${
-                        due > 0
-                          ? "bg-gradient-to-b from-amber-400 to-orange-500 opacity-100"
-                          : "opacity-0"
-                      }`}
-                      aria-hidden
-                    />
-
-                    {/* Identity + hover-revealed actions, like the Destinations card. */}
-                    <div className="flex items-center gap-3">
-                      <Avatar name={c.name} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">
-                          {c.name}
-                        </div>
-                        <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500 dark:text-slate-400">
-                          <MailIcon className="h-3 w-3 shrink-0 opacity-70" />
-                          <span className="truncate">{c.email || "No email"}</span>
-                        </div>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-0.5 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none">
-                        <Link
-                          href={`/flights/statement?customer=${c.id}`}
-                          title="View statement"
-                          aria-label={`View ${c.name}'s statement`}
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-blue-500/10 hover:text-blue-600 dark:hover:bg-blue-400/10 dark:hover:text-blue-400"
-                        >
-                          <StatementIcon className="h-4 w-4" />
-                        </Link>
-                        <button
-                          onClick={() => startEdit(c)}
-                          title="Edit"
-                          aria-label={`Edit ${c.name}`}
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
-                        >
-                          <EditIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setPending(c)}
-                          title="Delete"
-                          aria-label={`Delete ${c.name}`}
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Phone + balance status. */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {c.phone && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/[0.06] px-3 py-1.5 text-xs font-medium tabular-nums text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">
-                          <PhoneIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                          {c.phone}
-                        </span>
-                      )}
-                      {due > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => setBreakdownFor(c)}
-                          title={`See what makes up ${c.name}'s balance`}
-                          aria-label={`See what makes up ${c.name}'s balance of ${fmtMoney(due)}`}
-                          className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600 transition-colors duration-200 ease-out hover:bg-amber-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25"
-                        >
-                          {fmtMoney(due)} due
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Settled
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <CustomerCardBoard
+            customers={filtered}
+            balances={balances}
+            statementHref={(c) => `/flights/statement?customer=${c.id}`}
+            onShowBreakdown={setBreakdownFor}
+            onEdit={startEdit}
+            onDelete={setPending}
+          />
           {!loading && customers.length === 0 && (
             <EmptyState message="No customers yet — add the people or agencies you sell tickets to." />
           )}
