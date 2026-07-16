@@ -140,7 +140,7 @@ export default function DestinationsPage() {
   return (
     <div>
       <PageHeader title="Destinations" />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="space-y-6">
       <Section
         icon={<PinIcon />}
         title={editingId ? "Edit destination" : "Add a destination"}
