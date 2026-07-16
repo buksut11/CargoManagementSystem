@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv } from "@/lib/csv";
 import type { Invoice, Payment } from "@/lib/types";
 import { fmtDate, fmtMoney, invoiceRef } from "@/lib/format";
-import { Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import { Card, EmptyState, Input, PageHeader, Td, Th } from "@/components/ui";
 
 type PaymentRow = Payment & { invoices?: Pick<Invoice, "id" | "bill_to"> | null };
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     supabase
@@ -25,12 +26,27 @@ export default function PaymentsPage() {
       });
   }, []);
 
-  const total = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+  // Search by invoice reference, the payer ("From") or the payment method,
+  // matching the search on the Shipments list.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return payments;
+    return payments.filter(
+      (p) =>
+        invoiceRef(p.invoice_id).toLowerCase().includes(q) ||
+        (p.invoices?.bill_to ?? "").toLowerCase().includes(q) ||
+        (p.method ?? "").toLowerCase().includes(q),
+    );
+  }, [payments, query]);
+
+  // Total and export follow the current filter, so a search narrows both the
+  // rows and the "Total received" summary to what's on screen.
+  const total = filtered.reduce((sum, p) => sum + Number(p.amount), 0);
 
   function exportCsv() {
     downloadCsv("payments.csv", [
       ["Date", "Amount", "Invoice", "From", "Method", "Note"],
-      ...payments.map((p) => [
+      ...filtered.map((p) => [
         p.paid_date,
         Number(p.amount),
         invoiceRef(p.invoice_id),
@@ -53,7 +69,7 @@ export default function PaymentsPage() {
             </span>
             <button
               onClick={exportCsv}
-              disabled={payments.length === 0}
+              disabled={filtered.length === 0}
               className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
             >
               ⬇ Export CSV
@@ -61,9 +77,18 @@ export default function PaymentsPage() {
           </div>
         }
       />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <div className="w-full sm:w-72">
+          <Input
+            placeholder="Search invoice #, from or method…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
       <Card className="table-scroll">
         <div className="space-y-3 p-3 lg:hidden">
-          {payments.map((p) => (
+          {filtered.map((p) => (
             <Link
               key={p.id}
               href={`/invoices/${p.invoice_id}`}
@@ -98,7 +123,7 @@ export default function PaymentsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
-            {payments.map((p) => (
+            {filtered.map((p) => (
               <tr key={p.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                 <Td>{fmtDate(p.paid_date)}</Td>
                 <Td className="font-medium">{fmtMoney(Number(p.amount))}</Td>
@@ -116,8 +141,14 @@ export default function PaymentsPage() {
             ))}
           </tbody>
         </table>
-        {!loading && payments.length === 0 && (
-          <EmptyState message="No payments yet — record them from an invoice page." />
+        {!loading && filtered.length === 0 && (
+          <EmptyState
+            message={
+              payments.length === 0
+                ? "No payments yet — record them from an invoice page."
+                : "No payments match your search."
+            }
+          />
         )}
       </Card>
     </div>

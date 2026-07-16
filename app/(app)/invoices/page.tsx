@@ -16,6 +16,7 @@ import {
   Badge,
   Card,
   EmptyState,
+  Input,
   PageHeader,
   Td,
   Th,
@@ -26,6 +27,7 @@ export default function InvoicesPage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -74,6 +76,18 @@ export default function InvoicesPage() {
     return <Badge className={PAYMENT_CLASS[state]}>{PAYMENT_LABEL[state]}</Badge>;
   }
 
+  // Filter by invoice reference or the "bill to" name, matching the search on
+  // the Shipments list.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return invoices;
+    return invoices.filter(
+      (inv) =>
+        invoiceRef(inv.id).toLowerCase().includes(q) ||
+        (inv.bill_to ?? "").toLowerCase().includes(q),
+    );
+  }, [invoices, query]);
+
   return (
     <div>
       <PageHeader
@@ -87,9 +101,18 @@ export default function InvoicesPage() {
           </Link>
         }
       />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <div className="w-full sm:w-72">
+          <Input
+            placeholder="Search invoice # or bill to…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
       <Card className="table-scroll">
         <div className="space-y-3 p-3 lg:hidden">
-          {invoices.map((inv) => {
+          {filtered.map((inv) => {
             const t = totals(inv);
             return (
               <Link
@@ -129,7 +152,7 @@ export default function InvoicesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
-            {invoices.map((inv) => {
+            {filtered.map((inv) => {
               const t = totals(inv);
               return (
                 <tr key={inv.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
@@ -154,8 +177,14 @@ export default function InvoicesPage() {
             })}
           </tbody>
         </table>
-        {!loading && invoices.length === 0 && (
-          <EmptyState message="No invoices yet — create one from your uninvoiced shipments." />
+        {!loading && filtered.length === 0 && (
+          <EmptyState
+            message={
+              invoices.length === 0
+                ? "No invoices yet — create one from your uninvoiced shipments."
+                : "No invoices match your search."
+            }
+          />
         )}
       </Card>
     </div>
