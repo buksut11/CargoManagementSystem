@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Field, inputClass } from "@/components/ui";
 import { BuildingIcon, PhoneIcon, WalletIcon } from "@/components/icons";
@@ -122,9 +122,27 @@ export function BillingCards({
   subStatus: string | null;
   onUpgraded: () => void;
 }) {
-  // Always the Pro price — these cards upgrade to Pro regardless of the org's
-  // current plan (reading the current plan's label showed the free "$0").
-  const proPrice = PLANS.pro.priceLabel;
+  // The price shown (and charged) is the org's own negotiated monthly amount
+  // (organizations.monthly_amount, migration 0045) when the operator has set
+  // one; otherwise the global Pro price. Best-effort: on a database without
+  // the column the query errors and the global label stands.
+  const [proPrice, setProPrice] = useState(PLANS.pro.priceLabel);
+  useEffect(() => {
+    if (!orgId) return;
+    let active = true;
+    supabase
+      .from("organizations")
+      .select("monthly_amount")
+      .eq("id", orgId)
+      .single()
+      .then(({ data, error }) => {
+        if (!active || error || data?.monthly_amount == null) return;
+        setProPrice(`$${Number(data.monthly_amount)} / mo`);
+      });
+    return () => {
+      active = false;
+    };
+  }, [orgId]);
 
   if (paid) {
     return (

@@ -96,8 +96,29 @@ The Settings page's **Subscription** card shows the current state, renewal
 date, days remaining, the open invoice, and the notification history with
 unread markers.
 
-## Price
+## Price — global default + per-organization override
 
-The monthly amount is `BILLING_PLAN_AMOUNT` / `BILLING_CURRENCY` (default
-25 USD) — the same value the payment cards charge. Keep `lib/plans.ts`'s
-`priceLabel` in step so the UI shows what is billed.
+The global monthly amount is `BILLING_PLAN_AMOUNT` / `BILLING_CURRENCY`
+(default 25 USD). Because prices are negotiated per customer, each
+organization can carry its own `monthly_amount` (migration `0045`), which
+overrides the global price everywhere at once: the invoice the lifecycle
+opens, the amount the EVC/eDahab/Premier cards display *and charge*, and the
+transaction log. Until the platform console exists, set it in the SQL Editor:
+
+```sql
+-- Give one organization a custom price (find ids: select id, name from organizations;)
+update public.organizations set monthly_amount = 15 where id = '<org-uuid>';
+-- Back to the global default
+update public.organizations set monthly_amount = null where id = '<org-uuid>';
+```
+
+## Who is who
+
+Every in-app role — org **owner**, **admin**, **manager**, **agent** — is a
+*customer* inside their own organization; none of them can see or affect any
+other organization, and none of them are the platform operator. The platform
+operator (you) currently manages the platform through the Supabase dashboard
+(see `docs/CREATE_ORGANIZATION.md` for provisioning and the SQL above for
+pricing); a dedicated platform console is a planned next step. Billing runs
+entirely on the local payment gateways — the Stripe code paths remain in the
+repo but are dormant unless Stripe keys are ever configured.

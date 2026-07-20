@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useOrg } from "@/components/org-context";
-import { daysUntil, graceEndsAt, inGrace, isFrozen, PLANS } from "@/lib/plans";
+import { daysUntil, graceEndsAt, inGrace, isFrozen } from "@/lib/plans";
 import { fmtDate } from "@/lib/format";
 
 // The subscription lifecycle banner, pinned above every page:
@@ -17,7 +17,6 @@ export function BillingBanner() {
   if (!org || !billing || !billing.periodEnd) return null;
 
   const isAdmin = org.role === "owner" || org.role === "admin";
-  const price = PLANS.pro.priceLabel;
 
   if (isFrozen(billing.status)) {
     return (
@@ -46,7 +45,9 @@ export function BillingBanner() {
           period, until <strong>{fmtDate(until.toISOString())}</strong> — after
           that the account becomes read-only until payment.
         </span>
-        <PayNow label={`Pay ${price}`} />
+        {/* Price is intentionally omitted: each org can have its own monthly
+            amount (migration 0045); Settings shows the exact figure. */}
+        <PayNow label="Pay now" />
       </Banner>
     );
   }
@@ -66,7 +67,7 @@ export function BillingBanner() {
           </strong>
           . Renew to keep uninterrupted access.
         </span>
-        <PayNow label={`Renew ${price}`} />
+        <PayNow label="Renew now" />
       </Banner>
     );
   }

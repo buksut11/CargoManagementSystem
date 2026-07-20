@@ -3,7 +3,6 @@ import { getPremierConfig, premierPurchase } from "@/lib/premier";
 import {
   finalizeCharge,
   newReferenceId,
-  PLAN_AMOUNT,
   PLAN_CURRENCY,
   requireBillingAdmin,
 } from "@/lib/billing";
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
   const referenceId = newReferenceId(ctx.orgId);
   const result = await premierPurchase(cfg, {
     accountNo: ctx.account,
-    amount: PLAN_AMOUNT,
+    amount: ctx.amount,
     currency: PLAN_CURRENCY,
     referenceId,
     description: "CargoBook Pro plan",
@@ -48,5 +47,6 @@ export async function POST(request: Request) {
     account: ctx.account,
     referenceId,
     result,
+    amount: ctx.amount,
   });
 }

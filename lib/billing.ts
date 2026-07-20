@@ -28,6 +28,9 @@ type AdminContext = {
   admin: SupabaseClient;
   orgId: string;
   account: string;
+  // What this organization pays per month: its own negotiated price
+  // (organizations.monthly_amount, migration 0045) or the global PLAN_AMOUNT.
+  amount: number;
 };
 
 // Validates the caller (bearer token → owner/admin of the org) and pulls the
@@ -82,7 +85,20 @@ export async function requireBillingAdmin(
     };
   }
 
-  return { admin, orgId, account };
+  // The org's own monthly price, when the operator has set one. Best-effort:
+  // on a database that predates migration 0045 the column is missing, the
+  // select errors, and the global price applies.
+  let amount = PLAN_AMOUNT;
+  const { data: org, error: orgErr } = await admin
+    .from("organizations")
+    .select("monthly_amount")
+    .eq("id", orgId)
+    .single();
+  if (!orgErr && org?.monthly_amount != null) {
+    amount = Number(org.monthly_amount);
+  }
+
+  return { admin, orgId, account, amount };
 }
 
 // Logs the attempt (approved or declined) and, on success, lifts the org to the
@@ -96,6 +112,9 @@ export async function finalizeCharge(
     account: string;
     referenceId: string;
     result: ChargeResult;
+    // The amount that was actually charged (the org's price); defaults to the
+    // global price so pre-0045 callers keep logging correctly.
+    amount?: number;
   },
 ): Promise<NextResponse> {
   const { provider, orgId, account, referenceId, result } = args;
@@ -106,7 +125,7 @@ export async function finalizeCharge(
     reference_id: referenceId,
     transaction_id: result.transactionId ?? null,
     account,
-    amount: PLAN_AMOUNT,
+    amount: args.amount ?? PLAN_AMOUNT,
     currency: PLAN_CURRENCY,
     status: result.ok ? "approved" : "failed",
     response_code: result.code ?? null,
