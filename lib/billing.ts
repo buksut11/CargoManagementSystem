@@ -120,23 +120,39 @@ export async function finalizeCharge(
     );
   }
 
-  const { error: upErr } = await admin
-    .from("organizations")
-    .update({ plan: "pro", subscription_status: "active" })
-    .eq("id", orgId);
-  if (upErr) {
-    return NextResponse.json(
-      {
-        error:
-          "Payment succeeded but the upgrade could not be saved. Contact support with transaction " +
-          (result.transactionId ?? referenceId) +
-          ".",
-      },
-      { status: 500 },
-    );
+  // Settle through the subscription lifecycle (migration 0044): mark the open
+  // monthly invoice paid, advance the billing month, and reactivate a past-due
+  // or frozen org — all in one transaction. Returns the new paid-through date.
+  const { data: paidThrough, error: rpcErr } = await admin.rpc(
+    "record_subscription_payment",
+    { p_org: orgId, p_reference: result.transactionId ?? referenceId },
+  );
+  if (rpcErr) {
+    // Databases that predate migration 0044 lack the function — fall back to
+    // the original flat upgrade so payments keep working either way.
+    const { error: upErr } = await admin
+      .from("organizations")
+      .update({ plan: "pro", subscription_status: "active" })
+      .eq("id", orgId);
+    if (upErr) {
+      return NextResponse.json(
+        {
+          error:
+            "Payment succeeded but the upgrade could not be saved. Contact support with transaction " +
+            (result.transactionId ?? referenceId) +
+            ".",
+        },
+        { status: 500 },
+      );
+    }
   }
 
-  return NextResponse.json({ ok: true, plan: "pro", transactionId: result.transactionId });
+  return NextResponse.json({
+    ok: true,
+    plan: "pro",
+    transactionId: result.transactionId,
+    paidThrough: paidThrough ?? null,
+  });
 }
 
 // A unique reference for a charge attempt, so a retry can never double-charge

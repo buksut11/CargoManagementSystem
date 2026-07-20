@@ -30,6 +30,7 @@ import {
 } from "@/components/icons";
 import { BillingCards } from "@/components/billing-cards";
 import { BillingHistory } from "@/components/billing-history";
+import { BillingStatus } from "@/components/billing-status";
 
 export default function SettingsPage() {
   const org = useOrg();
@@ -53,6 +54,8 @@ export default function SettingsPage() {
   const [detailsSaved, setDetailsSaved] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Bumped after a successful payment so the Subscription card refetches.
+  const [billingRefresh, setBillingRefresh] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -387,14 +390,20 @@ export default function SettingsPage() {
           </Section>
         ) : (
           <div>
+            <BillingStatus orgId={orgId} refreshKey={billingRefresh} />
             <BillingCards
               orgId={orgId}
               plan={current}
               paid={paid}
               subStatus={subStatus}
               onUpgraded={() => {
+                const wasFrozen = subStatus === "frozen";
                 setPlan("pro");
                 setSubStatus("active");
+                setBillingRefresh((k) => k + 1);
+                // Coming out of the frozen state, reload so the app chrome
+                // (read-only banner) picks up the reactivation immediately.
+                if (wasFrozen) window.location.reload();
               }}
             />
             <BillingHistory orgId={orgId} />

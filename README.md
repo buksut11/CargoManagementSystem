@@ -17,7 +17,7 @@ Built with Next.js + Tailwind CSS, data stored in [Supabase](https://supabase.co
 ## One-time setup (~10 minutes)
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free account → New project).
-2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through `0020_…`).
+2. **Create the database tables:** in the Supabase dashboard open **SQL Editor**, then paste and **Run** each file in [`supabase/migrations/`](supabase/migrations/) in order (`0001_…` through the latest).
 3. **Create your login user:** dashboard → **Authentication → Users → Add user** — enter your email and a password (tick "Auto confirm user").
 4. **Connect the app:** copy `.env.example` to `.env.local`, then fill in the values from dashboard → **Project Settings → API**:
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL
@@ -54,6 +54,17 @@ update public.profiles set role = 'admin' where email = 'someone@example.com';
 3. Record the **delivery costs** for the shipment (Expenses page, or directly on the shipment) — the net profit updates automatically.
 4. When it's time to bill, create an **invoice**: pick the uninvoiced shipments, click **Print** for a PDF to send.
 5. When money arrives, open the invoice and **record the payment** — the balance and paid/partial/unpaid badge update automatically.
+
+## Monthly billing
+
+Every organization is billed monthly ($25/mo by default): near month-end the
+admins get a renewal reminder (in-app, plus email/WhatsApp when configured), an
+unpaid invoice earns an automatic **3-day grace period**, and after grace the
+organization becomes **read-only** until payment — nothing is ever deleted, and
+paying (EVC Plus, eDahab or Premier Bank on the Settings page) restores full
+access instantly. Set `CRON_SECRET` and schedule `/api/billing/cron` daily (or
+enable `pg_cron`); the full setup is in
+[`docs/BILLING_LIFECYCLE.md`](docs/BILLING_LIFECYCLE.md).
 
 ## Tweaks
 

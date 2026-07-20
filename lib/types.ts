@@ -18,9 +18,16 @@ export type Organization = {
   phone: string | null;
   email: string | null;
   plan: string;
+  // 'active' | 'past_due' (in the 3-day grace window) | 'frozen' (read-only
+  // until the open invoice is paid) | Stripe's own statuses | null.
   subscription_status: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  // Monthly billing lifecycle (migration 0044). Undefined on rows read from a
+  // database that predates it.
+  current_period_start?: string;
+  current_period_end?: string;
+  billing_reminder_days?: number;
   // Which products this org runs ('cargo' | 'flights'). Set by the platform
   // operator at provisioning time and locked against tenant changes (migration
   // 0036); backfilled to ['cargo'] for every existing org by migration 0026.

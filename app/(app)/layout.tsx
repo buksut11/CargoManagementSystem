@@ -10,6 +10,8 @@ import { RoleProvider } from "@/components/role-context";
 import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
+import { BillingBanner } from "@/components/billing-banner";
+import type { BillingState } from "@/lib/plans";
 import {
   BookIcon,
   BoxIcon,
@@ -331,6 +333,7 @@ export default function AppLayout({
             logoUrl: null,
             role: uiRole,
             modules: ["cargo"],
+            billing: null,
           },
         });
         return;
@@ -374,6 +377,25 @@ export default function AppLayout({
       // user's next visit (see lib/branding.ts).
       cacheBranding({ name: activeOrg.name, logoUrl: activeOrg.logoUrl });
       const uiRole: UserRole = activeOrg.role === "agent" ? "agent" : "admin";
+
+      // Subscription lifecycle state (migration 0044). Queried separately and
+      // best-effort: on a database without the lifecycle columns this errors,
+      // billing stays null, and the app behaves exactly as before.
+      let billing: BillingState | null = null;
+      const { data: bill, error: billErr } = await supabase
+        .from("organizations")
+        .select("subscription_status, current_period_end, billing_reminder_days")
+        .eq("id", activeOrg.id)
+        .single();
+      if (!active) return;
+      if (!billErr && bill) {
+        billing = {
+          status: bill.subscription_status ?? null,
+          periodEnd: bill.current_period_end ?? null,
+          reminderDays: bill.billing_reminder_days ?? 5,
+        };
+      }
+
       setResolved({
         uiRole,
         org: {
@@ -382,6 +404,7 @@ export default function AppLayout({
           logoUrl: activeOrg.logoUrl,
           role: activeOrg.role,
           modules: activeOrg.modules,
+          billing,
         },
       });
     }
@@ -517,6 +540,7 @@ export default function AppLayout({
 
           <main className="min-w-0 flex-1 px-5 py-6 md:px-8 md:py-8">
             <div className="mx-auto w-full max-w-6xl">
+              <BillingBanner />
               <PageTransition>{children}</PageTransition>
             </div>
           </main>

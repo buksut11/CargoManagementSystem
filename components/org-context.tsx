@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import type { OrgRole } from "@/lib/types";
+import type { BillingState } from "@/lib/plans";
 
 // The organization the signed-in user is currently acting in, plus their role
 // in it. Populated by the app layout after resolving the user's memberships.
@@ -13,6 +14,9 @@ export type OrgContextValue = {
   role: OrgRole;
   // Enabled product modules for the active org ('cargo' | 'flights').
   modules: string[];
+  // Monthly subscription lifecycle (migration 0044); null when the database
+  // predates it. Drives the renewal/grace banner and the frozen read-only mode.
+  billing: BillingState | null;
 };
 
 const OrgContext = createContext<OrgContextValue | null>(null);
