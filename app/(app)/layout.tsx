@@ -9,7 +9,7 @@ import type { OrgRole, UserRole } from "@/lib/types";
 import { RoleProvider } from "@/components/role-context";
 import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageToggle } from "@/components/language-toggle";
+import { LanguageToggle, LanguageTogglePill } from "@/components/language-toggle";
 import { useT } from "@/lib/i18n";
 import { PageTransition } from "@/components/page-transition";
 import {
@@ -536,6 +536,8 @@ export default function AppLayout({
             <span className="text-base font-bold text-slate-900 dark:text-white">
               CargoBook
             </span>
+            {/* Language switch reachable without opening the drawer. */}
+            <LanguageTogglePill className="ml-auto" />
           </header>
 
           <main className="min-w-0 flex-1 px-5 py-6 md:px-8 md:py-8">
