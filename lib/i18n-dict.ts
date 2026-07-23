@@ -917,6 +917,19 @@ const so: Dictionary = {
   "— No customer —": "— Macmiil ma leh —",
   "Nothing outstanding — every booking is fully collected.":
     "Waxba lama sugayo — buugayn kastaa waa la wada aruuriyay.",
+
+  // ── Booking ledger ────────────────────────────────────────────────────────
+  "Financial summary": "Kooban maaliyadeed",
+  "Customer total due": "Wadarta macmiilku leeyahay",
+  "Paid to airline": "La bixiyay shirkadda",
+  "Refunded to customer": "Loo celiyay macmiilka",
+  "Method (cash, card, transfer…)": "Habka (cash, kaadh, wareejin…)",
+  Record: "Diiwaangeli",
+  "None yet.": "Weli midna.",
+  "Refunds & voids": "Celin & buri",
+  "Refund to customer": "Celin macmiilka",
+  "penalty {amount}": "ganaax {amount}",
+  "ADM {amount}": "ADM {amount}",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

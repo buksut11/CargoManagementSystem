@@ -23,6 +23,7 @@ import {
 } from "@/components/ui";
 import { BuildingIcon, CoinsIcon, ReceiptIcon } from "@/components/icons";
 import { DatePicker } from "@/components/date-picker";
+import { useT } from "@/lib/i18n";
 import type { ReactNode } from "react";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -34,6 +35,7 @@ export function BookingLedger({
   booking: FlightBooking;
   onStatusChange?: (status: FlightBookingStatus) => void;
 }) {
+  const t = useT();
   const [payments, setPayments] = useState<BookingPayment[]>([]);
   const [supplierPays, setSupplierPays] = useState<SupplierPayment[]>([]);
   const [refunds, setRefunds] = useState<BookingRefund[]>([]);
@@ -133,39 +135,39 @@ export function BookingLedger({
 
   return (
     <div className="space-y-5">
-      <Section icon={<CoinsIcon />} title="Financial summary">
+      <Section icon={<CoinsIcon />} title={t("Financial summary")}>
         <dl className="space-y-2 text-sm">
-          <Row label="Sale total" value={fmtMoney(saleTotal)} />
-          <Row label="Received" value={fmtMoney(received)} />
+          <Row label={t("Sale total")} value={fmtMoney(saleTotal)} />
+          <Row label={t("Received")} value={fmtMoney(received)} />
           <Row
-            label="Receivable"
+            label={t("Receivable")}
             value={fmtMoney(receivable)}
             accent={receivable > 0 ? "amber" : "emerald"}
           />
           {customerDue != null && customerDue !== receivable && (
             <Row
-              label="Customer total due"
+              label={t("Customer total due")}
               value={fmtMoney(Math.max(0, customerDue))}
               accent={customerDue > 0 ? "amber" : "emerald"}
             />
           )}
           <div className="my-2 border-t border-slate-200/60 dark:border-white/10" />
-          <Row label="Net cost" value={fmtMoney(netCost)} />
-          <Row label="Paid to airline" value={fmtMoney(paidSupplier)} />
+          <Row label={t("Net cost")} value={fmtMoney(netCost)} />
+          <Row label={t("Paid to airline")} value={fmtMoney(paidSupplier)} />
           <Row
-            label="Payable"
+            label={t("Payable")}
             value={fmtMoney(payable)}
             accent={payable > 0 ? "amber" : "emerald"}
           />
           <div className="my-2 border-t border-slate-200/60 dark:border-white/10" />
           <Row
-            label="Profit"
+            label={t("Profit")}
             value={fmtMoney(Number(booking.profit))}
             accent={Number(booking.profit) < 0 ? "rose" : "emerald"}
             bold
           />
           {refunded > 0 && (
-            <Row label="Refunded to customer" value={fmtMoney(refunded)} />
+            <Row label={t("Refunded to customer")} value={fmtMoney(refunded)} />
           )}
         </dl>
       </Section>
@@ -174,7 +176,7 @@ export function BookingLedger({
 
       <LedgerSection<BookingPayment>
         icon={<CoinsIcon />}
-        title="Customer receipts"
+        title={t("Customer receipts")}
         rows={payments}
         rowLabel={(p) => (
           <>
@@ -231,7 +233,7 @@ export function BookingLedger({
 
       <LedgerSection<SupplierPayment>
         icon={<BuildingIcon />}
-        title="Airline payments"
+        title={t("Airline payments")}
         rows={supplierPays}
         rowLabel={(p) => (
           <>
@@ -374,6 +376,7 @@ function LedgerSection<T extends { id: number }>({
   onUpdate: (id: number, form: AddForm) => Promise<boolean>;
   onDelete: (id: number) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [amount, setAmount] = useState("");
@@ -433,7 +436,7 @@ function LedgerSection<T extends { id: number }>({
           onClick={startAdd}
           className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
-          {open && editingId == null ? "Close" : "+ Add"}
+          {open && editingId == null ? t("Close") : t("+ Add")}
         </button>
       }
     >
@@ -446,7 +449,7 @@ function LedgerSection<T extends { id: number }>({
               min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Amount"
+              placeholder={t("Amount")}
               required
             />
             <DatePicker value={date} onChange={setDate} required />
@@ -454,16 +457,16 @@ function LedgerSection<T extends { id: number }>({
           <Input
             value={method}
             onChange={(e) => setMethod(e.target.value)}
-            placeholder="Method (cash, card, transfer…)"
+            placeholder={t("Method (cash, card, transfer…)")}
           />
           <Input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Note (optional)"
+            placeholder={t("Note (optional)")}
           />
           <div className="flex gap-2">
             <Button type="submit" disabled={busy}>
-              {busy ? "Saving…" : editingId != null ? "Save changes" : "Record"}
+              {busy ? t("Saving…") : editingId != null ? t("Save changes") : t("Record")}
             </Button>
             {editingId != null && (
               <Button
@@ -474,14 +477,14 @@ function LedgerSection<T extends { id: number }>({
                   setOpen(false);
                 }}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
             )}
           </div>
         </form>
       )}
       {rows.length === 0 ? (
-        <p className="text-sm text-slate-400">None yet.</p>
+        <p className="text-sm text-slate-400">{t("None yet.")}</p>
       ) : (
         <ul className="divide-y divide-slate-200/60 dark:divide-white/10">
           {rows.map((row) => (
@@ -489,10 +492,10 @@ function LedgerSection<T extends { id: number }>({
               <div className="flex flex-col">{rowLabel(row)}</div>
               <div className="flex shrink-0 items-center gap-2">
                 <button onClick={() => startEdit(row)} className={rowActionClass}>
-                  Edit
+                  {t("Edit")}
                 </button>
                 <button onClick={() => onDelete(row.id)} className={rowDeleteClass}>
-                  Delete
+                  {t("Delete")}
                 </button>
               </div>
             </li>
@@ -524,6 +527,7 @@ function RefundSection({
   onUpdate: (id: number, r: RefundInput) => Promise<boolean>;
   onDelete: (id: number) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [date, setDate] = useState(today());
@@ -580,14 +584,14 @@ function RefundSection({
   return (
     <Section
       icon={<ReceiptIcon />}
-      title="Refunds & voids"
+      title={t("Refunds & voids")}
       action={
         <button
           type="button"
           onClick={startAdd}
           className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
-          {open && editingId == null ? "Close" : "+ Add"}
+          {open && editingId == null ? t("Close") : t("+ Add")}
         </button>
       }
     >
@@ -595,15 +599,15 @@ function RefundSection({
         <form onSubmit={submit} className="mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <Select value="refund" disabled>
-              <option value="refund">Refund</option>
+              <option value="refund">{t("Refund")}</option>
             </Select>
             <DatePicker value={date} onChange={setDate} required />
           </div>
-          <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder="Refund to customer" />
-          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" />
+          <Input type="number" step="0.01" min="0" value={customerRefund} onChange={(e) => setCustomerRefund(e.target.value)} placeholder={t("Refund to customer")} />
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("Note (optional)")} />
           <div className="flex gap-2">
             <Button type="submit" disabled={busy}>
-              {busy ? "Saving…" : editingId != null ? "Save changes" : "Record"}
+              {busy ? t("Saving…") : editingId != null ? t("Save changes") : t("Record")}
             </Button>
             {editingId != null && (
               <Button
@@ -614,34 +618,34 @@ function RefundSection({
                   setOpen(false);
                 }}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
             )}
           </div>
         </form>
       )}
       {refunds.length === 0 ? (
-        <p className="text-sm text-slate-400">None yet.</p>
+        <p className="text-sm text-slate-400">{t("None yet.")}</p>
       ) : (
         <ul className="divide-y divide-slate-200/60 dark:divide-white/10">
           {refunds.map((r) => (
             <li key={r.id} className="flex items-center justify-between gap-3 py-2">
               <div className="flex flex-col">
                 <span className="font-medium capitalize">
-                  {r.refund_type} · {fmtMoney(Number(r.customer_refund))}
+                  {t(r.refund_type)} · {fmtMoney(Number(r.customer_refund))}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {fmtDate(r.refund_date)}
-                  {Number(r.penalty) > 0 ? ` · penalty ${fmtMoney(Number(r.penalty))}` : ""}
-                  {Number(r.adm_amount) > 0 ? ` · ADM ${fmtMoney(Number(r.adm_amount))}` : ""}
+                  {Number(r.penalty) > 0 ? ` · ${t("penalty {amount}", { amount: fmtMoney(Number(r.penalty)) })}` : ""}
+                  {Number(r.adm_amount) > 0 ? ` · ${t("ADM {amount}", { amount: fmtMoney(Number(r.adm_amount)) })}` : ""}
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button onClick={() => startEdit(r)} className={rowActionClass}>
-                  Edit
+                  {t("Edit")}
                 </button>
                 <button onClick={() => onDelete(r.id)} className={rowDeleteClass}>
-                  Delete
+                  {t("Delete")}
                 </button>
               </div>
             </li>
