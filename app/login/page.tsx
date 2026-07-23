@@ -202,7 +202,7 @@ export default function LoginPage() {
           <h2 className="hidden text-3xl font-bold leading-tight tracking-tight lg:block xl:text-4xl">
             {t("Run flights and cargo from one clean dashboard")}
           </h2>
-          <LoginStory className="mx-auto w-full max-w-[15rem] sm:max-w-[17rem] lg:mx-0 lg:max-w-none" />
+          <LoginStory className="mx-auto w-full max-w-[17rem] sm:max-w-[19rem] lg:mx-0 lg:max-w-none" />
         </section>
 
         {/* Auth card — frosted glass in both themes */}
@@ -235,7 +235,9 @@ export default function LoginPage() {
               {t("Welcome back")}
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {t("Sign in to continue to CargoBook")}
+              {t("Sign in to continue to {name}", {
+                name: branding?.name ?? "CargoBook",
+              })}
             </p>
           </div>
           {!isConfigured && (

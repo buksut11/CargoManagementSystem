@@ -411,9 +411,12 @@ export function LoginStory({ className = "" }: { className?: string }) {
   const scene = SCENES[active];
 
   return (
-    <div className={`select-none ${className}`}>
-      {/* stage */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-[0_20px_50px_-24px_rgba(30,41,90,0.55)] ring-1 ring-white/50 dark:ring-white/10">
+    // Frosted-glass card so the tour sits on the same surface as the auth card
+    // and the in-app panels — one consistent design language, and the caption
+    // reads on glass instead of directly on the busy background photo.
+    <div className={`glass-card select-none rounded-[1.75rem] p-4 sm:p-5 ${className}`}>
+      {/* stage — the illustration keeps its own soft surface for legibility */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl ring-1 ring-black/5 dark:ring-white/10">
         {SCENES.map((s, i) => (
           <svg
             key={s.key}
@@ -434,7 +437,7 @@ export function LoginStory({ className = "" }: { className?: string }) {
       </div>
 
       {/* caption — crossfades with the scene */}
-      <div className="mt-5 min-h-[4.5rem]">
+      <div className="mt-4 min-h-[4.25rem] px-1">
         <div key={scene.key} className="animate-rise-in">
           <h3 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
             {t(scene.title)}
@@ -446,7 +449,11 @@ export function LoginStory({ className = "" }: { className?: string }) {
       </div>
 
       {/* segmented progress / navigation */}
-      <div className="mt-4 flex items-center gap-2" role="tablist" aria-label={t("Feature tour")}>
+      <div
+        className="mt-3 flex items-center gap-2 px-1"
+        role="tablist"
+        aria-label={t("Feature tour")}
+      >
         {SCENES.map((s, i) => (
           <button
             key={s.key}

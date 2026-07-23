@@ -71,6 +71,7 @@ const so: Dictionary = {
   "Welcome back": "Ku soo dhawoow",
   "Sign in to continue to CargoBook":
     "Gal si aad u sii wadato CargoBook",
+  "Sign in to continue to {name}": "Gal si aad u sii wadato {name}",
   "Sign in": "Gal",
   "Signing in…": "Waa la gelayaa…",
   Email: "Iimaylka",
