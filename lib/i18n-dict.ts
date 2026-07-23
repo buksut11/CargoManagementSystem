@@ -382,7 +382,6 @@ const so: Dictionary = {
   "Build a statement": "Samee bayaan",
   "Pick a customer and a date range, then print or save as PDF.":
     "Dooro macmiil iyo muddo taariikheed, kadibna daabac ama u kaydi PDF.",
-  Customer: "Macmiil",
   "Select a customer…": "Dooro macmiil…",
   To: "Ilaa",
   Beginning: "Bilowga",
@@ -401,7 +400,6 @@ const so: Dictionary = {
   Charges: "Lacago la dallacay",
   "Payments & credits": "Lacag-bixinno & deyn-celin",
   Charge: "Lacag la dallacay",
-  Balance: "Hadhaaga",
   "Balance brought forward": "Hadhaaga la soo gudbiyay",
   "No transactions in this date range.":
     "Ma jiraan wax dhaqdhaqaaq ah muddadan taariikheed.",
