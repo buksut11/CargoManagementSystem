@@ -180,6 +180,14 @@ function homeFor(role: OrgRole, modules: string[]) {
   return "/";
 }
 
+// One frosted surface shared by all three navbar chrome pieces — the desktop
+// sidebar, the mobile drawer and the mobile top bar — so they read as the same
+// colour everywhere instead of the three different white opacities they used to
+// carry (25% / 55% / 35%). Border sides, blur strength and shadows still vary
+// per element (structure, not colour); only the tint is unified here.
+const navSurface =
+  "border-white/50 bg-white/40 dark:border-white/10 dark:bg-slate-900/50";
+
 const itemBase =
   "flex w-full items-center gap-3 rounded-full px-3.5 py-2.5 text-sm font-medium transition-colors";
 const itemIdle =
@@ -455,7 +463,7 @@ export default function AppLayout({
             of spilling past it (which painted items on the page background). */}
         {/* rounded-r-3xl: only the corners facing the content curve — the
             panel stays flush with the screen's left edge and full height. */}
-        <aside className="no-print no-scrollbar sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 overflow-y-auto rounded-r-3xl border-y border-r border-white/50 bg-white/25 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/30 md:flex">
+        <aside className={`no-print no-scrollbar sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1.5 overflow-y-auto rounded-r-3xl border-y border-r px-4 py-5 backdrop-blur-xl md:flex ${navSurface}`}>
           <SidebarContent
             orgRole={resolved.org.role}
             orgName={resolved.org.orgName}
@@ -482,7 +490,7 @@ export default function AppLayout({
             aria-hidden
           />
           <aside
-            className={`no-scrollbar absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto rounded-r-3xl border-y border-r border-white/50 bg-white/55 px-4 py-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-slate-900/70 ${
+            className={`no-scrollbar absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col gap-1.5 overflow-y-auto rounded-r-3xl border-y border-r px-4 py-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out motion-reduce:transition-none ${navSurface} ${
               menuOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
@@ -507,7 +515,7 @@ export default function AppLayout({
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar with hamburger */}
-          <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-white/50 bg-white/35 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/50 md:hidden">
+          <header className={`no-print sticky top-0 z-30 flex items-center gap-3 border-b px-4 py-3 backdrop-blur-xl md:hidden ${navSurface}`}>
             <button
               onClick={() => setMenuOpen(true)}
               aria-label={t("Open menu")}
