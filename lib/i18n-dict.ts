@@ -417,6 +417,18 @@ const so: Dictionary = {
   "Cargo invoice": "Qaansheeg xamuul",
   "Payment received": "Lacag-bixin la helay",
   "All activity through {date}": "Dhammaan dhaqdhaqaaqa ilaa {date}",
+
+  // ── Invoices list ─────────────────────────────────────────────────────────
+  "+ New invoice": "+ Qaansheeg cusub",
+  "Search invoice # or bill to…": "Raadi lambarka qaansheegga ama loo dallacay…",
+  Issued: "La soo saaray",
+  "No invoices yet — create one from your uninvoiced shipments.":
+    "Weli qaansheegyo ma jiraan — mid ka samee shixnadahaaga aan la qaansheegin.",
+  "No match in the loaded invoices — “Load older invoices” below widens the search.":
+    "Wax u dhigma kuma jiraan qaansheegyada la soo dejiyay — “Soo raro qaansheegyadii hore” hoose ayaa ballaadhinaya raadinta.",
+  "No invoices match your search.":
+    "Ma jiraan qaansheegyo u dhigma raadintaada.",
+  "Load older invoices": "Soo raro qaansheegyadii hore",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

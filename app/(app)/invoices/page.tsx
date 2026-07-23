@@ -23,6 +23,7 @@ import {
   Th,
 } from "@/components/ui";
 import { useRole } from "@/components/role-context";
+import { useT } from "@/lib/i18n";
 
 type InvoiceTotals = { invoiced: number; paid: number };
 
@@ -31,6 +32,7 @@ const PAGE_SIZE = 100;
 export default function InvoicesPage() {
   // Agents get read-only invoices (they open one to record a payment), so the
   // "New invoice" action is hidden from them.
+  const tr = useT();
   const isAgent = useRole() === "agent";
   const [invoiceTotals, setInvoiceTotals] = useState<Map<number, InvoiceTotals>>(
     () => new Map(),
@@ -108,7 +110,7 @@ export default function InvoicesPage() {
   }
 
   function StatusBadge({ state }: { state: ReturnType<typeof paymentState> }) {
-    return <Badge className={PAYMENT_CLASS[state]}>{PAYMENT_LABEL[state]}</Badge>;
+    return <Badge className={PAYMENT_CLASS[state]}>{tr(PAYMENT_LABEL[state])}</Badge>;
   }
 
   // Filter by invoice reference or the "bill to" name, matching the search on
@@ -126,14 +128,14 @@ export default function InvoicesPage() {
   return (
     <div>
       <PageHeader
-        title="Invoices"
+        title={tr("Invoices")}
         action={
           isAgent ? undefined : (
             <Link
               href="/invoices/new"
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              + New invoice
+              {tr("+ New invoice")}
             </Link>
           )
         }
@@ -141,7 +143,7 @@ export default function InvoicesPage() {
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="w-full sm:w-72">
           <Input
-            placeholder="Search invoice # or bill to…"
+            placeholder={tr("Search invoice # or bill to…")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -165,10 +167,10 @@ export default function InvoicesPage() {
                 </div>
                 <div className="mt-1 text-sm">{inv.bill_to || "—"}</div>
                 <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
-                  <span>Total {fmtMoney(t.total)}</span>
-                  <span>Paid {fmtMoney(t.paid)}</span>
+                  <span>{tr("Total")} {fmtMoney(t.total)}</span>
+                  <span>{tr("Paid")} {fmtMoney(t.paid)}</span>
                   <span className="font-semibold text-slate-900 dark:text-slate-100">
-                    Balance {fmtMoney(t.balance)}
+                    {tr("Balance")} {fmtMoney(t.balance)}
                   </span>
                   <span>{fmtDate(inv.issued_date)}</span>
                 </div>
@@ -179,13 +181,13 @@ export default function InvoicesPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Invoice</Th>
-              <Th>Bill to</Th>
-              <Th>Issued</Th>
-              <Th>Total</Th>
-              <Th>Paid</Th>
-              <Th>Balance</Th>
-              <Th>Status</Th>
+              <Th>{tr("Invoice")}</Th>
+              <Th>{tr("Bill to")}</Th>
+              <Th>{tr("Issued")}</Th>
+              <Th>{tr("Total")}</Th>
+              <Th>{tr("Paid")}</Th>
+              <Th>{tr("Balance")}</Th>
+              <Th>{tr("Status")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -218,10 +220,10 @@ export default function InvoicesPage() {
           <EmptyState
             message={
               invoices.length === 0
-                ? "No invoices yet — create one from your uninvoiced shipments."
+                ? tr("No invoices yet — create one from your uninvoiced shipments.")
                 : hasMore
-                  ? "No match in the loaded invoices — “Load older invoices” below widens the search."
-                  : "No invoices match your search."
+                  ? tr("No match in the loaded invoices — “Load older invoices” below widens the search.")
+                  : tr("No invoices match your search.")
             }
           />
         )}
@@ -233,10 +235,12 @@ export default function InvoicesPage() {
             disabled={loadingMore}
             className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
           >
-            {loadingMore ? "Loading…" : "Load older invoices"}
+            {loadingMore ? tr("Loading…") : tr("Load older invoices")}
           </button>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            Showing the {invoices.length} most recent — search covers what’s loaded.
+            {tr("Showing the {count} most recent — search covers what’s loaded.", {
+              count: invoices.length,
+            })}
           </span>
         </div>
       )}
