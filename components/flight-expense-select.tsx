@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { FLIGHT_EXPENSE_CATEGORY_LABEL } from "@/lib/format";
 import type { FlightExpenseCategory } from "@/lib/types";
 import { Button, ErrorNote, Input, Select } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const ADD_NEW = "__add_new__";
 
@@ -25,6 +26,7 @@ export function FlightExpenseSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   const [custom, setCustom] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
@@ -93,10 +95,10 @@ export function FlightExpenseSelect({
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
-            {o.label}
+            {t(o.label)}
           </option>
         ))}
-        <option value={ADD_NEW}>➕ Add new category…</option>
+        <option value={ADD_NEW}>{t("➕ Add new category…")}</option>
       </Select>
 
       {adding && (
@@ -108,16 +110,16 @@ export function FlightExpenseSelect({
           />
           <div className="relative w-full max-w-sm glass-panel rounded-2xl p-5">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              New expense category
+              {t("New expense category")}
             </h3>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              It will be saved and available in this dropdown from now on.
+              {t("It will be saved and available in this dropdown from now on.")}
             </p>
             <div className="mt-3">
               <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="e.g. 🌐 Internet"
+                placeholder={t("e.g. 🌐 Internet")}
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -139,14 +141,14 @@ export function FlightExpenseSelect({
                 variant="secondary"
                 onClick={() => setAdding(false)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="button"
                 onClick={saveNew}
                 disabled={saving || !newName.trim()}
               >
-                {saving ? "Adding…" : "Add category"}
+                {saving ? t("Adding…") : t("Add category")}
               </Button>
             </div>
           </div>

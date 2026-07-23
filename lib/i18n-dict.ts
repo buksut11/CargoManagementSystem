@@ -812,6 +812,33 @@ const so: Dictionary = {
     "Weli macaamiil ma jiraan — ku dar dadka ama wakaaladaha aad tigidhada ka iibiso.",
   'Delete "{name}"? Their bookings will keep working but show no customer.':
     "Tirtir “{name}”? Buugayntooda way sii shaqayn doontaa laakiin macmiil ma muujin doonto.",
+
+  // ── Airlines (suppliers) ──────────────────────────────────────────────────
+  "Edit airline": "Wax ka beddel shirkadda",
+  "New airline": "Shirkad cusub",
+  "Airlines you buy tickets through": "Shirkadaha aad tigidhada ka iibsato",
+  Contact: "Xiriir",
+  "Phone / email / account no.": "Telefoon / iimayl / lambar akoon",
+  "Add airline": "Ku dar shirkad",
+  "An airline with that name already exists.":
+    "Shirkad magacaas leh hore ayay u jirtay.",
+  Statement: "Bayaan",
+  "View {name} statement": "Fiiri bayaanka {name}",
+  "No airlines yet — add the airlines you buy through.":
+    "Weli shirkado ma jiraan — ku dar shirkadaha aad ka iibsato.",
+  "Delete airline?": "Tirtir shirkadda?",
+  'Delete "{name}"? Their bookings keep working but show no airline.':
+    "Tirtir “{name}”? Buugayntoodu way sii shaqaynaysaa laakiin shirkad ma muujinayaan.",
+
+  // ── Flight expense categories ─────────────────────────────────────────────
+  "👥 Staff salary": "👥 Mushahar shaqaale",
+  "🏢 Rent": "🏢 Kiro",
+  "💡 Electricity": "💡 Koronto",
+  "📦 Other": "📦 Kale",
+  "➕ Add new category…": "➕ Ku dar qayb cusub…",
+  "New expense category": "Qayb kharash cusub",
+  "e.g. 🌐 Internet": "tusaale 🌐 Internet",
+  "Add category": "Ku dar qaybta",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
