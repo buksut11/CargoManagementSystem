@@ -641,6 +641,17 @@ const so: Dictionary = {
     "Isku dayada lacag-bixinta qorshaha Pro, kii ugu dambeeyay marka hore.",
   Approved: "La ansixiyay",
   Failed: "Fashilmay",
+
+  // ── Print documents ───────────────────────────────────────────────────────
+  "Loading invoice…": "Waa la soo dejinayaa qaansheegga…",
+  "← Back to invoice": "← Ku noqo qaansheegga",
+  "Shipment receipt": "Rasiidka shixnadda",
+  "Loading shipment…": "Waa la soo dejinayaa shixnadda…",
+  "← Back to shipment": "← Ku noqo shixnadda",
+  "Loading receipt…": "Waa la soo dejinayaa rasiidka…",
+  "Created {date}": "La abuuray {date}",
+  "Sender signature": "Saxeexa dirayaha",
+  "Receiver signature": "Saxeexa qaataha",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
