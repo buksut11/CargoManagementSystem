@@ -9,6 +9,8 @@ import type { OrgRole, UserRole } from "@/lib/types";
 import { RoleProvider } from "@/components/role-context";
 import { OrgProvider, type OrgContextValue } from "@/components/org-context";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useT } from "@/lib/i18n";
 import { PageTransition } from "@/components/page-transition";
 import {
   BookIcon,
@@ -200,6 +202,7 @@ function SidebarContent({
   onNavigate?: () => void;
   onSignOut: () => void;
 }) {
+  const t = useT();
   const nav = navFor(orgRole, modules);
   return (
     <>
@@ -226,7 +229,7 @@ function SidebarContent({
             {orgName}
           </div>
           <div className="truncate text-xs capitalize text-slate-500 dark:text-slate-400">
-            CargoBook · {orgRole}
+            CargoBook · {t(orgRole)}
           </div>
         </div>
       </div>
@@ -238,7 +241,7 @@ function SidebarContent({
           )}
           {section.label && (
             <div className="px-3.5 pt-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-              {section.label}
+              {t(section.label)}
             </div>
           )}
           {section.items.map((item) => {
@@ -263,19 +266,20 @@ function SidebarContent({
                 <span className="shrink-0">
                   <Icon />
                 </span>
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
               </Link>
             );
           })}
         </div>
       ))}
       <div className="flex-1" />
+      <LanguageToggle className={`${itemBase} ${itemIdle}`} labelClass="inline" />
       <ThemeToggle className={`${itemBase} ${itemIdle}`} labelClass="inline" />
       <button onClick={onSignOut} className={`${itemBase} ${itemIdle}`}>
         <span className="shrink-0">
           <LogoutIcon />
         </span>
-        <span>Sign out</span>
+        <span>{t("Sign out")}</span>
       </button>
     </>
   );
@@ -284,6 +288,7 @@ function SidebarContent({
 export default function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   const [resolved, setResolved] = useState<{
@@ -435,7 +440,7 @@ export default function AppLayout({
   if (!resolved || (orgRole && !pathAllowed(orgRole, pathname, orgModules))) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-        Loading…
+        {t("Loading…")}
       </div>
     );
   }
@@ -483,7 +488,7 @@ export default function AppLayout({
           >
             <button
               onClick={() => setMenuOpen(false)}
-              aria-label="Close menu"
+              aria-label={t("Close menu")}
               className="absolute right-3 top-4 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
             >
               <CloseIcon />
@@ -505,7 +510,7 @@ export default function AppLayout({
           <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-white/50 bg-white/35 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/50 md:hidden">
             <button
               onClick={() => setMenuOpen(true)}
-              aria-label="Open menu"
+              aria-label={t("Open menu")}
               className="rounded-full p-1.5 text-slate-600 hover:bg-white/60 dark:text-slate-300 dark:hover:bg-white/10"
             >
               <MenuIcon />
@@ -529,6 +534,7 @@ export default function AppLayout({
 
 // Signed in, but the account has no organization membership (invite-only).
 function NoOrgScreen({ onSignOut }: { onSignOut: () => void }) {
+  const t = useT();
   return (
     <div className="flex min-h-dvh flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30">
@@ -536,18 +542,19 @@ function NoOrgScreen({ onSignOut }: { onSignOut: () => void }) {
       </div>
       <div>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-          No organization yet
+          {t("No organization yet")}
         </h1>
         <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-          Your account isn’t part of any organization. Ask an admin to invite
-          you, then sign in again.
+          {t(
+            "Your account isn’t part of any organization. Ask an admin to invite you, then sign in again.",
+          )}
         </p>
       </div>
       <button
         onClick={onSignOut}
         className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
       >
-        Sign out
+        {t("Sign out")}
       </button>
     </div>
   );
