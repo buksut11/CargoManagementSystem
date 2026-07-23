@@ -20,8 +20,10 @@ import {
   TRIP_TYPE_LABEL,
 } from "@/lib/format";
 import { MailIcon, PhoneIcon, UserIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 export default function PrintBookingPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const bookingId = Number(id);
@@ -77,7 +79,7 @@ export default function PrintBookingPage() {
   }, [bookingId, router]);
 
   if (!booking) {
-    return <p className="p-8 text-sm text-slate-400">Loading…</p>;
+    return <p className="p-8 text-sm text-slate-400">{t("Loading…")}</p>;
   }
 
   const saleTotal = Number(booking.sale_total);
@@ -93,13 +95,13 @@ export default function PrintBookingPage() {
           onClick={() => window.print()}
           className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
         >
-          🖨 Print / Save as PDF
+          {t("🖨 Print / Save as PDF")}
         </button>
         <Link
           href={`/flights/bookings/${booking.id}`}
           className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
         >
-          ← Back to booking
+          {t("← Back to booking")}
         </Link>
       </div>
 
@@ -133,14 +135,14 @@ export default function PrintBookingPage() {
         </div>
 
         <div className="mt-4 text-center text-lg font-bold uppercase tracking-wide text-slate-800">
-          Ticket invoice
+          {t("Ticket invoice")}
         </div>
 
         <div className="mt-6 flex justify-between">
           <div className="text-sm text-slate-600">
             {booking.flight_customers?.name && (
               <>
-                <div className="font-semibold text-slate-800">Bill to</div>
+                <div className="font-semibold text-slate-800">{t("Bill to")}</div>
                 <div className="flex items-center gap-1.5">
                   <UserIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                   {booking.flight_customers.name}
@@ -163,7 +165,7 @@ export default function PrintBookingPage() {
           <div className="text-right">
             <div className="text-xl font-bold">{bookingRef(booking.id)}</div>
             {booking.pnr && (
-              <div className="mt-1 text-sm text-slate-500">PNR {booking.pnr}</div>
+              <div className="mt-1 text-sm text-slate-500">{t("PNR {pnr}", { pnr: booking.pnr })}</div>
             )}
             <div className="mt-1 text-sm text-slate-500">
               {fmtDate(booking.booking_date)}
@@ -176,10 +178,10 @@ export default function PrintBookingPage() {
           <table className="mt-8 w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-slate-300 text-left text-xs uppercase text-slate-500">
-                <th className="py-2 pr-2">Flight</th>
-                <th className="py-2 pr-2">Route</th>
-                <th className="py-2 pr-2">Departs</th>
-                <th className="py-2">Classes</th>
+                <th className="py-2 pr-2">{t("Flight")}</th>
+                <th className="py-2 pr-2">{t("Route")}</th>
+                <th className="py-2 pr-2">{t("Departs")}</th>
+                <th className="py-2">{t("Classes")}</th>
               </tr>
             </thead>
             <tbody>
@@ -204,13 +206,13 @@ export default function PrintBookingPage() {
         {/* Passengers */}
         {passengers.length > 0 && (
           <div className="mt-6 text-sm">
-            <div className="mb-1 font-semibold text-slate-800">Passengers</div>
+            <div className="mb-1 font-semibold text-slate-800">{t("Passengers")}</div>
             <ul className="text-slate-700">
               {passengers.map((p) => (
                 <li key={p.id} className="flex justify-between">
                   <span>
                     {p.full_name}
-                    <span className="text-slate-400 capitalize"> ({p.type})</span>
+                    <span className="text-slate-400 capitalize"> ({t(p.type)})</span>
                   </span>
                   <span>{fmtMoney(Number(p.sale_amount))}</span>
                 </li>
@@ -222,14 +224,14 @@ export default function PrintBookingPage() {
         {/* Fare summary */}
         <table className="mt-8 w-full border-collapse text-sm">
           <tbody>
-            <FareRow label="Trip type" value={TRIP_TYPE_LABEL[booking.trip_type]} />
-            <FareRow label="Status" value={FLIGHT_STATUS_LABEL[booking.status]} />
+            <FareRow label={t("Trip type")} value={t(TRIP_TYPE_LABEL[booking.trip_type])} />
+            <FareRow label={t("Status")} value={t(FLIGHT_STATUS_LABEL[booking.status])} />
           </tbody>
         </table>
 
         <div className="mt-6 space-y-1 text-right">
           <div className="flex items-baseline justify-end gap-4">
-            <span className="text-sm text-slate-500">Total</span>
+            <span className="text-sm text-slate-500">{t("Total")}</span>
             <span
               className={`text-2xl font-bold ${refunded ? "text-rose-600" : ""}`}
             >
@@ -238,16 +240,16 @@ export default function PrintBookingPage() {
           </div>
           {refunded ? (
             <div className="text-sm font-semibold text-rose-600">
-              Refunded to customer
+              {t("Refunded to customer")}
             </div>
           ) : (
             received > 0 && (
               <>
                 <div className="text-sm text-slate-600">
-                  Paid: {fmtMoney(received)}
+                  {t("Paid")}: {fmtMoney(received)}
                 </div>
                 <div className="text-sm font-semibold text-slate-800">
-                  Balance due: {fmtMoney(balance)}
+                  {t("Balance due")}: {fmtMoney(balance)}
                 </div>
               </>
             )
@@ -261,7 +263,7 @@ export default function PrintBookingPage() {
         )}
 
         <p className="mt-10 text-center text-xs text-slate-400">
-          Generated by {org?.name ?? "CargoBook"} · {fmtDate(new Date().toISOString())}
+          {t("Generated by")} {org?.name ?? "CargoBook"} · {fmtDate(new Date().toISOString())}
         </p>
       </div>
     </div>

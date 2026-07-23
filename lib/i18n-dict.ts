@@ -958,6 +958,14 @@ const so: Dictionary = {
   bsp: "BSP",
   gds: "GDS",
   other: "kale",
+  "Opening statement…": "Waa la furayaa bayaanka…",
+
+  // ── Flight ticket invoice (print) ─────────────────────────────────────────
+  "← Back to booking": "← Ku noqo buugaynta",
+  "Ticket invoice": "Qaansheeg tigidh",
+  Route: "Waddo",
+  Departs: "Baxaya",
+  Classes: "Fasallo",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
