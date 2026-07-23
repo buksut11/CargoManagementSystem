@@ -774,6 +774,21 @@ const so: Dictionary = {
   "{item} {number}": "{item} {number}",
   "Remove {item} {number}": "Ka saar {item} {number}",
   "{placeholder} time": "{placeholder} waqtiga",
+
+  // ── Booking detail ────────────────────────────────────────────────────────
+  "Booking not found.": "Buugaynta lama helin.",
+  "🖨 Invoice": "🖨 Qaansheeg",
+  "📄 Statement": "📄 Bayaan",
+  "This permanently removes the booking and its passengers, itinerary, receipts, payments and refunds. This cannot be undone.":
+    "Tan si joogto ah ayay u saartaa buugaynta iyo rakaabkeeda, jadwalka, rasiidyada, lacag-bixinnada iyo celinta lacagaha. Tan dib looma celin karo.",
+  "Booking ref": "Tixraaca buugaynta",
+  Price: "Qiimaha",
+  "Booking details": "Faahfaahinta buugaynta",
+  "No segments.": "Ma jiraan qaybo.",
+  "No passengers.": "Ma jiraan rakaab.",
+  adult: "qof weyn",
+  child: "ilmo",
+  infant: "dhallaan",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
