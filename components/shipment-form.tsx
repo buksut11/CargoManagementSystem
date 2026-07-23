@@ -20,8 +20,10 @@ import {
 import { DatePicker } from "@/components/date-picker";
 import { BookIcon, BoxIcon, CoinsIcon } from "@/components/icons";
 import { fmtMoney } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
+  const t = useT();
   const router = useRouter();
   const org = useOrg();
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -76,7 +78,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
     e.target.value = ""; // allow re-selecting the same file
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setError("Please choose an image file.");
+      setError(t("Please choose an image file."));
       return;
     }
     setUploading(true);
@@ -135,24 +137,24 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
       {/* Shipment details */}
       <Section
         icon={<BoxIcon />}
-        title="Shipment details"
-        subtitle="What is being shipped and where it's going"
+        title={t("Shipment details")}
+        subtitle={t("What is being shipped and where it's going")}
       >
         <div className="space-y-4">
-          <Field label="Description">
+          <Field label={t("Description")}>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. 3 boxes of spare parts"
+              placeholder={t("e.g. 3 boxes of spare parts")}
               required
               autoFocus
             />
           </Field>
           <Field
-            label="Destination"
+            label={t("Destination")}
             hint={
               destinations.length === 0
-                ? "No destinations yet — add them on the Destinations page."
+                ? t("No destinations yet — add them on the Destinations page.")
                 : undefined
             }
           >
@@ -161,7 +163,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
                 value={destinationId}
                 onChange={(e) => setDestinationId(e.target.value)}
               >
-                <option value="">— none —</option>
+                <option value="">{t("— none —")}</option>
                 {destinations.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
@@ -173,7 +175,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
                 href="/destinations"
                 className="shrink-0 rounded-full border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.05] px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/[0.08]"
               >
-                Manage
+                {t("Manage")}
               </Link>
             </div>
           </Field>
@@ -183,11 +185,11 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
       {/* Weight & pricing */}
       <Section
         icon={<CoinsIcon />}
-        title="Weight & pricing"
-        subtitle="Weight, rate and the price you charge"
+        title={t("Weight & pricing")}
+        subtitle={t("Weight, rate and the price you charge")}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Weight (kg)">
+          <Field label={t("Weight (kg)")}>
             <Input
               type="number"
               step="0.01"
@@ -200,7 +202,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
               required
             />
           </Field>
-          <Field label="Rate per kg (optional)">
+          <Field label={t("Rate per kg (optional)")}>
             <Input
               type="number"
               step="0.01"
@@ -210,14 +212,14 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
                 setRatePerKg(e.target.value);
                 recompute(weightKg, e.target.value);
               }}
-              placeholder="leave empty to type total"
+              placeholder={t("leave empty to type total")}
             />
           </Field>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field
-            label="Total price"
-            hint={ratePerKg !== "" ? "Computed from weight × rate." : undefined}
+            label={t("Total price")}
+            hint={ratePerKg !== "" ? t("Computed from weight × rate.") : undefined}
           >
             <Input
               type="number"
@@ -229,19 +231,19 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
               required
             />
           </Field>
-          <Field label="Ship date">
+          <Field label={t("Ship date")}>
             <DatePicker value={shipDate} onChange={setShipDate} />
           </Field>
         </div>
         <div className="mt-4">
-          <Field label="Status">
+          <Field label={t("Status")}>
             <Select
               value={status}
               onChange={(e) => setStatus(e.target.value as ShipmentStatus)}
             >
-              <option value="pending">Pending</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
+              <option value="pending">{t("Pending")}</option>
+              <option value="shipped">{t("Shipped")}</option>
+              <option value="delivered">{t("Delivered")}</option>
             </Select>
           </Field>
         </div>
@@ -250,18 +252,18 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
       {/* Notes & attachment */}
       <Section
         icon={<BookIcon />}
-        title="Notes & attachment"
-        subtitle="Internal notes and an optional parcel or receipt photo"
+        title={t("Notes & attachment")}
+        subtitle={t("Internal notes and an optional parcel or receipt photo")}
       >
         <div className="space-y-4">
           <Field
-            label="Notes (optional)"
-            hint="Shown on the printed shipment receipt."
+            label={t("Notes (optional)")}
+            hint={t("Shown on the printed shipment receipt.")}
           >
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. fragile — handle with care"
+              placeholder={t("e.g. fragile — handle with care")}
             />
           </Field>
           {/*
@@ -274,9 +276,9 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
           */}
           <div className="min-w-0">
             <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Attachment image{" "}
+              {t("Attachment image")}{" "}
               <span className="font-normal text-slate-400 dark:text-slate-500">
-                (optional)
+                {t("(optional)")}
               </span>
             </span>
 
@@ -289,7 +291,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             />
 
             <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-              Agents can view it but not change it.
+              {t("Agents can view it but not change it.")}
             </p>
           </div>
         </div>
@@ -301,7 +303,7 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
           while the user scrolls the form, mirroring the booking form. */}
       <div className="glass-panel sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
         <span className="text-sm text-slate-500 dark:text-slate-400">
-          Total{" "}
+          {t("Total")}{" "}
           <span className="font-semibold text-slate-900 dark:text-slate-100">
             {fmtMoney(total === "" ? 0 : parseFloat(total) || 0)}
           </span>
@@ -312,10 +314,10 @@ export function ShipmentForm({ shipment }: { shipment?: Shipment }) {
             variant="secondary"
             onClick={() => router.push("/shipments")}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={busy || uploading}>
-            {busy ? "Saving…" : shipment ? "Save changes" : "Add shipment"}
+            {busy ? t("Saving…") : shipment ? t("Save changes") : t("Add shipment")}
           </Button>
         </div>
       </div>
@@ -339,6 +341,7 @@ function AttachmentSlot({
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: () => void;
 }) {
+  const t = useT();
   return (
     <div className="min-w-0">
       {/* Hidden native input, driven by the styled triggers below. */}
@@ -356,7 +359,7 @@ function AttachmentSlot({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={url}
-            alt="Shipment attachment"
+            alt={t("Attachment image")}
             style={{ imageOrientation: "none" }}
             className="mx-auto block h-48 w-full object-contain"
           />
@@ -367,7 +370,7 @@ function AttachmentSlot({
                 uploading ? "pointer-events-none opacity-60" : ""
               }`}
             >
-              Replace
+              {t("Replace")}
             </label>
             <button
               type="button"
@@ -376,7 +379,7 @@ function AttachmentSlot({
               className="pointer-events-auto inline-flex items-center justify-center gap-1 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-red-600 disabled:opacity-60"
             >
               <span aria-hidden>✕</span>
-              Remove
+              {t("Remove")}
             </button>
           </figcaption>
         </figure>
@@ -403,10 +406,10 @@ function AttachmentSlot({
             </svg>
           </span>
           <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            {uploading ? "Uploading…" : "Click to upload an image"}
+            {uploading ? t("Uploading…") : t("Click to upload an image")}
           </span>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            PNG or JPG · parcel or receipt
+            {t("PNG or JPG · parcel or receipt")}
           </span>
         </label>
       )}

@@ -429,6 +429,40 @@ const so: Dictionary = {
   "No invoices match your search.":
     "Ma jiraan qaansheegyo u dhigma raadintaada.",
   "Load older invoices": "Soo raro qaansheegyadii hore",
+
+  // ── Shipment form ─────────────────────────────────────────────────────────
+  "Shipment details": "Faahfaahinta shixnadda",
+  "What is being shipped and where it's going":
+    "Waxa la dirayo iyo halka uu tegayo",
+  "e.g. 3 boxes of spare parts": "tusaale 3 sanduuq oo qalab dheeraad ah",
+  "No destinations yet — add them on the Destinations page.":
+    "Weli meelo ma jiraan — ku dar bogga Meelaha.",
+  "— none —": "— midna —",
+  Manage: "Maamul",
+  "Weight & pricing": "Miisaanka & qiimaha",
+  "Weight, rate and the price you charge":
+    "Miisaanka, qiimaha halkiiba iyo qiimaha aad dalbato",
+  "Rate per kg (optional)": "Qiimaha kg-giiba (ikhtiyaari)",
+  "leave empty to type total": "ka tag madhan si aad wadarta u qorto",
+  "Total price": "Qiimaha guud",
+  "Computed from weight × rate.": "Laga xisaabiyay miisaanka × qiimaha.",
+  "Notes & attachment": "Faallo & lifaaq",
+  "Internal notes and an optional parcel or receipt photo":
+    "Faallo gudaha ah iyo sawir ikhtiyaari ah oo baakidhka ama rasiidka",
+  "Notes (optional)": "Faallo (ikhtiyaari)",
+  "Shown on the printed shipment receipt.":
+    "Waxaa lagu tusayaa rasiidka shixnadda ee la daabaco.",
+  "e.g. fragile — handle with care": "tusaale jajab — si taxadar leh u qabo",
+  "Attachment image": "Sawirka lifaaqa",
+  "(optional)": "(ikhtiyaari)",
+  "Agents can view it but not change it.":
+    "Wakiillada way arki karaan laakiin ma beddeli karaan.",
+  "Add shipment": "Ku dar shixnad",
+  "Please choose an image file.": "Fadlan dooro fayl sawir ah.",
+  Replace: "Beddel",
+  "Uploading…": "Waa la soo gelinayaa…",
+  "Click to upload an image": "Guji si aad sawir u soo geliso",
+  "PNG or JPG · parcel or receipt": "PNG ama JPG · baakidh ama rasiid",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
