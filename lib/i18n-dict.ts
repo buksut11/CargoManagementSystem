@@ -877,6 +877,16 @@ const so: Dictionary = {
   "Delete booking seats?": "Tirtir kuraasta?",
   'Delete the {date} entry for "{air}"?':
     "Tirtir gelitaanka {date} ee “{air}”?",
+
+  // ── Flight receipts / payables ────────────────────────────────────────────
+  "Customer receipts": "Rasiidyada macmiilka",
+  Booking: "Buugayn",
+  "No receipts yet — record them from a booking's page.":
+    "Weli rasiidyo ma jiraan — ka diiwaangeli bogga buugaynta.",
+  "Airline payments": "Lacag-bixinnada shirkadda",
+  "Total paid:": "Wadarta la bixiyay:",
+  "No airline payments yet — record them from a booking's page.":
+    "Weli lacag-bixinno shirkadeed ma jiraan — ka diiwaangeli bogga buugaynta.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
