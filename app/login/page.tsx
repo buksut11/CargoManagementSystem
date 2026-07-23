@@ -182,14 +182,14 @@ export default function LoginPage() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-start gap-8 px-6 py-10 lg:flex-row lg:justify-between lg:gap-12 lg:px-10">
-        {/* Brand + storytelling panel — shown on every screen size. On desktop
-            it fills the left column; on mobile it sits above the auth card so
-            new users see what CargoBook does before signing in. */}
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-8 px-6 py-10 lg:flex-row lg:justify-between lg:gap-12 lg:px-10">
+        {/* Brand + storytelling panel — desktop only. On mobile it made the
+            page too tall and pushed the form down, so phones show just the
+            auth card (which already carries the logo and welcome). */}
         <section
           data-animate
           style={{ opacity: 0 }}
-          className="flex w-full max-w-md flex-col gap-5 text-slate-900 dark:text-white"
+          className="hidden w-full max-w-md flex-col gap-5 text-slate-900 lg:flex dark:text-white"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900/10 ring-1 ring-slate-900/20 backdrop-blur dark:bg-white/15 dark:ring-white/25">
