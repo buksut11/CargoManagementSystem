@@ -18,6 +18,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/lib/i18n";
 
 export function Card({
   children,
@@ -581,6 +582,7 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const t = useT();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -609,7 +611,7 @@ export function ConfirmDialog({
             disabled={busy}
             className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.12]"
           >
-            {cancelLabel}
+            {t(cancelLabel)}
           </button>
           <button
             type="button"
@@ -617,7 +619,7 @@ export function ConfirmDialog({
             disabled={busy}
             className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-red-500/30 transition-colors hover:bg-red-700 disabled:opacity-50"
           >
-            {busy ? "Deleting…" : confirmLabel}
+            {busy ? t("Deleting…") : t(confirmLabel)}
           </button>
         </div>
       </div>

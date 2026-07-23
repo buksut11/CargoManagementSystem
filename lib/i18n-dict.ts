@@ -185,6 +185,43 @@ const so: Dictionary = {
   "No results": "Wax natiijo ah lama helin",
   "Nothing here yet": "Weli waxba halkan ma jiraan",
   "Something went wrong.": "Wax baa qaldamay.",
+
+  // ── Dashboard ─────────────────────────────────────────────────────────────
+  "Total weight": "Wadarta miisaanka",
+  Invoiced: "La qaansheegay",
+  Outstanding: "Hadhay",
+  "Net profit": "Faaiidada saafiga ah",
+  "Kg shipped per month": "Kg la diray bishiiba",
+  "this month": "bishaan",
+  "Payment status": "Xaaladda lacag-bixinta",
+  "Nothing invoiced yet — create your first invoice to see paid vs. due here.":
+    "Weli waxba lama qaansheegin — abuur qaansheegkaagii ugu horreeyay si aad halkan ugu aragto wixii la bixiyay iyo wixii la sugayo.",
+  "Received per month": "La helay bishiiba",
+  "Recent shipments": "Shixnadihii ugu dambeeyay",
+  "View all →": "Fiiri dhammaan →",
+  Ref: "Tixraac",
+  "No shipments yet — add your first one from the Shipments page.":
+    "Weli shixnado ma jiraan — ka dar kii ugu horreeyay bogga Shixnadaha.",
+
+  // ── Shipments list ────────────────────────────────────────────────────────
+  "+ New shipment": "+ Shixnad cusub",
+  "Search description, destination…": "Raadi sharaxaad, meesha loo diro…",
+  "All statuses": "Dhammaan xaaladaha",
+  "Exporting…": "Waa la dhoofinayaa…",
+  "⬇ Export CSV": "⬇ Dhoofi CSV",
+  "Bill to": "Loo dallacay",
+  "not invoiced": "aan la qaansheegin",
+  "Rate per kg": "Qiimaha kg-giiba",
+  "Ship date": "Taariikhda dirista",
+  "No shipments yet — click “New shipment” to add your first.":
+    "Weli shixnado ma jiraan — guji “Shixnad cusub” si aad ugu darto kaagii ugu horreeyay.",
+  "No shipments yet.": "Weli shixnado ma jiraan.",
+  "No match in the loaded shipments — “Load older shipments” below widens the search.":
+    "Wax u dhigma kuma jiraan shixnadaha la soo dejiyay — “Soo raro shixnadihii hore” hoose ayaa ballaadhinaya raadinta.",
+  "No shipments match your search.": "Ma jiraan shixnado u dhigma raadintaada.",
+  "Load older shipments": "Soo raro shixnadihii hore",
+  "Showing the {count} most recent — search covers what’s loaded.":
+    "Waxaa la tusayaa {count} ee ugu dambeeyay — raadintu waxay dabooshaa waxa la soo dejiyay.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
