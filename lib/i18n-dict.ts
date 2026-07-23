@@ -279,6 +279,52 @@ const so: Dictionary = {
   "Delete {name}": "Tirtir {name}",
   "No email": "Iimayl ma leh",
   "No phone": "Telefoon ma leh",
+
+  // ── Audit trail ───────────────────────────────────────────────────────────
+  Created: "La abuuray",
+  Updated: "La cusboonaysiiyay",
+  Deleted: "La tirtiray",
+  system: "nidaamka",
+  Everyone: "Qof kasta",
+  "Agents only": "Wakiillada oo keliya",
+  "Admins only": "Maamulayaasha oo keliya",
+  When: "Goorta",
+  Who: "Cida",
+  Action: "Ficil",
+  Changes: "Isbeddellada",
+  "No activity recorded yet — shipment changes will appear here.":
+    "Weli dhaqdhaqaaq lama diiwaangelin — isbeddellada shixnadaha halkan ayay ka soo muuqan doonaan.",
+  "No activity matches this filter.":
+    "Ma jiro dhaqdhaqaaq u dhigma shaandhadan.",
+
+  // ── Contact Us ────────────────────────────────────────────────────────────
+  "Feature request": "Codsi astaan",
+  "Problem / error": "Dhibaato / qalad",
+  "Something else": "Wax kale",
+  "Questions, ideas, or something not working? Get in touch — we usually reply within the same working day.":
+    "Su'aalo, fikrado, ama wax aan shaqeynayn? Nala soo xiriir — sida caadiga ah waxaan ku jawaabnaa isla maalinta shaqada.",
+  "Get in touch": "Nala soo xiriir",
+  "Send us a message on WhatsApp — it arrives instantly":
+    "Noogu soo dir fariin WhatsApp — isla markiiba way timaaddaa",
+  "What is it about?": "Waa maxay arrinku?",
+  "Your message": "Fariintaada",
+  "Describe the feature you'd like, or the problem you ran into…":
+    "Sharax astaanta aad rabto, ama dhibaatada kula kulantay…",
+  "Send via WhatsApp": "Ku dir WhatsApp",
+  "Opens WhatsApp with your message ready to send — your email and organization are attached automatically.":
+    "Wuxuu furaa WhatsApp fariintaada oo diyaar u ah in la diro — iimaylkaaga iyo ururkaaga si toos ah ayaa loo lifaaqay.",
+  "Contact information": "Macluumaadka xiriirka",
+  "Reach us directly": "Si toos ah nagula soo xiriir",
+  "Business hours": "Saacadaha shaqada",
+  "When you can reach us": "Goorta aad nagu heli karto",
+  "Saturday – Wednesday": "Sabti – Arbaco",
+  Thursday: "Khamiis",
+  Friday: "Jimce",
+  Closed: "Xiran",
+  "Thursday and Friday are non-working days.":
+    "Khamiista iyo Jimcaha maalmo aan shaqo lahayn.",
+  "From:": "Ka:",
+  "unknown user": "isticmaale aan la aqoon",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
