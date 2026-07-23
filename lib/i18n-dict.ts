@@ -908,6 +908,15 @@ const so: Dictionary = {
     "Weli dhaqdhaqaaq lacageed ma jiro — rasiidyada, lacag-bixinnada shirkadaha iyo celinta ayaa halkan ka soo muuqan doona.",
   "No activity recorded yet — booking changes will appear here.":
     "Weli dhaqdhaqaaq lama diiwaangelin — isbeddellada buugaynta halkan ayay ka soo muuqan doonaan.",
+
+  // ── Flight reports ────────────────────────────────────────────────────────
+  "Net margin": "Faaiidada saafiga %",
+  "By airline": "Shirkad ahaan",
+  bookings: "buugayn",
+  "Customer outstanding": "Deynta macmiilka",
+  "— No customer —": "— Macmiil ma leh —",
+  "Nothing outstanding — every booking is fully collected.":
+    "Waxba lama sugayo — buugayn kastaa waa la wada aruuriyay.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
