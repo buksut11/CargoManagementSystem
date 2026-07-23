@@ -557,6 +557,18 @@ const so: Dictionary = {
   "Remove {name} from the organization? They will lose access.":
     "Ka saar {name} ururka? Waxay lumin doonaan gelitaanka.",
   "this member": "xubintan",
+
+  // ── Date / time picker controls ───────────────────────────────────────────
+  "Pick a date": "Dooro taariikh",
+  "Choose date": "Dooro taariikhda",
+  "Previous month": "Bisha hore",
+  "Next month": "Bisha xigta",
+  "Previous year": "Sanadkii hore",
+  "Next year": "Sanadka xiga",
+  "Choose time": "Dooro waqtiga",
+  Hour: "Saac",
+  Min: "Daqiiqad",
+  Time: "Waqti",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

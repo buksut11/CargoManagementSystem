@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { inputClass } from "./ui";
+import { useT } from "@/lib/i18n";
 
 const MONTHS = [
   "January",
@@ -94,6 +95,7 @@ export function DatePicker({
   required?: boolean;
   placeholder?: string;
 }) {
+  const t = useT();
   const rootRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -175,7 +177,7 @@ export function DatePicker({
 
   const label = selected
     ? `${selected.d} ${MONTHS[selected.m].slice(0, 3)} ${selected.y}`
-    : placeholder;
+    : t(placeholder);
 
   return (
     <div ref={rootRef} className="relative min-w-0">
@@ -230,7 +232,7 @@ export function DatePicker({
         <div
           ref={popRef}
           role="dialog"
-          aria-label="Choose date"
+          aria-label={t("Choose date")}
           style={
             dropUp
               ? { left: pos.left, bottom: pos.bottom }
@@ -242,7 +244,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={() => (view === "days" ? shiftMonth(-1) : setViewY(viewY - 1))}
-              aria-label={view === "days" ? "Previous month" : "Previous year"}
+              aria-label={view === "days" ? t("Previous month") : t("Previous year")}
               className={navButtonClass}
             >
               <Chevron left />
@@ -257,7 +259,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={() => (view === "days" ? shiftMonth(1) : setViewY(viewY + 1))}
-              aria-label={view === "days" ? "Next month" : "Next year"}
+              aria-label={view === "days" ? t("Next month") : t("Next year")}
               className={navButtonClass}
             >
               <Chevron />
@@ -338,7 +340,7 @@ export function DatePicker({
                 }}
                 className="rounded-full px-2.5 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/[0.1] dark:hover:text-slate-200"
               >
-                Clear
+                {t("Clear")}
               </button>
             ) : (
               <span />
@@ -348,7 +350,7 @@ export function DatePicker({
               onClick={() => pick(today.y, today.m, today.d)}
               className="rounded-full px-2.5 py-1 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/10 dark:text-blue-400"
             >
-              Today
+              {t("Today")}
             </button>
           </div>
         </div>,
@@ -396,6 +398,7 @@ export function TimePicker({
   placeholder?: string;
   ariaLabel?: string;
 }) {
+  const t = useT();
   const rootRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const hourColRef = useRef<HTMLDivElement>(null);
@@ -467,7 +470,7 @@ export function TimePicker({
     return () => cancelAnimationFrame(id);
   }, [open, hh, mm]);
 
-  const label = valid ? `${hh}:${mm}` : placeholder;
+  const label = valid ? `${hh}:${mm}` : t(placeholder);
 
   return (
     <div ref={rootRef} className="relative min-w-0">
@@ -497,7 +500,7 @@ export function TimePicker({
           <div
             ref={popRef}
             role="dialog"
-            aria-label="Choose time"
+            aria-label={t("Choose time")}
             style={
               dropUp
                 ? { left: pos.left, bottom: pos.bottom }
@@ -511,7 +514,7 @@ export function TimePicker({
                   key={h}
                   className="flex h-5 items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"
                 >
-                  {h}
+                  {t(h)}
                 </span>
               ))}
             </div>
