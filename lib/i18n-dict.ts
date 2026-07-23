@@ -325,6 +325,42 @@ const so: Dictionary = {
     "Khamiista iyo Jimcaha maalmo aan shaqo lahayn.",
   "From:": "Ka:",
   "unknown user": "isticmaale aan la aqoon",
+
+  // ── Transport modes ───────────────────────────────────────────────────────
+  "✈️ Airplane": "✈️ Diyaarad",
+  "🚗 Car": "🚗 Baabuur",
+  "🏍️ Motorcycle": "🏍️ Mooto",
+  "📦 Other": "📦 Kale",
+
+  // ── Expenses ──────────────────────────────────────────────────────────────
+  "Income (all shipments)": "Dakhliga (dhammaan shixnadaha)",
+  "Delivery expenses": "Kharashaadka gaarsiinta",
+  "Add a delivery expense": "Ku dar kharash gaarsiineed",
+  "Record what a delivery cost you (airplane, car, motorcycle…)":
+    "Diiwaangeli waxa gaarsiintu kugu kacday (diyaarad, baabuur, mooto…)",
+  "— choose shipment —": "— dooro shixnad —",
+  Transport: "Gaadiid",
+  Cost: "Kharashka",
+  "Date (optional)": "Taariikhda (ikhtiyaari)",
+  "Adding…": "Waa lagu darayaa…",
+  "All expenses": "Dhammaan kharashaadka",
+  "No expenses yet — record what a delivery cost you (airplane, car, motorcycle…) to see your real profit.":
+    "Weli kharashaad ma jiraan — diiwaangeli waxa gaarsiintu kugu kacday (diyaarad, baabuur, mooto…) si aad u aragto faaiidadaada dhabta ah.",
+  "Profit per shipment": "Faaiidada shixnadiiba",
+  Income: "Dakhliga",
+  "No shipments yet — profit per shipment will appear here.":
+    "Weli shixnado ma jiraan — faaiidada shixnadiiba halkan ayay ka soo muuqan doontaa.",
+  "Delete expense?": "Tirtir kharashka?",
+  "This removes the {amount} expense. This cannot be undone.":
+    "Tan waxay saaraysaa kharashka {amount}. Tan dib looma celin karo.",
+
+  // ── Transport / expense-type dropdown ─────────────────────────────────────
+  "➕ Add new type…": "➕ Ku dar nooc cusub…",
+  "New transport / expense type": "Nooc gaadiid / kharash cusub",
+  "It will be saved and available in this dropdown from now on.":
+    "Waa la kaydin doonaa oo hadda ka dib wuu ku jiri doonaa liiskan.",
+  "e.g. 🚢 Ship": "tusaale 🚢 Markab",
+  "Add type": "Ku dar nooca",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

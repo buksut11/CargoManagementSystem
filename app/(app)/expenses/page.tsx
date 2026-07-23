@@ -24,12 +24,14 @@ import {
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 import { ChartIcon, WalletIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 // The dropdown and the profit table only render these three fields, so the
 // query fetches just them instead of every shipment column.
 type ShipmentLite = Pick<Shipment, "id" | "description" | "total">;
 
 export default function ExpensesPage() {
+  const t = useT();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [shipments, setShipments] = useState<ShipmentLite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,13 +128,13 @@ export default function ExpensesPage() {
 
   return (
     <div>
-      <PageHeader title="Expenses" />
+      <PageHeader title={t("Expenses")} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {stats.map((s) => (
           <Card key={s.label} className="p-5">
             <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              {s.label}
+              {t(s.label)}
             </div>
             <div
               className={`mt-1.5 text-2xl font-bold tracking-tight ${
@@ -150,21 +152,21 @@ export default function ExpensesPage() {
       <Section
         className="mt-5"
         icon={<WalletIcon />}
-        title="Add a delivery expense"
-        subtitle="Record what a delivery cost you (airplane, car, motorcycle…)"
+        title={t("Add a delivery expense")}
+        subtitle={t("Record what a delivery cost you (airplane, car, motorcycle…)")}
       >
         <form
           onSubmit={add}
           className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-6"
         >
           <div className="lg:col-span-2">
-            <Field label="Shipment">
+            <Field label={t("Shipment")}>
               <Select
                 value={shipmentId}
                 onChange={(e) => setShipmentId(e.target.value)}
                 required
               >
-                <option value="">— choose shipment —</option>
+                <option value="">{t("— choose shipment —")}</option>
                 {shipments.map((s) => (
                   <option key={s.id} value={s.id}>
                     {shipmentRef(s.id)} — {s.description}
@@ -173,10 +175,10 @@ export default function ExpensesPage() {
               </Select>
             </Field>
           </div>
-          <Field label="Transport">
+          <Field label={t("Transport")}>
             <TransportSelect value={mode} onChange={setMode} />
           </Field>
-          <Field label="Cost">
+          <Field label={t("Cost")}>
             <Input
               type="number"
               step="0.01"
@@ -186,11 +188,11 @@ export default function ExpensesPage() {
               required
             />
           </Field>
-          <Field label="Date (optional)">
+          <Field label={t("Date (optional)")}>
             <DatePicker value={date} onChange={setDate} />
           </Field>
           <Button type="submit" disabled={busy}>
-            {busy ? "Adding…" : "Add"}
+            {busy ? t("Adding…") : t("Add")}
           </Button>
         </form>
         <div className="mt-3">
@@ -204,7 +206,7 @@ export default function ExpensesPage() {
             <WalletIcon />
           </IconChip>
           <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            All expenses
+            {t("All expenses")}
           </h2>
         </div>
         <div className="mt-2 space-y-3 p-3 lg:hidden">
@@ -214,7 +216,7 @@ export default function ExpensesPage() {
               className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
             >
               <div className="flex items-center justify-between gap-2">
-                <span>{modeLabel(exp.transport_mode)}</span>
+                <span>{t(modeLabel(exp.transport_mode))}</span>
                 <span className="font-semibold text-red-600 dark:text-red-400">
                   −{fmtMoney(Number(exp.amount))}
                 </span>
@@ -232,7 +234,7 @@ export default function ExpensesPage() {
                   onClick={() => setPending(exp)}
                   className={`ml-auto ${rowDeleteClass}`}
                 >
-                  Delete
+                  {t("Delete")}
                 </button>
               </div>
             </div>
@@ -241,11 +243,11 @@ export default function ExpensesPage() {
         <table className="mt-1 hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Date</Th>
-              <Th>Shipment</Th>
-              <Th>Transport</Th>
-              <Th>Note</Th>
-              <Th>Cost</Th>
+              <Th>{t("Date")}</Th>
+              <Th>{t("Shipment")}</Th>
+              <Th>{t("Transport")}</Th>
+              <Th>{t("Note")}</Th>
+              <Th>{t("Cost")}</Th>
               <Th />
             </tr>
           </thead>
@@ -265,7 +267,7 @@ export default function ExpensesPage() {
                   </Link>
                 </Td>
                 <Td className="whitespace-nowrap">
-                  {modeLabel(exp.transport_mode)}
+                  {t(modeLabel(exp.transport_mode))}
                 </Td>
                 <Td>{exp.description ?? "—"}</Td>
                 <Td className="whitespace-nowrap font-medium text-red-600 dark:text-red-400">
@@ -273,7 +275,7 @@ export default function ExpensesPage() {
                 </Td>
                 <Td className="text-right">
                   <button onClick={() => setPending(exp)} className={rowDeleteClass}>
-                    Delete
+                    {t("Delete")}
                   </button>
                 </Td>
               </tr>
@@ -281,7 +283,7 @@ export default function ExpensesPage() {
           </tbody>
         </table>
         {!loading && expenses.length === 0 && (
-          <EmptyState message="No expenses yet — record what a delivery cost you (airplane, car, motorcycle…) to see your real profit." />
+          <EmptyState message={t("No expenses yet — record what a delivery cost you (airplane, car, motorcycle…) to see your real profit.")} />
         )}
       </Card>
 
@@ -291,7 +293,7 @@ export default function ExpensesPage() {
             <ChartIcon />
           </IconChip>
           <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Profit per shipment
+            {t("Profit per shipment")}
           </h2>
         </div>
         <div className="mt-2 space-y-3 p-3 lg:hidden">
@@ -320,8 +322,8 @@ export default function ExpensesPage() {
                 </div>
                 <div className="mt-1 text-sm">{s.description}</div>
                 <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-slate-500 dark:text-slate-400">
-                  <span>Income {fmtMoney(Number(s.total))}</span>
-                  <span>Expenses −{fmtMoney(cost)}</span>
+                  <span>{t("Income")} {fmtMoney(Number(s.total))}</span>
+                  <span>{t("Expenses")} −{fmtMoney(cost)}</span>
                 </div>
               </Link>
             );
@@ -330,11 +332,11 @@ export default function ExpensesPage() {
         <table className="mt-1 hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Ref</Th>
-              <Th>Description</Th>
-              <Th>Income</Th>
-              <Th>Expenses</Th>
-              <Th>Net profit</Th>
+              <Th>{t("Ref")}</Th>
+              <Th>{t("Description")}</Th>
+              <Th>{t("Income")}</Th>
+              <Th>{t("Expenses")}</Th>
+              <Th>{t("Net profit")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -376,18 +378,18 @@ export default function ExpensesPage() {
           </tbody>
         </table>
         {!loading && shipments.length === 0 && (
-          <EmptyState message="No shipments yet — profit per shipment will appear here." />
+          <EmptyState message={t("No shipments yet — profit per shipment will appear here.")} />
         )}
       </Card>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete expense?"
+        title={t("Delete expense?")}
         message={
           pending
-            ? `This removes the ${fmtMoney(
-                Number(pending.amount),
-              )} expense. This cannot be undone.`
+            ? t("This removes the {amount} expense. This cannot be undone.", {
+                amount: fmtMoney(Number(pending.amount)),
+              })
             : undefined
         }
         busy={deleting}
