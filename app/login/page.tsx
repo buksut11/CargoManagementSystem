@@ -22,6 +22,8 @@ import {
 } from "@/components/icons";
 import { LogoOrb } from "@/components/logo-orb";
 import { ThemeTogglePill } from "@/components/theme-toggle";
+import { LanguageTogglePill } from "@/components/language-toggle";
+import { useT } from "@/lib/i18n";
 
 // WebGL backdrop is client-only and lazy-loaded so it never blocks first paint.
 const ThreeBackground = dynamic(
@@ -43,6 +45,7 @@ const featureItems = [
 ];
 
 export default function LoginPage() {
+  const t = useT();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState("");
@@ -149,7 +152,7 @@ export default function LoginPage() {
     setError(null);
     setNotice(null);
     if (!email) {
-      setError("Enter your email above first, then tap “Forgot password”.");
+      setError(t("Enter your email above first, then tap “Forgot password”."));
       return;
     }
     setBusy(true);
@@ -159,7 +162,7 @@ export default function LoginPage() {
     });
     setBusy(false);
     if (error) setError(error.message);
-    else setNotice(`We’ve sent a password reset link to ${email}.`);
+    else setNotice(t("We’ve sent a password reset link to {email}.", { email }));
   }
 
   return (
@@ -200,11 +203,12 @@ export default function LoginPage() {
             <span className="text-xl font-bold tracking-tight">CargoBook</span>
           </div>
           <h2 className="text-4xl font-bold leading-tight tracking-tight xl:text-5xl">
-            Track Every Shipment, From Port to Door
+            {t("Track Every Shipment, From Port to Door")}
           </h2>
           <p className="max-w-sm text-lg text-slate-700 dark:text-white/75">
-            Shipments, invoices and payments — organised in one clean, fast
-            dashboard built for the way you work.
+            {t(
+              "Shipments, invoices and payments — organised in one clean, fast dashboard built for the way you work.",
+            )}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-5 text-sm font-medium text-slate-800 dark:text-white/80">
             {featureItems.map(({ label, icon }) => (
@@ -212,7 +216,7 @@ export default function LoginPage() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900/10 ring-1 ring-slate-900/15 backdrop-blur dark:bg-white/10 dark:ring-white/20 [&_svg]:h-4 [&_svg]:w-4">
                   {icon}
                 </span>
-                {label}
+                {t(label)}
               </span>
             ))}
           </div>
@@ -224,7 +228,10 @@ export default function LoginPage() {
           style={{ opacity: 0 }}
           className="glass-card relative w-full max-w-md rounded-[1.75rem] p-8 sm:p-10"
         >
-          <ThemeTogglePill className="absolute right-5 top-5" />
+          <div className="absolute right-5 top-5 flex items-center gap-2">
+            <LanguageTogglePill />
+            <ThemeTogglePill />
+          </div>
 
           <div className="mb-8 text-center">
             {branding?.logoUrl ? (
@@ -242,10 +249,10 @@ export default function LoginPage() {
               <LogoOrb className="mx-auto -mt-2 mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(59,130,246,0.4)]" />
             )}
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Welcome back
+              {t("Welcome back")}
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Sign in to continue to CargoBook
+              {t("Sign in to continue to CargoBook")}
             </p>
           </div>
           {!isConfigured && (
@@ -255,7 +262,7 @@ export default function LoginPage() {
             </p>
           )}
           <form onSubmit={signIn} className="space-y-4">
-            <Field label="Email">
+            <Field label={t("Email")}>
               <span className="relative block">
                 <span className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-600 dark:text-slate-500 [&_svg]:h-4.5 [&_svg]:w-4.5">
                   <MailIcon />
@@ -273,7 +280,7 @@ export default function LoginPage() {
                 />
               </span>
             </Field>
-            <Field label="Password">
+            <Field label={t("Password")}>
               <span className="relative block">
                 <span className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-600 dark:text-slate-500 [&_svg]:h-4.5 [&_svg]:w-4.5">
                   <LockIcon />
@@ -291,7 +298,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t("Hide password") : t("Show password")}
                   className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-slate-600 transition-colors hover:text-slate-800 dark:text-slate-500 dark:hover:text-slate-300 [&_svg]:h-4.5 [&_svg]:w-4.5"
                 >
                   {showPassword ? <EyeIcon /> : <EyeOffIcon />}
@@ -306,7 +313,7 @@ export default function LoginPage() {
                   onChange={(e) => setRemember(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600 focus:ring-blue-500 dark:border-slate-600"
                 />
-                Remember me
+                {t("Remember me")}
               </label>
               <button
                 type="button"
@@ -314,7 +321,7 @@ export default function LoginPage() {
                 disabled={busy}
                 className="font-medium text-blue-700 hover:text-blue-800 hover:underline disabled:opacity-50 dark:text-blue-400"
               >
-                Forgot password?
+                {t("Forgot password?")}
               </button>
             </div>
             {notice && (
@@ -328,7 +335,7 @@ export default function LoginPage() {
               disabled={busy}
               className="w-full rounded-full bg-gradient-to-b from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition hover:from-blue-600 hover:to-blue-700 disabled:opacity-50"
             >
-              {busy ? "Signing in…" : "Sign in"}
+              {busy ? t("Signing in…") : t("Sign in")}
             </button>
           </form>
         </div>

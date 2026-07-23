@@ -29,10 +29,12 @@ import { ShipmentForm } from "@/components/shipment-form";
 import { ShipmentExpenses } from "@/components/shipment-expenses";
 import { useRole } from "@/components/role-context";
 import { useSignedAttachment } from "@/lib/storage";
+import { useT } from "@/lib/i18n";
 import Link from "next/link";
 
 // Agents see the shipment read-only and may only change its status and notes.
 function AgentShipmentView({ shipment }: { shipment: Shipment }) {
+  const t = useT();
   const router = useRouter();
   const [status, setStatus] = useState<ShipmentStatus>(shipment.status);
   const [notes, setNotes] = useState(shipment.notes ?? "");
@@ -108,7 +110,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
     rows.push([
       "Payment",
       <span key="not-invoiced" className="text-slate-400">
-        Not invoiced
+        {t("Not invoiced")}
       </span>,
     ]);
   }
@@ -142,16 +144,16 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
       <PageHeader
         title={shipmentRef(shipment.id)}
         action={
-          <Badge className={STATUS_CLASS[status]}>{STATUS_LABEL[status]}</Badge>
+          <Badge className={STATUS_CLASS[status]}>{t(STATUS_LABEL[status])}</Badge>
         }
       />
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Section icon={<BoxIcon />} title="Shipment details">
+        <Section icon={<BoxIcon />} title={t("Shipment details")}>
           <dl className="space-y-3">
             {rows.map(([label, value]) => (
               <div key={label} className="flex gap-3 text-sm">
                 <dt className="w-28 shrink-0 font-medium text-slate-500 dark:text-slate-400">
-                  {label}
+                  {t(label)}
                 </dt>
                 <dd className="min-w-0">{value}</dd>
               </div>
@@ -160,7 +162,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
           {shipment.attachment_url && attachmentSrc && (
             <div className="mt-4 border-t border-slate-200/60 dark:border-white/10 pt-4">
               <p className="mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-                Attachment
+                {t("Attachment")}
               </p>
               <a
                 href={attachmentSrc}
@@ -171,7 +173,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={attachmentSrc}
-                  alt="Shipment attachment"
+                  alt={t("Attachment image")}
                   style={{ imageOrientation: "none" }}
                   className="mx-auto block h-64 w-full object-contain"
                 />
@@ -179,9 +181,9 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
             </div>
           )}
         </Section>
-        <Section icon={<BookIcon />} title="Status & notes">
+        <Section icon={<BookIcon />} title={t("Status & notes")}>
           <form onSubmit={save} className="space-y-3">
-            <Field label="Update status">
+            <Field label={t("Update status")}>
               <Select
                 value={status}
                 onChange={(e) => {
@@ -189,37 +191,37 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
                   setSaved(false);
                 }}
               >
-                <option value="pending">Pending</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
+                <option value="pending">{t("Pending")}</option>
+                <option value="shipped">{t("Shipped")}</option>
+                <option value="delivered">{t("Delivered")}</option>
               </Select>
             </Field>
-            <Field label="Notes">
+            <Field label={t("Notes")}>
               <Textarea
                 value={notes}
                 onChange={(e) => {
                   setNotes(e.target.value);
                   setSaved(false);
                 }}
-                placeholder="Add a note about this shipment…"
+                placeholder={t("Add a note about this shipment…")}
               />
             </Field>
             <ErrorNote message={error} />
             {saved && (
               <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
-                Saved.
+                {t("Saved.")}
               </p>
             )}
             <div className="flex gap-3">
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : "Save"}
+                {busy ? t("Saving…") : t("Save")}
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => router.push("/shipments")}
               >
-                Back
+                {t("Back")}
               </Button>
             </div>
           </form>
@@ -230,6 +232,7 @@ function AgentShipmentView({ shipment }: { shipment: Shipment }) {
 }
 
 export default function EditShipmentPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const role = useRole();
@@ -264,10 +267,10 @@ export default function EditShipmentPage() {
   }
 
   if (notFound) {
-    return <p className="text-sm text-slate-500 dark:text-slate-400">Shipment not found.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">{t("Shipment not found.")}</p>;
   }
   if (!shipment) {
-    return <p className="text-sm text-slate-400">Loading…</p>;
+    return <p className="text-sm text-slate-400">{t("Loading…")}</p>;
   }
 
   if (role === "agent") {
@@ -277,39 +280,39 @@ export default function EditShipmentPage() {
   return (
     <div>
       <PageHeader
-        title={`Edit ${shipmentRef(shipment.id)}`}
+        title={t("Edit {ref}", { ref: shipmentRef(shipment.id) })}
         action={
           <div className="flex gap-2">
             <Link
               href={`/shipments/${shipment.id}/print`}
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              🖨 Print receipt
+              {t("🖨 Print receipt")}
             </Link>
             <Button variant="danger" onClick={() => setConfirmOpen(true)}>
-              Delete
+              {t("Delete")}
             </Button>
           </div>
         }
       />
       <ConfirmDialog
         open={confirmOpen}
-        title={`Delete ${shipmentRef(shipment.id)}?`}
-        message="This permanently removes the shipment. This cannot be undone."
+        title={t("Delete {ref}?", { ref: shipmentRef(shipment.id) })}
+        message={t("This permanently removes the shipment. This cannot be undone.")}
         busy={deleting}
         onConfirm={confirmRemove}
         onCancel={() => setConfirmOpen(false)}
       />
       {shipment.invoice_id && (
         <p className="mb-4 max-w-xl rounded-lg border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 px-3 py-2 text-sm text-blue-800 dark:text-blue-300">
-          This shipment is on{" "}
+          {t("This shipment is on ")}
           <Link
             href={`/invoices/${shipment.invoice_id}`}
             className="font-medium underline"
           >
             {invoiceRef(shipment.invoice_id)}
           </Link>
-          . Changing its total will change that invoice&apos;s balance.
+          {t(". Changing its total will change that invoice’s balance.")}
         </p>
       )}
       <div className="grid items-start gap-5 xl:grid-cols-2">

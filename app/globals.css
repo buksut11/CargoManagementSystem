@@ -102,6 +102,45 @@
   );
 }
 
+/* ── Right-to-left (RTL) readiness ──────────────────────────────────────────
+   Direction is driven by the active locale: lib/i18n.tsx sets <html dir> from
+   LOCALE_META, and the pre-paint script in app/layout.tsx applies it before the
+   first frame. Somali and English both read left-to-right today, so nothing
+   below is exercised yet — but an RTL locale (e.g. Arabic) can be added to
+   LOCALES with dir:"rtl" and the shell will flip correctly.
+
+   Most layout uses Tailwind flex/gap utilities that mirror automatically under
+   dir="rtl". The pieces that need explicit handling are the ones built from
+   *physical* CSS (left/right), collected here:
+
+   1. The scooped active nav tab (.nav-tab) reaches to the sidebar's right edge
+      via physical `right`/`margin-right`; under RTL the sidebar sits on the
+      right, so the tab must reach the *left* edge instead. */
+[dir="rtl"] .nav-tab {
+  margin-right: 0;
+  margin-left: -1rem;
+  border-radius: 0 9999px 9999px 0;
+}
+[dir="rtl"] .nav-tab::before,
+[dir="rtl"] .nav-tab::after {
+  right: auto;
+  left: 0;
+}
+[dir="rtl"] .nav-tab::before {
+  background: radial-gradient(
+    circle at 100% 0,
+    transparent calc(var(--tab-scoop) - 1px),
+    var(--tab-fill) var(--tab-scoop)
+  );
+}
+[dir="rtl"] .nav-tab::after {
+  background: radial-gradient(
+    circle at 100% 100%,
+    transparent calc(var(--tab-scoop) - 1px),
+    var(--tab-fill) var(--tab-scoop)
+  );
+}
+
 /* Tailwind v4's preflight resets interactive elements to the default arrow
    cursor. Restore the hand (pointer) cursor on every clickable control, and
    show the disabled cursor when a button can't be pressed. */

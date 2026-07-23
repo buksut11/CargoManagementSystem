@@ -17,6 +17,7 @@ import {
   Section,
 } from "@/components/ui";
 import { EditIcon, PinIcon, PlaneIcon, TrashIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 // A tasteful, deterministic gradient per destination so the code badges carry
 // a bit of colour variety instead of a wall of identical blue.
@@ -57,6 +58,7 @@ function CodeBadge({ name, code }: { name: string; code: string | null }) {
 }
 
 export default function FlightDestinationsPage() {
+  const t = useT();
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -119,7 +121,7 @@ export default function FlightDestinationsPage() {
     if (error) {
       setError(
         error.code === "23505"
-          ? "A destination with that name already exists."
+          ? t("A destination with that name already exists.")
           : error.message,
       );
       return;
@@ -143,27 +145,27 @@ export default function FlightDestinationsPage() {
 
   return (
     <div>
-      <PageHeader title="Destinations" />
+      <PageHeader title={t("Destinations")} />
       <div className="space-y-6">
         <Section
           icon={<PinIcon />}
-          title={editingId ? "Edit destination" : "New destination"}
-          subtitle="Airports or cities you fly to"
+          title={editingId ? t("Edit destination") : t("New destination")}
+          subtitle={t("Airports or cities you fly to")}
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="flex flex-wrap items-end gap-3">
             <div className="min-w-40 flex-1">
-              <Field label="Name">
+              <Field label={t("Name")}>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Istanbul"
+                  placeholder={t("e.g. Istanbul")}
                   required
                 />
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Code">
+              <Field label={t("Code")}>
                 <Input
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
@@ -174,11 +176,11 @@ export default function FlightDestinationsPage() {
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : editingId ? "Save changes" : "Add destination"}
+                {busy ? t("Saving…") : editingId ? t("Save changes") : t("Add destination")}
               </Button>
               {editingId && (
                 <Button type="button" variant="secondary" onClick={resetForm}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
               )}
             </div>
@@ -186,7 +188,7 @@ export default function FlightDestinationsPage() {
                 pushed its input above the row's shared baseline (items-end),
                 breaking the Name / Code / button alignment. */}
             <p className="w-full text-xs text-slate-500 dark:text-slate-400">
-              Code is optional — the IATA / airport code.
+              {t("Code is optional — the IATA / airport code.")}
             </p>
           </form>
           <div className="mt-3">
@@ -196,7 +198,7 @@ export default function FlightDestinationsPage() {
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
             <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              All destinations
+              {t("All destinations")}
             </h2>
             {destinations.length > 0 && (
               <span className="rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-white/[0.08] dark:text-slate-300">
@@ -216,15 +218,15 @@ export default function FlightDestinationsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{d.name}</div>
                   <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                    {d.code ? "Airport" : "No code"}
+                    {d.code ? t("Airport") : t("No code")}
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <button onClick={() => startEdit(d)} className={rowActionClass}>
-                    Edit
+                    {t("Edit")}
                   </button>
                   <button onClick={() => setPending(d)} className={rowDeleteClass}>
-                    Delete
+                    {t("Delete")}
                   </button>
                 </div>
               </div>
@@ -246,23 +248,23 @@ export default function FlightDestinationsPage() {
                     <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500 dark:text-slate-400">
                       <PlaneIcon className="h-3 w-3 shrink-0 opacity-70" />
                       <span className="truncate">
-                        {d.code ? "Airport" : "No code"}
+                        {d.code ? t("Airport") : t("No code")}
                       </span>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-0.5 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 motion-reduce:transition-none">
                     <button
                       onClick={() => startEdit(d)}
-                      title="Edit"
-                      aria-label={`Edit ${d.name}`}
+                      title={t("Edit")}
+                      aria-label={t("Edit {name}", { name: d.name })}
                       className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
                     >
                       <EditIcon className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setPending(d)}
-                      title="Delete"
-                      aria-label={`Delete ${d.name}`}
+                      title={t("Delete")}
+                      aria-label={t("Delete {name}", { name: d.name })}
                       className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
                     >
                       <TrashIcon className="h-4 w-4" />
@@ -273,17 +275,19 @@ export default function FlightDestinationsPage() {
             </div>
           )}
           {!loading && destinations.length === 0 && (
-            <EmptyState message="No destinations yet — add the airports or cities you fly to." />
+            <EmptyState message={t("No destinations yet — add the airports or cities you fly to.")} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete destination?"
+        title={t("Delete destination?")}
         message={
           pending
-            ? `Delete "${pending.name}"? Existing bookings keep their saved itinerary.`
+            ? t('Delete "{name}"? Existing bookings keep their saved itinerary.', {
+                name: pending.name,
+              })
             : undefined
         }
         busy={deleting}

@@ -30,8 +30,10 @@ import {
 import { DatePicker } from "@/components/date-picker";
 import { CoinsIcon, PhoneIcon, PinIcon } from "@/components/icons";
 import { useRole } from "@/components/role-context";
+import { useT } from "@/lib/i18n";
 
 export default function InvoiceDetailPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const invoiceId = Number(id);
@@ -137,8 +139,8 @@ export default function InvoiceDetailPage() {
   }
 
   if (notFound)
-    return <p className="text-sm text-slate-500 dark:text-slate-400">Invoice not found.</p>;
-  if (!invoice) return <p className="text-sm text-slate-400">Loading…</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">{t("Invoice not found.")}</p>;
+  if (!invoice) return <p className="text-sm text-slate-400">{t("Loading…")}</p>;
 
   return (
     <div>
@@ -150,11 +152,11 @@ export default function InvoiceDetailPage() {
               href={`/invoices/${invoice.id}/print`}
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              🖨 Print
+              {t("🖨 Print")}
             </Link>
             {!isAgent && (
               <Button variant="danger" onClick={() => setConfirmInvoiceOpen(true)}>
-                Delete
+                {t("Delete")}
               </Button>
             )}
           </div>
@@ -166,7 +168,7 @@ export default function InvoiceDetailPage() {
           <Card className="p-6">
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
               <div>
-                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Bill to</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">{t("Bill to")}</div>
                 <div className="mt-0.5 font-medium">
                   {invoice.bill_to || "—"}
                 </div>
@@ -184,17 +186,17 @@ export default function InvoiceDetailPage() {
                 )}
               </div>
               <div>
-                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Issued</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">{t("Issued")}</div>
                 <div className="mt-0.5 font-medium">
                   {fmtDate(invoice.issued_date)}
                 </div>
               </div>
               <div>
-                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Total</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">{t("Total")}</div>
                 <div className="mt-0.5 font-medium">{fmtMoney(total)}</div>
               </div>
               <div>
-                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">Balance</div>
+                <div className="text-xs uppercase text-slate-500 dark:text-slate-400">{t("Balance")}</div>
                 <div
                   className={`mt-0.5 font-bold ${
                     balance > 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
@@ -238,11 +240,11 @@ export default function InvoiceDetailPage() {
             <table className="hidden w-full lg:table">
               <thead className="border-b border-slate-200/60 dark:border-white/10">
                 <tr>
-                  <Th>Shipment</Th>
-                  <Th>Description</Th>
-                  <Th>Destination</Th>
-                  <Th>Weight</Th>
-                  <Th>Amount</Th>
+                  <Th>{t("Shipment")}</Th>
+                  <Th>{t("Description")}</Th>
+                  <Th>{t("Destination")}</Th>
+                  <Th>{t("Weight")}</Th>
+                  <Th>{t("Amount")}</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -274,15 +276,15 @@ export default function InvoiceDetailPage() {
                 <IconChip>
                   <CoinsIcon />
                 </IconChip>
-                <h2 className="font-semibold">Payments</h2>
+                <h2 className="font-semibold">{t("Payments")}</h2>
               </div>
               {balance <= 0 && total > 0 ? (
                 <Badge className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                  Paid in full
+                  {t("Paid in full")}
                 </Badge>
               ) : (
                 <Badge className="bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                  {fmtMoney(balance)} due
+                  {t("{amount} due", { amount: fmtMoney(balance) })}
                 </Badge>
               )}
             </div>
@@ -306,23 +308,23 @@ export default function InvoiceDetailPage() {
                       onClick={() => setPendingPayment(p)}
                       className={rowDeleteClass}
                     >
-                      Delete
+                      {t("Delete")}
                     </button>
                   )}
                 </div>
               ))}
               {payments.length === 0 && (
                 <p className="px-4 py-3 text-sm text-slate-400">
-                  No payments yet.
+                  {t("No payments yet.")}
                 </p>
               )}
             </div>
             <table className="mt-2 hidden w-full lg:table">
               <thead className="border-b border-slate-200/60 dark:border-white/10">
                 <tr>
-                  <Th>Date</Th>
-                  <Th>Amount</Th>
-                  <Th>Method</Th>
+                  <Th>{t("Date")}</Th>
+                  <Th>{t("Amount")}</Th>
+                  <Th>{t("Method")}</Th>
                   <Th />
                 </tr>
               </thead>
@@ -340,7 +342,7 @@ export default function InvoiceDetailPage() {
                           onClick={() => setPendingPayment(p)}
                           className={rowDeleteClass}
                         >
-                          Delete
+                          {t("Delete")}
                         </button>
                       )}
                     </Td>
@@ -348,7 +350,7 @@ export default function InvoiceDetailPage() {
                 ))}
                 {payments.length === 0 && (
                   <tr>
-                    <Td className="text-slate-400">No payments yet.</Td>
+                    <Td className="text-slate-400">{t("No payments yet.")}</Td>
                     <Td />
                     <Td />
                     <Td />
@@ -362,11 +364,11 @@ export default function InvoiceDetailPage() {
         <div>
           <Section
             icon={<CoinsIcon />}
-            title="Record a payment"
-            subtitle="Log what the customer has paid on this invoice"
+            title={t("Record a payment")}
+            subtitle={t("Log what the customer has paid on this invoice")}
           >
             <form onSubmit={addPayment} className="space-y-4">
-              <Field label="Amount">
+              <Field label={t("Amount")}>
                 <Input
                   type="number"
                   step="0.01"
@@ -376,19 +378,19 @@ export default function InvoiceDetailPage() {
                   required
                 />
               </Field>
-              <Field label="Date">
+              <Field label={t("Date")}>
                 <DatePicker value={paidDate} onChange={setPaidDate} required />
               </Field>
-              <Field label="Method (optional)">
+              <Field label={t("Method (optional)")}>
                 <Input
                   value={method}
                   onChange={(e) => setMethod(e.target.value)}
-                  placeholder="cash, bank transfer…"
+                  placeholder={t("cash, bank transfer…")}
                 />
               </Field>
               <ErrorNote message={error} />
               <Button type="submit" disabled={busy} className="w-full">
-                {busy ? "Saving…" : "Add payment"}
+                {busy ? t("Saving…") : t("Add payment")}
               </Button>
               {balance > 0 && (
                 <button
@@ -396,7 +398,7 @@ export default function InvoiceDetailPage() {
                   onClick={() => setAmount(balance.toFixed(2))}
                   className="w-full text-center text-xs text-blue-600 dark:text-blue-400 hover:underline"
                 >
-                  Fill remaining balance ({fmtMoney(balance)})
+                  {t("Fill remaining balance ({amount})", { amount: fmtMoney(balance) })}
                 </button>
               )}
             </form>
@@ -406,12 +408,12 @@ export default function InvoiceDetailPage() {
 
       <ConfirmDialog
         open={!!pendingPayment}
-        title="Delete payment?"
+        title={t("Delete payment?")}
         message={
           pendingPayment
-            ? `This removes the ${fmtMoney(
-                Number(pendingPayment.amount),
-              )} payment. This cannot be undone.`
+            ? t("This removes the {amount} payment. This cannot be undone.", {
+                amount: fmtMoney(Number(pendingPayment.amount)),
+              })
             : undefined
         }
         busy={deleting}
@@ -420,8 +422,8 @@ export default function InvoiceDetailPage() {
       />
       <ConfirmDialog
         open={confirmInvoiceOpen}
-        title={`Delete ${invoiceRef(invoiceId)}?`}
-        message="Its payments will be deleted and its shipments become uninvoiced again. This cannot be undone."
+        title={t("Delete {ref}?", { ref: invoiceRef(invoiceId) })}
+        message={t("Its payments will be deleted and its shipments become uninvoiced again. This cannot be undone.")}
         busy={deleting}
         onConfirm={confirmRemoveInvoice}
         onCancel={() => setConfirmInvoiceOpen(false)}

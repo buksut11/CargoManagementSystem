@@ -15,10 +15,12 @@ import {
 } from "@/components/ui";
 import { BuildingIcon, UsersIcon } from "@/components/icons";
 import { FlightBreakdownModal } from "@/components/flight-breakdown-modal";
+import { useT } from "@/lib/i18n";
 
 type Row = { key: string; bookings: number; sales: number; profit: number };
 
 export default function FlightReportsPage() {
+  const t = useT();
   const [bookings, setBookings] = useState<FlightBooking[]>([]);
   const [paid, setPaid] = useState<Record<number, number>>({});
   const [refunded, setRefunded] = useState<Record<number, number>>({});
@@ -125,34 +127,34 @@ export default function FlightReportsPage() {
   return (
     <div>
       <PageHeader
-        title="Reports"
+        title={t("Reports")}
         action={
           <button
             onClick={() =>
               downloadCsv("flight-airline-report.csv", [
-                ["Airline", "Bookings", "Sales", "Profit"],
+                [t("Airline"), t("Bookings"), t("Sales"), t("Profit")],
                 ...byAirline.map((r) => [r.key, r.bookings, r.sales, r.profit]),
               ])
             }
             disabled={byAirline.length === 0}
             className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
           >
-            ⬇ Export CSV
+            {t("⬇ Export CSV")}
           </button>
         }
       />
 
       <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <Stat label="Bookings" value={loading ? "…" : String(bookings.length)} />
-        <Stat label="Sales" value={loading ? "…" : fmtMoney(totalSales)} />
-        <Stat label="Gross profit" value={loading ? "…" : fmtMoney(grossProfit)} />
+        <Stat label={t("Bookings")} value={loading ? "…" : String(bookings.length)} />
+        <Stat label={t("Sales")} value={loading ? "…" : fmtMoney(totalSales)} />
+        <Stat label={t("Gross profit")} value={loading ? "…" : fmtMoney(grossProfit)} />
         <Stat
-          label="Op. expenses"
+          label={t("Op. expenses")}
           value={loading ? "…" : `−${fmtMoney(expensesTotal)}`}
         />
-        <Stat label="Net profit" value={loading ? "…" : fmtMoney(netProfit)} />
+        <Stat label={t("Net profit")} value={loading ? "…" : fmtMoney(netProfit)} />
         <Stat
-          label="Net margin"
+          label={t("Net margin")}
           value={
             loading || totalSales === 0
               ? "—"
@@ -168,7 +170,7 @@ export default function FlightReportsPage() {
               <BuildingIcon />
             </IconChip>
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              By airline
+              {t("By airline")}
             </div>
           </div>
           <div className="space-y-3 p-3 lg:hidden">
@@ -180,16 +182,16 @@ export default function FlightReportsPage() {
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{r.key}</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {r.bookings} bookings
+                    {r.bookings} {t("bookings")}
                   </span>
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                   <span>
-                    <span className="text-slate-500 dark:text-slate-400">Sales </span>
+                    <span className="text-slate-500 dark:text-slate-400">{t("Sales")} </span>
                     {fmtMoney(r.sales)}
                   </span>
                   <span>
-                    <span className="text-slate-500 dark:text-slate-400">Profit </span>
+                    <span className="text-slate-500 dark:text-slate-400">{t("Profit")} </span>
                     {fmtMoney(r.profit)}
                   </span>
                 </div>
@@ -199,10 +201,10 @@ export default function FlightReportsPage() {
           <table className="mt-2 hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Airline</Th>
-                <Th>Bookings</Th>
-                <Th>Sales</Th>
-                <Th>Profit</Th>
+                <Th>{t("Airline")}</Th>
+                <Th>{t("Bookings")}</Th>
+                <Th>{t("Sales")}</Th>
+                <Th>{t("Profit")}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -217,7 +219,7 @@ export default function FlightReportsPage() {
             </tbody>
           </table>
           {!loading && byAirline.length === 0 && (
-            <EmptyState message="No bookings yet." />
+            <EmptyState message={t("No bookings yet.")} />
           )}
         </Card>
 
@@ -227,7 +229,7 @@ export default function FlightReportsPage() {
               <UsersIcon />
             </IconChip>
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Customer outstanding
+              {t("Customer outstanding")}
             </div>
           </div>
           <div className="space-y-3 p-3 lg:hidden">
@@ -237,14 +239,14 @@ export default function FlightReportsPage() {
                 className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{r.name}</span>
+                  <span className="font-medium">{t(r.name)}</span>
                   {r.id != null ? (
                     <button
                       type="button"
                       onClick={() =>
                         setBreakdownFor({ id: r.id!, name: r.name })
                       }
-                      title={`See what makes up ${r.name}'s balance`}
+                      title={t("See what makes up {name}'s balance", { name: r.name })}
                       className="-mr-2 rounded-full px-2 py-0.5 font-medium text-amber-600 transition-colors hover:bg-amber-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:text-amber-400 dark:hover:bg-amber-400/15"
                     >
                       {fmtMoney(r.outstanding)}
@@ -256,8 +258,8 @@ export default function FlightReportsPage() {
                   )}
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-                  <span>Sales {fmtMoney(r.sales)}</span>
-                  <span>Received {fmtMoney(r.received)}</span>
+                  <span>{t("Sales")} {fmtMoney(r.sales)}</span>
+                  <span>{t("Received")} {fmtMoney(r.received)}</span>
                 </div>
               </div>
             ))}
@@ -265,16 +267,16 @@ export default function FlightReportsPage() {
           <table className="mt-2 hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Customer</Th>
-                <Th>Sales</Th>
-                <Th>Received</Th>
-                <Th>Outstanding</Th>
+                <Th>{t("Customer")}</Th>
+                <Th>{t("Sales")}</Th>
+                <Th>{t("Received")}</Th>
+                <Th>{t("Outstanding")}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
               {byCustomer.map((r) => (
                 <tr key={r.id ?? r.name} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
-                  <Td className="font-medium">{r.name}</Td>
+                  <Td className="font-medium">{t(r.name)}</Td>
                   <Td>{fmtMoney(r.sales)}</Td>
                   <Td>{fmtMoney(r.received)}</Td>
                   <Td className="font-medium">
@@ -282,7 +284,7 @@ export default function FlightReportsPage() {
                       <button
                         type="button"
                         onClick={() => setBreakdownFor({ id: r.id!, name: r.name })}
-                        title={`See what makes up ${r.name}'s balance`}
+                        title={t("See what makes up {name}'s balance", { name: r.name })}
                         className="-mx-2 rounded-full px-2 py-0.5 text-amber-600 transition-colors hover:bg-amber-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:text-amber-400 dark:hover:bg-amber-400/15"
                       >
                         {fmtMoney(r.outstanding)}
@@ -298,7 +300,7 @@ export default function FlightReportsPage() {
             </tbody>
           </table>
           {!loading && byCustomer.length === 0 && (
-            <EmptyState message="Nothing outstanding — every booking is fully collected." />
+            <EmptyState message={t("Nothing outstanding — every booking is fully collected.")} />
           )}
         </Card>
       </div>

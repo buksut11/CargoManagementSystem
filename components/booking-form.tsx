@@ -32,6 +32,7 @@ import {
   TicketIcon,
   UsersIcon,
 } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 import type { ReactNode } from "react";
 
 type PaxRow = { full_name: string; type: PassengerType; sale: string };
@@ -64,6 +65,7 @@ function fromLocalInput(v: string): string | null {
 }
 
 export function BookingForm({ booking }: { booking?: FlightBooking }) {
+  const tr = useT();
   const router = useRouter();
   const editing = !!booking;
 
@@ -203,7 +205,9 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
     if (sameCity !== -1) {
       setBusy(false);
       setError(
-        `Flight ${sameCity + 1} has the same From and To destination — pick a different arrival city.`,
+        tr("Flight {number} has the same From and To destination — pick a different arrival city.", {
+          number: sameCity + 1,
+        }),
       );
       return;
     }
@@ -264,7 +268,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
         .single();
       if (insErr || !data) {
         setBusy(false);
-        setError(insErr?.message ?? "Could not create the booking.");
+        setError(insErr?.message ?? tr("Could not create the booking."));
         return;
       }
       bookingId = (data as { id: number }).id;
@@ -328,16 +332,16 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       {/* Trip details */}
       <Section
         icon={<TicketIcon />}
-        title="Trip details"
-        subtitle="Who is flying and with which airline"
+        title={tr("Trip details")}
+        subtitle={tr("Who is flying and with which airline")}
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Airline">
+          <Field label={tr("Airline")}>
             <Select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
             >
-              <option value="">— Select airline —</option>
+              <option value="">{tr("— Select airline —")}</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -345,12 +349,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
               ))}
             </Select>
           </Field>
-          <Field label="Customer">
+          <Field label={tr("Customer")}>
             <Select
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
             >
-              <option value="">— None —</option>
+              <option value="">{tr("— None —")}</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -359,51 +363,51 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
             </Select>
             {existingBalance !== null && existingBalance > 0 && (
               <span className="mt-1.5 block text-xs text-amber-600 dark:text-amber-400">
-                Existing balance {fmtMoney(existingBalance)} · with this ticket{" "}
+                {tr("Existing balance")} {fmtMoney(existingBalance)} · {tr("with this ticket")}{" "}
                 <span className="font-semibold">
                   {fmtMoney(existingBalance + saleTotal)}
                 </span>{" "}
-                due
+                {tr("due")}
               </span>
             )}
           </Field>
-          <Field label="PNR" hint="Airline booking reference / locator">
+          <Field label={tr("PNR")} hint={tr("Airline booking reference / locator")}>
             <Input
               value={pnr}
               onChange={(e) => setPnr(e.target.value)}
               placeholder="e.g. ABC123"
             />
           </Field>
-          <Field label="Trip type">
+          <Field label={tr("Trip type")}>
             <Select
               value={tripType}
               onChange={(e) => setTripType(e.target.value as TripType)}
             >
-              {(Object.keys(TRIP_TYPE_LABEL) as TripType[]).map((t) => (
-                <option key={t} value={t}>
-                  {TRIP_TYPE_LABEL[t]}
+              {(Object.keys(TRIP_TYPE_LABEL) as TripType[]).map((tt) => (
+                <option key={tt} value={tt}>
+                  {tr(TRIP_TYPE_LABEL[tt])}
                 </option>
               ))}
             </Select>
           </Field>
-          <Field label="Booking date">
+          <Field label={tr("Booking date")}>
             <DatePicker value={bookingDate} onChange={setBookingDate} required />
           </Field>
-          <Field label="Status">
+          <Field label={tr("Status")}>
             <Select
               value={status}
               onChange={(e) =>
                 setStatus(e.target.value as FlightBooking["status"])
               }
             >
-              <option value="booked">Booked</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="refunded">Refunded</option>
+              <option value="booked">{tr("Booked")}</option>
+              <option value="cancelled">{tr("Cancelled")}</option>
+              <option value="refunded">{tr("Refunded")}</option>
               {/* Ticketed / Void aren't offered when setting a status, but keep
                   the current one selectable so editing an older booking that
                   already carries it doesn't silently lose or mislabel it. */}
               {(status === "ticketed" || status === "void") && (
-                <option value={status}>{FLIGHT_STATUS_LABEL[status]}</option>
+                <option value={status}>{tr(FLIGHT_STATUS_LABEL[status])}</option>
               )}
             </Select>
           </Field>
@@ -413,8 +417,8 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       {/* Passengers */}
       <RepeatSection
         icon={<UsersIcon />}
-        title="Passengers"
-        subtitle="Add every traveller and their ticket price"
+        title={tr("Passengers")}
+        subtitle={tr("Add every traveller and their ticket price")}
         singular="Passenger"
         rows={passengers}
         onAdd={() => setPassengers((r) => [...r, { ...emptyPax }])}
@@ -430,7 +434,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                   ),
                 )
               }
-              placeholder="Full name"
+              placeholder={tr("Full name")}
             />
             <Select
               value={p.type}
@@ -442,9 +446,9 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                 )
               }
             >
-              <option value="adult">Adult</option>
-              <option value="child">Child</option>
-              <option value="infant">Infant</option>
+              <option value="adult">{tr("Adult")}</option>
+              <option value="child">{tr("Child")}</option>
+              <option value="infant">{tr("Infant")}</option>
             </Select>
             <Input
               type="number"
@@ -456,7 +460,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                   r.map((x, j) => (j === i ? { ...x, sale: e.target.value } : x)),
                 )
               }
-              placeholder="Sale price"
+              placeholder={tr("Sale price")}
             />
           </div>
         )}
@@ -465,8 +469,8 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       {/* Itinerary */}
       <RepeatSection
         icon={<PlaneIcon />}
-        title="Flights"
-        subtitle="Flights, dates and classes — the first departure sets the travel date"
+        title={tr("Flights")}
+        subtitle={tr("Flights, dates and classes — the first departure sets the travel date")}
         singular="Flight"
         rows={segments}
         onAdd={() => setSegments((r) => [...r, { ...emptySeg }])}
@@ -482,7 +486,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                     r.map((x, j) => (j === i ? { ...x, origin: v } : x)),
                   )
                 }
-                placeholder="From"
+                placeholder={tr("From")}
               />
               <DestinationSelect
                 value={s.destination}
@@ -492,13 +496,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                     r.map((x, j) => (j === i ? { ...x, destination: v } : x)),
                   )
                 }
-                placeholder="To"
+                placeholder={tr("To")}
               />
             </div>
             {s.origin && s.destination && s.origin === s.destination && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                From and To are the same destination — pick a different arrival
-                city.
+                {tr("From and To are the same destination — pick a different arrival city.")}
               </p>
             )}
             <div className="grid gap-2 sm:grid-cols-2">
@@ -509,7 +512,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                     r.map((x, j) => (j === i ? { ...x, departure_at: v } : x)),
                   )
                 }
-                placeholder="Departure"
+                placeholder={tr("Departure")}
               />
               <DateTimeInput
                 value={s.arrival_at}
@@ -518,7 +521,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                     r.map((x, j) => (j === i ? { ...x, arrival_at: v } : x)),
                   )
                 }
-                placeholder="Arrival"
+                placeholder={tr("Arrival")}
               />
               <Select
                 value={s.cabin_class}
@@ -530,9 +533,9 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
                   )
                 }
               >
-                <option value="">— Classes —</option>
-                <option value="Economy">Economy</option>
-                <option value="Business">Business</option>
+                <option value="">{tr("— Classes —")}</option>
+                <option value="Economy">{tr("Economy")}</option>
+                <option value="Business">{tr("Business")}</option>
                 {s.cabin_class &&
                   s.cabin_class !== "Economy" &&
                   s.cabin_class !== "Business" && (
@@ -547,13 +550,13 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       {/* Pricing */}
       <Section
         icon={<CoinsIcon />}
-        title="Pricing"
-        subtitle="What you pay the airline versus what the customer pays you"
+        title={tr("Pricing")}
+        subtitle={tr("What you pay the airline versus what the customer pays you")}
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <Field
-            label="Net cost (to airline)"
-            hint="The fare and fees you owe the airline"
+            label={tr("Net cost (to airline)")}
+            hint={tr("The fare and fees you owe the airline")}
           >
             <Input
               type="number"
@@ -566,10 +569,10 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           </Field>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <Stat label="Sale total" value={fmtMoney(saleTotal)} />
-          <Stat label="Net cost" value={fmtMoney(num(netCost))} />
+          <Stat label={tr("Sale total")} value={fmtMoney(saleTotal)} />
+          <Stat label={tr("Net cost")} value={fmtMoney(num(netCost))} />
           <Stat
-            label="Profit"
+            label={tr("Profit")}
             value={fmtMoney(profit)}
             tone={profit < 0 ? "negative" : "positive"}
           />
@@ -577,11 +580,11 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       </Section>
 
       {/* Notes */}
-      <Section icon={<BookIcon />} title="Notes" subtitle="Internal only">
+      <Section icon={<BookIcon />} title={tr("Notes")} subtitle={tr("Internal only")}>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Internal notes about this booking…"
+          placeholder={tr("Internal notes about this booking…")}
         />
       </Section>
 
@@ -592,10 +595,12 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
       <div className="glass-panel sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
           <span className="text-slate-500 dark:text-slate-400">
-            {paxCount} {paxCount === 1 ? "passenger" : "passengers"}
+            {paxCount === 1
+              ? tr("{count} passenger", { count: paxCount })
+              : tr("{count} passengers", { count: paxCount })}
           </span>
           <span className="text-slate-500 dark:text-slate-400">
-            Profit{" "}
+            {tr("Profit")}{" "}
             <span
               className={`font-semibold ${
                 profit < 0
@@ -608,7 +613,7 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
           </span>
           {existingBalance !== null && existingBalance > 0 && (
             <span className="text-slate-500 dark:text-slate-400">
-              Total due{" "}
+              {tr("Total due")}{" "}
               <span className="font-semibold text-amber-600 dark:text-amber-400">
                 {fmtMoney(existingBalance + saleTotal)}
               </span>
@@ -621,10 +626,10 @@ export function BookingForm({ booking }: { booking?: FlightBooking }) {
             variant="secondary"
             onClick={() => router.push("/flights/bookings")}
           >
-            Cancel
+            {tr("Cancel")}
           </Button>
           <Button type="submit" disabled={busy}>
-            {busy ? "Saving…" : editing ? "Save changes" : "Create booking"}
+            {busy ? tr("Saving…") : editing ? tr("Save changes") : tr("Create booking")}
           </Button>
         </div>
       </div>
@@ -669,6 +674,7 @@ function DateTimeInput({
   onChange: (value: string) => void;
   placeholder: string;
 }) {
+  const tr = useT();
   const date = value.slice(0, 10);
   const time = value.slice(11, 16);
   return (
@@ -680,10 +686,10 @@ function DateTimeInput({
       />
       <TimePicker
         value={time}
-        onChange={(t) => onChange(`${date}T${t || "00:00"}`)}
+        onChange={(v) => onChange(`${date}T${v || "00:00"}`)}
         disabled={!date}
-        placeholder="Time"
-        ariaLabel={`${placeholder} time`}
+        placeholder={tr("Time")}
+        ariaLabel={tr("{placeholder} time", { placeholder })}
       />
     </div>
   );
@@ -738,6 +744,7 @@ function RepeatSection<T>({
   onRemove: (i: number) => void;
   render: (row: T, i: number) => ReactNode;
 }) {
+  const tr = useT();
   return (
     <Section
       icon={icon}
@@ -749,7 +756,7 @@ function RepeatSection<T>({
           onClick={onAdd}
           className="shrink-0 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
         >
-          + Add {singular.toLowerCase()}
+          {tr("+ Add {item}", { item: tr(singular).toLowerCase() })}
         </button>
       }
     >
@@ -765,17 +772,17 @@ function RepeatSection<T>({
                   {i + 1}
                 </span>
                 <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {singular} {i + 1}
+                  {tr("{item} {number}", { item: tr(singular), number: i + 1 })}
                 </span>
               </div>
               {rows.length > 1 && (
                 <button
                   type="button"
                   onClick={() => onRemove(i)}
-                  aria-label={`Remove ${singular.toLowerCase()} ${i + 1}`}
+                  aria-label={tr("Remove {item} {number}", { item: tr(singular).toLowerCase(), number: i + 1 })}
                   className="rounded-lg px-2 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
                 >
-                  Remove
+                  {tr("Remove")}
                 </button>
               )}
             </div>

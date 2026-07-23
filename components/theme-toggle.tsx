@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 /**
  * Segmented moon/sun pill (login card, top-right in the reference art).
@@ -70,6 +71,7 @@ export function ThemeToggle({
   className?: string;
   labelClass?: string;
 }) {
+  const t = useT();
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -93,8 +95,8 @@ export function ThemeToggle({
   return (
     <button
       onClick={toggle}
-      title="Switch light/dark mode"
-      aria-label="Switch light/dark mode"
+      title={t("Switch light/dark mode")}
+      aria-label={t("Switch light/dark mode")}
       className={className}
     >
       <span className="relative block h-5 w-5 shrink-0">
@@ -114,7 +116,7 @@ export function ThemeToggle({
         </span>
       </span>
       <span className={labelClass}>
-        {dark ? "Dark mode" : "Light mode"}
+        {dark ? t("Dark mode") : t("Light mode")}
       </span>
     </button>
   );

@@ -7,10 +7,12 @@ import { downloadCsv } from "@/lib/csv";
 import type { Invoice, Payment } from "@/lib/types";
 import { fmtDate, fmtMoney, invoiceRef } from "@/lib/format";
 import { Card, EmptyState, Input, PageHeader, Td, Th } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 type PaymentRow = Payment & { invoices?: Pick<Invoice, "id" | "bill_to"> | null };
 
 export default function PaymentsPage() {
+  const t = useT();
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -45,7 +47,7 @@ export default function PaymentsPage() {
 
   function exportCsv() {
     downloadCsv("payments.csv", [
-      ["Date", "Amount", "Invoice", "From", "Method", "Note"],
+      [t("Date"), t("Amount"), t("Invoice"), t("From"), t("Method"), t("Note")],
       ...filtered.map((p) => [
         p.paid_date,
         Number(p.amount),
@@ -60,11 +62,11 @@ export default function PaymentsPage() {
   return (
     <div>
       <PageHeader
-        title="Payments"
+        title={t("Payments")}
         action={
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-500 dark:text-slate-400">
-              Total received:{" "}
+              {t("Total received:")}{" "}
               <span className="font-bold">{fmtMoney(total)}</span>
             </span>
             <button
@@ -72,7 +74,7 @@ export default function PaymentsPage() {
               disabled={filtered.length === 0}
               className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
             >
-              ⬇ Export CSV
+              {t("⬇ Export CSV")}
             </button>
           </div>
         }
@@ -80,7 +82,7 @@ export default function PaymentsPage() {
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="w-full sm:w-72">
           <Input
-            placeholder="Search invoice #, from or method…"
+            placeholder={t("Search invoice #, from or method…")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -115,11 +117,11 @@ export default function PaymentsPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Date</Th>
-              <Th>Amount</Th>
-              <Th>Invoice</Th>
-              <Th>From</Th>
-              <Th>Method</Th>
+              <Th>{t("Date")}</Th>
+              <Th>{t("Amount")}</Th>
+              <Th>{t("Invoice")}</Th>
+              <Th>{t("From")}</Th>
+              <Th>{t("Method")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -145,8 +147,8 @@ export default function PaymentsPage() {
           <EmptyState
             message={
               payments.length === 0
-                ? "No payments yet — record them from an invoice page."
-                : "No payments match your search."
+                ? t("No payments yet — record them from an invoice page.")
+                : t("No payments match your search.")
             }
           />
         )}

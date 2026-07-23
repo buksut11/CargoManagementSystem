@@ -30,8 +30,10 @@ import { PlaneIcon, TicketIcon, UsersIcon } from "@/components/icons";
 import { BookingForm } from "@/components/booking-form";
 import { BookingLedger } from "@/components/booking-ledger";
 import { useRole } from "@/components/role-context";
+import { useT } from "@/lib/i18n";
 
 export default function BookingDetailPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const role = useRole();
@@ -62,12 +64,12 @@ export default function BookingDetailPage() {
   if (notFound) {
     return (
       <p className="text-sm text-slate-500 dark:text-slate-400">
-        Booking not found.
+        {t("Booking not found.")}
       </p>
     );
   }
   if (!booking) {
-    return <p className="text-sm text-slate-400">Loading…</p>;
+    return <p className="text-sm text-slate-400">{t("Loading…")}</p>;
   }
 
   if (role === "agent") {
@@ -77,38 +79,38 @@ export default function BookingDetailPage() {
   return (
     <div>
       <PageHeader
-        title={`Edit ${bookingRef(booking.id)}`}
+        title={t("Edit {ref}", { ref: bookingRef(booking.id) })}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium ${FLIGHT_STATUS_CLASS[booking.status]}`}
             >
-              {FLIGHT_STATUS_LABEL[booking.status]}
+              {t(FLIGHT_STATUS_LABEL[booking.status])}
             </span>
             <Link
               href={`/flights/bookings/${booking.id}/print`}
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              🖨 Invoice
+              {t("🖨 Invoice")}
             </Link>
             {booking.customer_id && (
               <Link
                 href={`/flights/customers/${booking.customer_id}/statement`}
                 className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.1]"
               >
-                📄 Statement
+                {t("📄 Statement")}
               </Link>
             )}
             <Button variant="danger" onClick={() => setConfirmOpen(true)}>
-              Delete
+              {t("Delete")}
             </Button>
           </div>
         }
       />
       <ConfirmDialog
         open={confirmOpen}
-        title={`Delete ${bookingRef(booking.id)}?`}
-        message="This permanently removes the booking and its passengers, itinerary, receipts, payments and refunds. This cannot be undone."
+        title={t("Delete {ref}?", { ref: bookingRef(booking.id) })}
+        message={t("This permanently removes the booking and its passengers, itinerary, receipts, payments and refunds. This cannot be undone.")}
         busy={deleting}
         onConfirm={confirmRemove}
         onCancel={() => setConfirmOpen(false)}
@@ -129,6 +131,7 @@ export default function BookingDetailPage() {
 // Agents see the booking read-only, without the cost/profit or the money ledger
 // (the ledger tables are editor-only at the database level anyway).
 function AgentBookingView({ booking }: { booking: FlightBooking }) {
+  const t = useT();
   const [passengers, setPassengers] = useState<FlightPassenger[]>([]);
   const [segments, setSegments] = useState<FlightSegment[]>([]);
 
@@ -155,7 +158,7 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
     ["Booking ref", booking.booking_ref || "—"],
     ["Airline", booking.airline || booking.flight_suppliers?.name || "—"],
     ["Customer", booking.flight_customers?.name ?? "—"],
-    ["Trip type", TRIP_TYPE_LABEL[booking.trip_type]],
+    ["Trip type", t(TRIP_TYPE_LABEL[booking.trip_type])],
     ["Booking date", fmtDate(booking.booking_date)],
     ["Travel date", fmtDate(booking.travel_date)],
     [
@@ -179,17 +182,17 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
         title={bookingRef(booking.id)}
         action={
           <Badge className={FLIGHT_STATUS_CLASS[booking.status]}>
-            {FLIGHT_STATUS_LABEL[booking.status]}
+            {t(FLIGHT_STATUS_LABEL[booking.status])}
           </Badge>
         }
       />
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Section icon={<TicketIcon />} title="Booking details">
+        <Section icon={<TicketIcon />} title={t("Booking details")}>
           <dl className="space-y-3">
             {rows.map(([label, value]) => (
               <div key={label} className="flex gap-3 text-sm">
                 <dt className="w-28 shrink-0 font-medium text-slate-500 dark:text-slate-400">
-                  {label}
+                  {t(label)}
                 </dt>
                 <dd className="min-w-0">{value}</dd>
               </div>
@@ -197,9 +200,9 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
           </dl>
         </Section>
         <div className="space-y-5">
-          <Section icon={<PlaneIcon />} title="Flights">
+          <Section icon={<PlaneIcon />} title={t("Flights")}>
             {segments.length === 0 ? (
-              <p className="text-sm text-slate-400">No segments.</p>
+              <p className="text-sm text-slate-400">{t("No segments.")}</p>
             ) : (
               <ul className="space-y-2 text-sm">
                 {segments.map((s) => (
@@ -219,16 +222,16 @@ function AgentBookingView({ booking }: { booking: FlightBooking }) {
               </ul>
             )}
           </Section>
-          <Section icon={<UsersIcon />} title="Passengers">
+          <Section icon={<UsersIcon />} title={t("Passengers")}>
             {passengers.length === 0 ? (
-              <p className="text-sm text-slate-400">No passengers.</p>
+              <p className="text-sm text-slate-400">{t("No passengers.")}</p>
             ) : (
               <ul className="space-y-1 text-sm">
                 {passengers.map((p) => (
                   <li key={p.id} className="flex justify-between">
                     <span>
                       {p.full_name}{" "}
-                      <span className="text-xs text-slate-400 capitalize">({p.type})</span>
+                      <span className="text-xs text-slate-400 capitalize">({t(p.type)})</span>
                     </span>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
                       {fmtMoney(Number(p.sale_amount))}

@@ -61,6 +61,14 @@ export const LogoutIcon = () => (
   </Base>
 );
 
+export const GlobeIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Base {...props}>
+    <circle cx={12} cy={12} r={9} />
+    <path d="M3 12h18" />
+    <path d="M12 3c2.5 2.7 3.9 6 3.9 9s-1.4 6.3-3.9 9c-2.5-2.7-3.9-6-3.9-9s1.4-6.3 3.9-9z" />
+  </Base>
+);
+
 export const SunIcon = () => (
   <Base>
     <circle cx={12} cy={12} r={4} />

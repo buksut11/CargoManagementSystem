@@ -20,8 +20,10 @@ import {
   Th,
 } from "@/components/ui";
 import { BuildingIcon, StatementIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 export default function FlightSuppliersPage() {
+  const t = useT();
   const [suppliers, setSuppliers] = useState<FlightSupplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -82,7 +84,7 @@ export default function FlightSuppliersPage() {
     if (error) {
       setError(
         error.code === "23505"
-          ? "An airline with that name already exists."
+          ? t("An airline with that name already exists.")
           : error.message,
       );
       return;
@@ -106,16 +108,16 @@ export default function FlightSuppliersPage() {
 
   return (
     <div>
-      <PageHeader title="Airlines" />
+      <PageHeader title={t("Airlines")} />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <Section
           icon={<BuildingIcon />}
-          title={editingId ? "Edit airline" : "New airline"}
-          subtitle="Airlines you buy tickets through"
+          title={editingId ? t("Edit airline") : t("New airline")}
+          subtitle={t("Airlines you buy tickets through")}
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="space-y-3">
-            <Field label="Name">
+            <Field label={t("Name")}>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -123,20 +125,20 @@ export default function FlightSuppliersPage() {
                 required
               />
             </Field>
-            <Field label="Contact">
+            <Field label={t("Contact")}>
               <Input
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                placeholder="Phone / email / account no."
+                placeholder={t("Phone / email / account no.")}
               />
             </Field>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : editingId ? "Save changes" : "Add airline"}
+                {busy ? t("Saving…") : editingId ? t("Save changes") : t("Add airline")}
               </Button>
               {editingId && (
                 <Button type="button" variant="secondary" onClick={resetForm}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
               )}
             </div>
@@ -161,13 +163,13 @@ export default function FlightSuppliersPage() {
                     href={`/flights/supplier-statement?supplier=${s.id}`}
                     className={rowActionClass}
                   >
-                    Statement
+                    {t("Statement")}
                   </Link>
                   <button onClick={() => startEdit(s)} className={rowActionClass}>
-                    Edit
+                    {t("Edit")}
                   </button>
                   <button onClick={() => setPending(s)} className={rowDeleteClass}>
-                    Delete
+                    {t("Delete")}
                   </button>
                 </div>
               </div>
@@ -176,8 +178,8 @@ export default function FlightSuppliersPage() {
           <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Name</Th>
-                <Th>Contact</Th>
+                <Th>{t("Name")}</Th>
+                <Th>{t("Contact")}</Th>
                 <Th />
               </tr>
             </thead>
@@ -190,18 +192,18 @@ export default function FlightSuppliersPage() {
                     <span className="inline-flex items-center gap-2">
                       <Link
                         href={`/flights/supplier-statement?supplier=${s.id}`}
-                        title="View statement"
-                        aria-label={`View ${s.name} statement`}
+                        title={t("View statement")}
+                        aria-label={t("View {name} statement", { name: s.name })}
                         className={`${rowActionClass} inline-flex items-center gap-1.5`}
                       >
                         <StatementIcon className="h-4 w-4" />
-                        Statement
+                        {t("Statement")}
                       </Link>
                       <button onClick={() => startEdit(s)} className={rowActionClass}>
-                        Edit
+                        {t("Edit")}
                       </button>
                       <button onClick={() => setPending(s)} className={rowDeleteClass}>
-                        Delete
+                        {t("Delete")}
                       </button>
                     </span>
                   </Td>
@@ -210,17 +212,19 @@ export default function FlightSuppliersPage() {
             </tbody>
           </table>
           {!loading && suppliers.length === 0 && (
-            <EmptyState message="No airlines yet — add the airlines you buy through." />
+            <EmptyState message={t("No airlines yet — add the airlines you buy through.")} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete airline?"
+        title={t("Delete airline?")}
         message={
           pending
-            ? `Delete "${pending.name}"? Their bookings keep working but show no airline.`
+            ? t('Delete "{name}"? Their bookings keep working but show no airline.', {
+                name: pending.name,
+              })
             : undefined
         }
         busy={deleting}

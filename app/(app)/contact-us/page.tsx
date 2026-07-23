@@ -11,6 +11,7 @@ import {
   PhoneIcon,
   WhatsAppIcon,
 } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 // Staff → developer contact page. Messages don't go through the database at
 // all: the form composes a WhatsApp message to the app owner, pre-filled with
@@ -78,6 +79,7 @@ function InfoRow({
 }
 
 export default function ContactUsPage() {
+  const t = useT();
   const org = useOrg();
   const [email, setEmail] = useState("");
   const [category, setCategory] = useState<string>("feature");
@@ -97,8 +99,8 @@ export default function ContactUsPage() {
 
   const cat = CATEGORIES.find((c) => c.value === category) ?? CATEGORIES[0];
   const text = [
-    `${cat.emoji} ${cat.label} — CargoBook`,
-    `From: ${email || "unknown user"}${org?.orgName ? ` (${org.orgName})` : ""}`,
+    `${cat.emoji} ${t(cat.label)} — CargoBook`,
+    `${t("From:")} ${email || t("unknown user")}${org?.orgName ? ` (${org.orgName})` : ""}`,
     "",
     message.trim(),
   ].join("\n");
@@ -114,10 +116,11 @@ export default function ContactUsPage() {
       {/* Title left, supporting line right — the same top row as the
           classic contact-page layout. */}
       <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Contact Us</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("Contact Us")}</h1>
         <p className="max-w-md text-sm text-slate-500 dark:text-slate-400 md:text-right">
-          Questions, ideas, or something not working? Get in touch — we usually
-          reply within the same working day.
+          {t(
+            "Questions, ideas, or something not working? Get in touch — we usually reply within the same working day.",
+          )}
         </p>
       </div>
 
@@ -125,13 +128,13 @@ export default function ContactUsPage() {
         {/* Left: the message form */}
         <Section
           icon={<MailIcon />}
-          title="Get in touch"
-          subtitle="Send us a message on WhatsApp — it arrives instantly"
+          title={t("Get in touch")}
+          subtitle={t("Send us a message on WhatsApp — it arrives instantly")}
         >
           <form onSubmit={send} className="space-y-4">
             <div>
               <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                What is it about?
+                {t("What is it about?")}
               </span>
               <div className="grid gap-2 sm:grid-cols-3" role="radiogroup">
                 {CATEGORIES.map((c) => {
@@ -152,17 +155,17 @@ export default function ContactUsPage() {
                       <span className="text-base leading-none" aria-hidden>
                         {c.emoji}
                       </span>
-                      <span>{c.label}</span>
+                      <span>{t(c.label)}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-            <Field label="Your message">
+            <Field label={t("Your message")}>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Describe the feature you'd like, or the problem you ran into…"
+                placeholder={t("Describe the feature you'd like, or the problem you ran into…")}
                 rows={6}
                 required
               />
@@ -172,11 +175,12 @@ export default function ContactUsPage() {
               className="flex w-full items-center justify-center gap-2 rounded-full bg-[#25d366] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-colors hover:bg-[#1fb355]"
             >
               <WhatsAppIcon className="h-4.5 w-4.5" />
-              Send via WhatsApp
+              {t("Send via WhatsApp")}
             </button>
             <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-              Opens WhatsApp with your message ready to send — your email and
-              organization are attached automatically.
+              {t(
+                "Opens WhatsApp with your message ready to send — your email and organization are attached automatically.",
+              )}
             </p>
           </form>
         </Section>
@@ -185,8 +189,8 @@ export default function ContactUsPage() {
         <div className="grid gap-6">
           <Section
             icon={<ContactCardIcon />}
-            title="Contact information"
-            subtitle="Reach us directly"
+            title={t("Contact information")}
+            subtitle={t("Reach us directly")}
           >
             <div className="space-y-4">
               <InfoRow
@@ -198,13 +202,13 @@ export default function ContactUsPage() {
               />
               <InfoRow
                 icon={<PhoneIcon />}
-                label="Phone"
+                label={t("Phone")}
                 value={OWNER_PHONE}
                 href={`tel:+${OWNER_PHONE_WA}`}
               />
               <InfoRow
                 icon={<MailIcon />}
-                label="Email"
+                label={t("Email")}
                 value={OWNER_EMAIL}
                 href={`mailto:${OWNER_EMAIL}`}
               />
@@ -213,8 +217,8 @@ export default function ContactUsPage() {
 
           <Section
             icon={<ClockIcon />}
-            title="Business hours"
-            subtitle="When you can reach us"
+            title={t("Business hours")}
+            subtitle={t("When you can reach us")}
           >
             <div className="grid gap-2.5 sm:grid-cols-3">
               {HOURS.map((slot) => (
@@ -223,7 +227,7 @@ export default function ContactUsPage() {
                   className="rounded-2xl border border-white/60 bg-white/40 p-3.5 dark:border-white/10 dark:bg-white/[0.04]"
                 >
                   <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                    {slot.days}
+                    {t(slot.days)}
                   </div>
                   <div
                     className={`mt-1 text-sm font-semibold ${
@@ -232,13 +236,13 @@ export default function ContactUsPage() {
                         : "text-red-600 dark:text-red-400"
                     }`}
                   >
-                    {slot.hours}
+                    {t(slot.hours)}
                   </div>
                 </div>
               ))}
             </div>
             <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Thursday and Friday are non-working days.
+              {t("Thursday and Friday are non-working days.")}
             </p>
           </Section>
         </div>

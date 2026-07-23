@@ -30,8 +30,10 @@ import {
 } from "@/components/icons";
 import { BillingCards } from "@/components/billing-cards";
 import { BillingHistory } from "@/components/billing-history";
+import { useT } from "@/lib/i18n";
 
 export default function SettingsPage() {
+  const t = useT();
   const org = useOrg();
   const orgId = org?.orgId ?? "";
   const setSidebarLogo = useSetOrgLogo();
@@ -114,7 +116,7 @@ export default function SettingsPage() {
     e.target.value = ""; // allow re-selecting the same file
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setError("Please choose an image file.");
+      setError(t("Please choose an image file."));
       return;
     }
     setLogoBusy(true);
@@ -172,7 +174,7 @@ export default function SettingsPage() {
     try {
       downloadBackup(await exportBackup(supabase));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Backup failed.");
+      setError(e instanceof Error ? e.message : t("Backup failed."));
     }
     setBackupBusy(false);
   }
@@ -187,11 +189,11 @@ export default function SettingsPage() {
     try {
       const parsed = JSON.parse(await file.text()) as Backup;
       if (parsed?.app !== "cargobook" || !parsed.tables) {
-        throw new Error("This file is not a CargoBook backup.");
+        throw new Error(t("This file is not a CargoBook backup."));
       }
       setPendingRestore(parsed);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not read the file.");
+      setError(err instanceof Error ? err.message : t("Could not read the file."));
     }
   }
 
@@ -201,12 +203,12 @@ export default function SettingsPage() {
     const backup = pendingRestore;
     setPendingRestore(null);
     setError(null);
-    setRestoreProgress("Starting…");
+    setRestoreProgress(t("Starting…"));
     try {
       const summary = await restoreBackup(supabase, backup, setRestoreProgress);
       setRestoreResult(summary);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Restore failed.");
+      setError(e instanceof Error ? e.message : t("Restore failed."));
     }
     setRestoreProgress(null);
   }
@@ -224,14 +226,14 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Settings" />
+      <PageHeader title={t("Settings")} />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <div className="space-y-6">
         <Section
           icon={<BuildingIcon />}
-          title="Organization"
-          subtitle="The logo and details below appear on your printed invoices."
+          title={t("Organization")}
+          subtitle={t("The logo and details below appear on your printed invoices.")}
         >
           <div className="mb-4 flex items-center gap-4">
             <div
@@ -243,11 +245,11 @@ export default function SettingsPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={logoUrl}
-                  alt="Organization logo"
+                  alt={t("Organization logo")}
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <span className="text-xs text-slate-400">No logo</span>
+                <span className="text-xs text-slate-400">{t("No logo")}</span>
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -266,10 +268,10 @@ export default function SettingsPage() {
                 }`}
               >
                 {logoBusy
-                  ? "Working…"
+                  ? t("Working…")
                   : logoUrl
-                    ? "Replace logo"
-                    : "Upload logo"}
+                    ? t("Replace logo")
+                    : t("Upload logo")}
               </label>
               {logoUrl && (
                 <button
@@ -278,14 +280,14 @@ export default function SettingsPage() {
                   disabled={logoBusy}
                   className="rounded-lg px-3 py-1.5 text-sm text-rose-600 hover:bg-rose-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
                 >
-                  Remove
+                  {t("Remove")}
                 </button>
               )}
             </div>
           </div>
 
           <form onSubmit={saveDetails} className="space-y-3">
-            <Field label="Name">
+            <Field label={t("Name")}>
               <Input
                 value={name}
                 onChange={(e) => {
@@ -295,7 +297,7 @@ export default function SettingsPage() {
                 required
               />
             </Field>
-            <Field label="Address">
+            <Field label={t("Address")}>
               <Textarea
                 value={address}
                 rows={2}
@@ -306,7 +308,7 @@ export default function SettingsPage() {
               />
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Phone">
+              <Field label={t("Phone")}>
                 <Input
                   value={phone}
                   onChange={(e) => {
@@ -315,7 +317,7 @@ export default function SettingsPage() {
                   }}
                 />
               </Field>
-              <Field label="Email">
+              <Field label={t("Email")}>
                 <Input
                   type="email"
                   value={email}
@@ -328,11 +330,11 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={savingDetails || !name.trim()}>
-                {savingDetails ? "Saving…" : "Save"}
+                {savingDetails ? t("Saving…") : t("Save")}
               </Button>
               {detailsSaved && (
                 <span className="text-sm text-emerald-600 dark:text-emerald-400">
-                  Saved
+                  {t("Saved")}
                 </span>
               )}
             </div>
@@ -343,8 +345,8 @@ export default function SettingsPage() {
         </Section>
         <Section
           icon={<DashboardIcon />}
-          title="Modules"
-          subtitle="The product areas included in your plan. Contact us to add or remove one."
+          title={t("Modules")}
+          subtitle={t("The product areas included in your plan. Contact us to add or remove one.")}
         >
           <div className="space-y-2">
             {MODULE_INFO.map((m) => {
@@ -356,10 +358,10 @@ export default function SettingsPage() {
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {m.name}
+                      {t(m.name)}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400">
-                      {m.desc}
+                      {t(m.desc)}
                     </div>
                   </div>
                   {/* Read-only status. Which modules an org runs is set by the
@@ -372,7 +374,7 @@ export default function SettingsPage() {
                         : "bg-slate-100 text-slate-500 dark:bg-white/[0.06] dark:text-slate-400"
                     }`}
                   >
-                    {enabled ? "Included" : "Not included"}
+                    {enabled ? t("Included") : t("Not included")}
                   </span>
                 </div>
               );
@@ -382,8 +384,8 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-6">
         {loading ? (
-          <Section icon={<WalletIcon />} title="Billing">
-            <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+          <Section icon={<WalletIcon />} title={t("Billing")}>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t("Loading…")}</p>
           </Section>
         ) : (
           <div>
@@ -402,12 +404,12 @@ export default function SettingsPage() {
         )}
         <Section
           icon={<BookIcon />}
-          title="Backup & restore"
-          subtitle="Download all of this organization's data (shipments, invoices, payments, expenses, bookings, ledgers…) as a JSON file, or add the contents of a backup back in."
+          title={t("Backup & restore")}
+          subtitle={t("Download all of this organization's data (shipments, invoices, payments, expenses, bookings, ledgers…) as a JSON file, or add the contents of a backup back in.")}
         >
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" onClick={makeBackup} disabled={backupBusy}>
-              {backupBusy ? "Preparing…" : "⬇ Download backup"}
+              {backupBusy ? t("Preparing…") : t("⬇ Download backup")}
             </Button>
             <input
               id="restore-file-input"
@@ -423,7 +425,7 @@ export default function SettingsPage() {
                 restoreProgress ? "pointer-events-none opacity-60" : ""
               }`}
             >
-              ⬆ Restore from backup
+              {t("⬆ Restore from backup")}
             </label>
           </div>
           {restoreProgress && (
@@ -433,22 +435,21 @@ export default function SettingsPage() {
           )}
           {restoreResult && (
             <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
-              Restore finished — {restoredCount} records added.
+              {t("Restore finished — {count} records added.", { count: restoredCount })}
               {Object.entries(restoreResult.reused).length > 0 && (
                 <span>
                   {" "}
-                  Existing entries were reused for:{" "}
-                  {Object.entries(restoreResult.reused)
-                    .map(([t, n]) => `${t.replace(/_/g, " ")} (${n})`)
-                    .join(", ")}
-                  .
+                  {t("Existing entries were reused for: {list}.", {
+                    list: Object.entries(restoreResult.reused)
+                      .map(([tbl, n]) => `${tbl.replace(/_/g, " ")} (${n})`)
+                      .join(", "),
+                  })}
                 </span>
               )}
             </div>
           )}
           <p className="mt-3 text-xs text-slate-400">
-            Restore only adds — it never deletes existing data. Restoring the
-            same backup twice will duplicate shipments, invoices and bookings.
+            {t("Restore only adds — it never deletes existing data. Restoring the same backup twice will duplicate shipments, invoices and bookings.")}
           </p>
         </Section>
         </div>
@@ -456,10 +457,16 @@ export default function SettingsPage() {
 
       <ConfirmDialog
         open={!!pendingRestore}
-        title="Restore this backup?"
+        title={t("Restore this backup?")}
         message={
           pendingRestore
-            ? `Backup from ${pendingRestore.exported_at.slice(0, 10)}. Its shipments, invoices, bookings and payments will be ADDED to "${name || "this organization"}". Nothing is deleted, but restoring the same backup twice creates duplicates.`
+            ? t(
+                'Backup from {date}. Its shipments, invoices, bookings and payments will be ADDED to "{org}". Nothing is deleted, but restoring the same backup twice creates duplicates.',
+                {
+                  date: pendingRestore.exported_at.slice(0, 10),
+                  org: name || t("this organization"),
+                },
+              )
             : undefined
         }
         confirmLabel="Restore"

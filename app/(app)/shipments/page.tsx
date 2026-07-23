@@ -29,6 +29,7 @@ import {
   Th,
 } from "@/components/ui";
 import { useRole } from "@/components/role-context";
+import { useT } from "@/lib/i18n";
 
 type InvoiceTotals = { invoiced: number; paid: number };
 
@@ -37,6 +38,7 @@ const SHIPMENT_COLUMNS =
 const PAGE_SIZE = 100;
 
 export default function ShipmentsPage() {
+  const t = useT();
   const role = useRole();
   const isAdmin = role === "admin";
   const [invoiceTotals, setInvoiceTotals] = useState<Map<number, InvoiceTotals>>(
@@ -129,7 +131,7 @@ export default function ShipmentsPage() {
     const state = payStateByInvoice.get(s.invoice_id);
     if (!state) return null;
     return (
-      <Badge className={PAYMENT_CLASS[state]}>{PAYMENT_LABEL[state]}</Badge>
+      <Badge className={PAYMENT_CLASS[state]}>{t(PAYMENT_LABEL[state])}</Badge>
     );
   }
 
@@ -166,15 +168,15 @@ export default function ShipmentsPage() {
     const all = ((data as Shipment[]) ?? []).filter(matchesFilters);
     downloadCsv("shipments.csv", [
       [
-        "Ref",
-        "Description",
-        "Destination",
-        "Weight (kg)",
-        "Rate per kg",
-        "Total",
-        "Status",
-        "Invoice",
-        "Ship date",
+        t("Ref"),
+        t("Description"),
+        t("Destination"),
+        t("Weight (kg)"),
+        t("Rate per kg"),
+        t("Total"),
+        t("Status"),
+        t("Invoice"),
+        t("Ship date"),
       ],
       ...all.map((s) => [
         shipmentRef(s.id),
@@ -183,7 +185,7 @@ export default function ShipmentsPage() {
         Number(s.weight_kg),
         s.rate_per_kg != null ? Number(s.rate_per_kg) : "",
         Number(s.total),
-        STATUS_LABEL[s.status],
+        t(STATUS_LABEL[s.status]),
         s.invoice_id ? invoiceRef(s.invoice_id) : "",
         s.ship_date ?? "",
       ]),
@@ -193,14 +195,14 @@ export default function ShipmentsPage() {
   return (
     <div>
       <PageHeader
-        title="Shipments"
+        title={t("Shipments")}
         action={
           isAdmin ? (
             <Link
               href="/shipments/new"
               className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
             >
-              + New shipment
+              {t("+ New shipment")}
             </Link>
           ) : undefined
         }
@@ -208,7 +210,7 @@ export default function ShipmentsPage() {
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="w-full sm:w-64">
           <Input
-            placeholder="Search description, destination…"
+            placeholder={t("Search description, destination…")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -220,10 +222,10 @@ export default function ShipmentsPage() {
               setStatusFilter(e.target.value as "" | ShipmentStatus)
             }
           >
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
+            <option value="">{t("All statuses")}</option>
+            <option value="pending">{t("Pending")}</option>
+            <option value="shipped">{t("Shipped")}</option>
+            <option value="delivered">{t("Delivered")}</option>
           </Select>
         </div>
         {isAdmin && (
@@ -232,7 +234,7 @@ export default function ShipmentsPage() {
             disabled={filtered.length === 0 || exporting}
             className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
           >
-            {exporting ? "Exporting…" : "⬇ Export CSV"}
+            {exporting ? t("Exporting…") : t("⬇ Export CSV")}
           </button>
         )}
       </div>
@@ -249,7 +251,7 @@ export default function ShipmentsPage() {
                   {shipmentRef(s.id)}
                 </span>
                 <Badge className={STATUS_CLASS[s.status]}>
-                  {STATUS_LABEL[s.status]}
+                  {t(STATUS_LABEL[s.status])}
                 </Badge>
               </div>
               <div className="mt-1 text-sm">{s.description}</div>
@@ -261,7 +263,7 @@ export default function ShipmentsPage() {
                 </span>
                 {isAdmin && (
                   <span>
-                    {s.invoice_id ? invoiceRef(s.invoice_id) : "not invoiced"}
+                    {s.invoice_id ? invoiceRef(s.invoice_id) : t("not invoiced")}
                   </span>
                 )}
                 {s.invoices?.bill_to && <span>👤 {s.invoices.bill_to}</span>}
@@ -275,16 +277,16 @@ export default function ShipmentsPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Ref</Th>
-              <Th>Description</Th>
-              <Th>Destination</Th>
-              <Th>Weight</Th>
-              <Th>Total</Th>
-              <Th>Status</Th>
-              <Th>Payment</Th>
-              {isAdmin && <Th>Invoice</Th>}
-              {!isAdmin && <Th>Bill to</Th>}
-              <Th>Date</Th>
+              <Th>{t("Ref")}</Th>
+              <Th>{t("Description")}</Th>
+              <Th>{t("Destination")}</Th>
+              <Th>{t("Weight")}</Th>
+              <Th>{t("Total")}</Th>
+              <Th>{t("Status")}</Th>
+              <Th>{t("Payment")}</Th>
+              {isAdmin && <Th>{t("Invoice")}</Th>}
+              {!isAdmin && <Th>{t("Bill to")}</Th>}
+              <Th>{t("Date")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -308,7 +310,7 @@ export default function ShipmentsPage() {
                 </Td>
                 <Td>
                   <Badge className={STATUS_CLASS[s.status]}>
-                    {STATUS_LABEL[s.status]}
+                    {t(STATUS_LABEL[s.status])}
                   </Badge>
                 </Td>
                 <Td>{payBadge(s) ?? <span className="text-slate-400">—</span>}</Td>
@@ -322,7 +324,7 @@ export default function ShipmentsPage() {
                         {invoiceRef(s.invoice_id)}
                       </Link>
                     ) : (
-                      <span className="text-slate-400">not invoiced</span>
+                      <span className="text-slate-400">{t("not invoiced")}</span>
                     )}
                   </Td>
                 )}
@@ -346,11 +348,11 @@ export default function ShipmentsPage() {
             message={
               shipments.length === 0
                 ? isAdmin
-                  ? "No shipments yet — click “New shipment” to add your first."
-                  : "No shipments yet."
+                  ? t("No shipments yet — click “New shipment” to add your first.")
+                  : t("No shipments yet.")
                 : hasMore
-                  ? "No match in the loaded shipments — “Load older shipments” below widens the search."
-                  : "No shipments match your search."
+                  ? t("No match in the loaded shipments — “Load older shipments” below widens the search.")
+                  : t("No shipments match your search.")
             }
           />
         )}
@@ -362,10 +364,12 @@ export default function ShipmentsPage() {
             disabled={loadingMore}
             className="rounded-full border border-white/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.05] backdrop-blur px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-white/[0.08] disabled:opacity-50"
           >
-            {loadingMore ? "Loading…" : "Load older shipments"}
+            {loadingMore ? t("Loading…") : t("Load older shipments")}
           </button>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            Showing the {shipments.length} most recent — search covers what’s loaded.
+            {t("Showing the {count} most recent — search covers what’s loaded.", {
+              count: shipments.length,
+            })}
           </span>
         </div>
       )}

@@ -16,10 +16,12 @@ import {
 import { CoinsIcon } from "@/components/icons";
 import { TransportSelect } from "@/components/transport-select";
 import { DatePicker } from "@/components/date-picker";
+import { useT } from "@/lib/i18n";
 
 // Delivery costs for one shipment, plus the resulting net profit
 // (income from the customer − delivery expenses).
 export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
+  const t = useT();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [mode, setMode] = useState("");
   const [amount, setAmount] = useState("");
@@ -91,22 +93,22 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
     <Section
       className="max-w-xl"
       icon={<CoinsIcon />}
-      title="Delivery expenses & profit"
-      subtitle="Costs to deliver this shipment and the resulting net profit"
+      title={t("Delivery expenses & profit")}
+      subtitle={t("Costs to deliver this shipment and the resulting net profit")}
     >
       <div className="grid grid-cols-3 gap-3 text-center">
         <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
-          <div className="text-xs text-slate-500 dark:text-slate-400">Income</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">{t("Income")}</div>
           <div className="mt-0.5 text-sm font-bold">{fmtMoney(income)}</div>
         </div>
         <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
-          <div className="text-xs text-slate-500 dark:text-slate-400">Expenses</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">{t("Expenses")}</div>
           <div className="mt-0.5 text-sm font-bold text-red-600 dark:text-red-400">
             −{fmtMoney(totalExpenses)}
           </div>
         </div>
         <div className="rounded-xl bg-white/30 p-3 dark:bg-white/[0.05]">
-          <div className="text-xs text-slate-500 dark:text-slate-400">Net profit</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">{t("Net profit")}</div>
           <div
             className={`mt-0.5 text-sm font-bold ${
               profit < 0
@@ -123,7 +125,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
         <ul className="mt-4 divide-y divide-slate-200/60 dark:divide-white/10">
           {expenses.map((exp) => (
             <li key={exp.id} className="flex items-center gap-3 py-2 text-sm">
-              <span className="shrink-0">{modeLabel(exp.transport_mode)}</span>
+              <span className="shrink-0">{t(modeLabel(exp.transport_mode))}</span>
               <span className="min-w-0 flex-1 truncate text-slate-500 dark:text-slate-400">
                 {exp.description || fmtDate(exp.expense_date)}
               </span>
@@ -133,7 +135,7 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
                 onClick={() => setPending(exp)}
                 className={rowDeleteClass}
               >
-                Delete
+                {t("Delete")}
               </button>
             </li>
           ))}
@@ -142,10 +144,10 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
 
       <form onSubmit={add} className="mt-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Transport">
+          <Field label={t("Transport")}>
             <TransportSelect value={mode} onChange={setMode} />
           </Field>
-          <Field label="Cost">
+          <Field label={t("Cost")}>
             <Input
               type="number"
               step="0.01"
@@ -157,31 +159,31 @@ export function ShipmentExpenses({ shipment }: { shipment: Shipment }) {
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Date (optional)">
+          <Field label={t("Date (optional)")}>
             <DatePicker value={date} onChange={setDate} />
           </Field>
-          <Field label="Note (optional)">
+          <Field label={t("Note (optional)")}>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. fuel to airport"
+              placeholder={t("e.g. fuel to airport")}
             />
           </Field>
         </div>
         <ErrorNote message={error} />
         <Button type="submit" disabled={busy}>
-          {busy ? "Adding…" : "+ Add expense"}
+          {busy ? t("Adding…") : t("+ Add expense")}
         </Button>
       </form>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete expense?"
+        title={t("Delete expense?")}
         message={
           pending
-            ? `This removes the ${fmtMoney(
-                Number(pending.amount),
-              )} expense. This cannot be undone.`
+            ? t("This removes the {amount} expense. This cannot be undone.", {
+                amount: fmtMoney(Number(pending.amount)),
+              })
             : undefined
         }
         busy={deleting}

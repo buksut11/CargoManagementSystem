@@ -15,6 +15,7 @@ import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
 import { Card, Field, PageHeader, Section, Select } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 import { BuildingIcon, PhoneIcon, StatementIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 // One movement on the airline's account, from the agency's payables viewpoint:
 // a charge is a ticket cost we owe the airline; a credit is a payment we made
@@ -97,6 +98,7 @@ type OrgHeader = Pick<
 >;
 
 export default function FlightSupplierStatementPage() {
+  const t = useT();
   const router = useRouter();
   const org = useOrg();
 
@@ -213,12 +215,12 @@ export default function FlightSupplierStatementPage() {
         const cost = Number(bk.net_cost);
         if (cost <= 0) continue; // nothing owed on this booking
         const route = routeLabel(bk.id);
-        const description = ["Ticket cost", route, bk.pnr ? `PNR ${bk.pnr}` : ""]
+        const description = [t("Ticket cost"), route, bk.pnr ? t("PNR {pnr}", { pnr: bk.pnr }) : ""]
           .filter(Boolean)
           .join(" · ");
         const detail = [
-          bk.flight_customers?.name ? `For ${bk.flight_customers.name}` : "",
-          bk.travel_date ? `Travel ${fmtDate(bk.travel_date)}` : "",
+          bk.flight_customers?.name ? t("For {name}", { name: bk.flight_customers.name }) : "",
+          bk.travel_date ? t("Travel {date}", { date: fmtDate(bk.travel_date) }) : "",
         ]
           .filter(Boolean)
           .join(" · ");
@@ -237,7 +239,7 @@ export default function FlightSupplierStatementPage() {
         rows.push({
           date: p.paid_date,
           ref: p.booking_id ? bookingRef(p.booking_id) : "—",
-          description: `Payment to airline${p.method ? ` (${p.method})` : ""}`,
+          description: `${t("Payment to airline")}${p.method ? ` (${p.method})` : ""}`,
           debit: 0,
           credit: Number(p.amount),
           sort: 1,
@@ -255,7 +257,7 @@ export default function FlightSupplierStatementPage() {
     return () => {
       active = false;
     };
-  }, [supplierId]);
+  }, [supplierId, t]);
 
   // Split the full history around the chosen window. Everything before `from`
   // collapses into a single opening balance so the running balance we owe is
@@ -318,27 +320,27 @@ export default function FlightSupplierStatementPage() {
 
   const periodLabel = from
     ? `${fmtDate(from)} — ${fmtDate(to || TODAY)}`
-    : `All activity through ${fmtDate(to || TODAY)}`;
+    : t("All activity through {date}", { date: fmtDate(to || TODAY) });
 
   return (
     <div>
       {/* Controls — never printed; the sheet below is the document. */}
       <div className="no-print">
-        <PageHeader title="Airline statement" />
+        <PageHeader title={t("Airline statement")} />
         <Section
           icon={<StatementIcon className="h-5 w-5" />}
-          title="Build a statement"
-          subtitle="Pick an airline and a date range, then print or save as PDF."
+          title={t("Build a statement")}
+          subtitle={t("Pick an airline and a date range, then print or save as PDF.")}
           className="mb-6"
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="sm:col-span-2 lg:col-span-2">
-              <Field label="Airline">
+              <Field label={t("Airline")}>
                 <Select
                   value={supplierId}
                   onChange={(e) => setSupplierId(e.target.value)}
                 >
-                  <option value="">Select an airline…</option>
+                  <option value="">{t("Select an airline…")}</option>
                   {suppliers.map((s) => (
                     <option key={s.id} value={String(s.id)}>
                       {s.name}
@@ -348,21 +350,21 @@ export default function FlightSupplierStatementPage() {
                 </Select>
               </Field>
             </div>
-            <Field label="From">
+            <Field label={t("From")}>
               <DatePicker
                 value={from}
                 onChange={setFrom}
-                placeholder="Beginning"
+                placeholder={t("Beginning")}
               />
             </Field>
-            <Field label="To">
-              <DatePicker value={to} onChange={setTo} placeholder="Today" />
+            <Field label={t("To")}>
+              <DatePicker value={to} onChange={setTo} placeholder={t("Today")} />
             </Field>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Quick range:
+              {t("Quick range:")}
             </span>
             {PRESETS.map((p) => (
               <button
@@ -371,7 +373,7 @@ export default function FlightSupplierStatementPage() {
                 onClick={() => applyPreset(p.key)}
                 className="rounded-full border border-white/60 bg-white/40 px-3 py-1 text-xs font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/70 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/[0.12]"
               >
-                {p.label}
+                {t(p.label)}
               </button>
             ))}
           </div>
@@ -382,13 +384,13 @@ export default function FlightSupplierStatementPage() {
                 onClick={() => window.print()}
                 className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-700"
               >
-                🖨 Print / Save as PDF
+                {t("🖨 Print / Save as PDF")}
               </button>
               <Link
                 href="/flights/suppliers"
                 className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur transition-colors hover:bg-white/60 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.1]"
               >
-                ← Back to airlines
+                {t("← Back to airlines")}
               </Link>
             </div>
           )}
@@ -402,7 +404,7 @@ export default function FlightSupplierStatementPage() {
             <BuildingIcon />
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Choose an airline above to build their statement of account.
+            {t("Choose an airline above to build their statement of account.")}
           </p>
         </Card>
       )}
@@ -441,21 +443,21 @@ export default function FlightSupplierStatementPage() {
             </div>
 
             <div className="mt-4 text-center text-lg font-bold uppercase tracking-wide text-slate-800">
-              Airline statement of account
+              {t("Airline statement of account")}
             </div>
 
             {/* Airline + meta */}
             <div className="mt-6 flex flex-wrap justify-between gap-4 text-sm">
               <div className="text-slate-600">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Statement for
+                  {t("Statement for")}
                 </div>
                 <div className="mt-1 text-base font-semibold text-slate-900">
                   {supplier.name}
                 </div>
                 {supplier.type && (
                   <div className="text-xs capitalize text-slate-500">
-                    {supplier.type}
+                    {t(supplier.type)}
                   </div>
                 )}
                 {supplier.contact && (
@@ -467,16 +469,16 @@ export default function FlightSupplierStatementPage() {
               </div>
               <div className="text-right text-slate-600">
                 <div>
-                  <span className="text-slate-400">Period: </span>
+                  <span className="text-slate-400">{t("Period:")} </span>
                   {periodLabel}
                 </div>
                 <div>
-                  <span className="text-slate-400">Issued: </span>
+                  <span className="text-slate-400">{t("Issued:")} </span>
                   {fmtDate(TODAY)}
                 </div>
                 {view && (
                   <div>
-                    <span className="text-slate-400">Entries: </span>
+                    <span className="text-slate-400">{t("Entries:")} </span>
                     {view.period.length}
                   </div>
                 )}
@@ -486,14 +488,14 @@ export default function FlightSupplierStatementPage() {
             {/* Summary strip */}
             {view && (
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <SummaryBox label="Opening balance" value={fmtMoney(view.opening)} />
-                <SummaryBox label="Ticket costs" value={fmtMoney(view.charges)} />
+                <SummaryBox label={t("Opening balance")} value={fmtMoney(view.opening)} />
+                <SummaryBox label={t("Ticket costs")} value={fmtMoney(view.charges)} />
                 <SummaryBox
-                  label="Payments & credits"
+                  label={t("Payments & credits")}
                   value={fmtMoney(view.credits)}
                 />
                 <SummaryBox
-                  label="Balance payable"
+                  label={t("Balance payable")}
                   value={fmtMoney(Math.max(view.closing, 0))}
                   strong
                   tone={view.closing > 0.005 ? "due" : "settled"}
@@ -505,12 +507,12 @@ export default function FlightSupplierStatementPage() {
             <table className="mt-8 w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-slate-300 text-left text-xs uppercase text-slate-500">
-                  <th className="py-2 pr-2">Date</th>
-                  <th className="py-2 pr-2">Ref</th>
-                  <th className="py-2 pr-2">Description</th>
-                  <th className="py-2 pr-2 text-right">Charge</th>
-                  <th className="py-2 pr-2 text-right">Payment</th>
-                  <th className="py-2 text-right">Balance</th>
+                  <th className="py-2 pr-2">{t("Date")}</th>
+                  <th className="py-2 pr-2">{t("Ref")}</th>
+                  <th className="py-2 pr-2">{t("Description")}</th>
+                  <th className="py-2 pr-2 text-right">{t("Charge")}</th>
+                  <th className="py-2 pr-2 text-right">{t("Payment")}</th>
+                  <th className="py-2 text-right">{t("Balance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -520,7 +522,7 @@ export default function FlightSupplierStatementPage() {
                   <tr className="border-b border-slate-200 text-slate-500">
                     <td className="py-2 pr-2 whitespace-nowrap">{fmtDate(from)}</td>
                     <td className="py-2 pr-2">—</td>
-                    <td className="py-2 pr-2 italic">Balance brought forward</td>
+                    <td className="py-2 pr-2 italic">{t("Balance brought forward")}</td>
                     <td className="py-2 pr-2 text-right">—</td>
                     <td className="py-2 pr-2 text-right">—</td>
                     <td className="py-2 text-right font-medium">
@@ -557,8 +559,8 @@ export default function FlightSupplierStatementPage() {
                   <tr>
                     <td colSpan={6} className="py-6 text-center text-slate-400">
                       {loadingLines
-                        ? "Loading…"
-                        : "No transactions in this date range."}
+                        ? t("Loading…")
+                        : t("No transactions in this date range.")}
                     </td>
                   </tr>
                 )}
@@ -570,17 +572,17 @@ export default function FlightSupplierStatementPage() {
               <div className="mt-6 space-y-1 text-right text-sm">
                 {from && (
                   <div className="text-slate-600">
-                    Opening balance: {fmtMoney(view.opening)}
+                    {t("Opening balance")}: {fmtMoney(view.opening)}
                   </div>
                 )}
                 <div className="text-slate-600">
-                  Total charged: {fmtMoney(view.charges)}
+                  {t("Total charged")}: {fmtMoney(view.charges)}
                 </div>
                 <div className="text-slate-600">
-                  Total payments &amp; credits: {fmtMoney(view.credits)}
+                  {t("Total payments & credits")}: {fmtMoney(view.credits)}
                 </div>
                 <div className="flex items-baseline justify-end gap-4 pt-1">
-                  <span className="text-sm text-slate-500">Balance payable</span>
+                  <span className="text-sm text-slate-500">{t("Balance payable")}</span>
                   <span
                     className={`text-2xl font-bold ${
                       view.closing > 0 ? "text-orange-600" : "text-emerald-700"
@@ -591,9 +593,9 @@ export default function FlightSupplierStatementPage() {
                 </div>
                 {view.closing <= 0 && (
                   <div className="text-xs text-emerald-700">
-                    Account fully settled
+                    {t("Account fully settled")}
                     {view.closing < 0
-                      ? ` (airline owes ${fmtMoney(-view.closing)})`
+                      ? ` ${t("(airline owes {amount})", { amount: fmtMoney(-view.closing) })}`
                       : ""}
                     .
                   </div>
@@ -606,19 +608,19 @@ export default function FlightSupplierStatementPage() {
             {view && view.closing > 0.005 && (
               <div className="mt-8">
                 <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Payable by age
+                  {t("Payable by age")}
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <AgingBox label="Current" hint="0–30 days" value={view.aging.current} />
-                  <AgingBox label="31–60 days" value={view.aging.d31} />
-                  <AgingBox label="61–90 days" value={view.aging.d61} />
-                  <AgingBox label="Over 90 days" value={view.aging.d90} overdue />
+                  <AgingBox label={t("Current")} hint={t("0–30 days")} value={view.aging.current} />
+                  <AgingBox label={t("31–60 days")} value={view.aging.d31} />
+                  <AgingBox label={t("61–90 days")} value={view.aging.d61} />
+                  <AgingBox label={t("Over 90 days")} value={view.aging.d90} overdue />
                 </div>
               </div>
             )}
 
             <p className="mt-10 text-center text-xs text-slate-400">
-              Generated by {orgHeader?.name ?? org?.orgName ?? "CargoBook"} ·{" "}
+              {t("Generated by")} {orgHeader?.name ?? org?.orgName ?? "CargoBook"} ·{" "}
               {fmtDate(TODAY)}
             </p>
           </div>

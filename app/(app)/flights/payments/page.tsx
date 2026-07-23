@@ -7,8 +7,10 @@ import { downloadCsv } from "@/lib/csv";
 import type { BookingPayment } from "@/lib/types";
 import { bookingRef, fmtDate, fmtMoney } from "@/lib/format";
 import { Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 export default function FlightReceiptsPage() {
+  const t = useT();
   const [payments, setPayments] = useState<BookingPayment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +29,7 @@ export default function FlightReceiptsPage() {
 
   function exportCsv() {
     downloadCsv("flight-receipts.csv", [
-      ["Date", "Amount", "Booking", "Method", "Note"],
+      [t("Date"), t("Amount"), t("Booking"), t("Method"), t("Note")],
       ...payments.map((p) => [
         p.paid_date,
         Number(p.amount),
@@ -41,18 +43,18 @@ export default function FlightReceiptsPage() {
   return (
     <div>
       <PageHeader
-        title="Customer receipts"
+        title={t("Customer receipts")}
         action={
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-500 dark:text-slate-400">
-              Total received: <span className="font-bold">{fmtMoney(total)}</span>
+              {t("Total received:")} <span className="font-bold">{fmtMoney(total)}</span>
             </span>
             <button
               onClick={exportCsv}
               disabled={payments.length === 0}
               className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
             >
-              ⬇ Export CSV
+              {t("⬇ Export CSV")}
             </button>
           </div>
         }
@@ -86,11 +88,11 @@ export default function FlightReceiptsPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Date</Th>
-              <Th>Amount</Th>
-              <Th>Booking</Th>
-              <Th>Method</Th>
-              <Th>Note</Th>
+              <Th>{t("Date")}</Th>
+              <Th>{t("Amount")}</Th>
+              <Th>{t("Booking")}</Th>
+              <Th>{t("Method")}</Th>
+              <Th>{t("Note")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -113,7 +115,7 @@ export default function FlightReceiptsPage() {
           </tbody>
         </table>
         {!loading && payments.length === 0 && (
-          <EmptyState message="No receipts yet — record them from a booking's page." />
+          <EmptyState message={t("No receipts yet — record them from a booking's page.")} />
         )}
       </Card>
     </div>

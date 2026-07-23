@@ -20,6 +20,7 @@ import {
 } from "@/lib/format";
 import { useRole } from "@/components/role-context";
 import { FlightBreakdownModal } from "@/components/flight-breakdown-modal";
+import { useT } from "@/lib/i18n";
 import {
   Badge,
   Card,
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui";
 
 export default function BookingsPage() {
+  const t = useT();
   const role = useRole();
   const isAgent = role === "agent";
   const [bookings, setBookings] = useState<FlightBooking[]>([]);
@@ -110,7 +112,7 @@ export default function BookingsPage() {
 
   function exportCsv() {
     downloadCsv("flight-bookings.csv", [
-      ["Ref", "PNR", "Airline", "Customer", "Booking date", "Travel date", "Status", "Sale total", "Received", "Receivable", "Net cost", "Profit"],
+      [t("Ref"), t("PNR"), t("Airline"), t("Customer"), t("Booking date"), t("Travel date"), t("Status"), t("Sale total"), t("Received"), t("Receivable"), t("Net cost"), t("Profit")],
       ...filtered.map((b) => [
         bookingRef(b.id),
         b.booking_ref ?? "",
@@ -118,7 +120,7 @@ export default function BookingsPage() {
         b.flight_customers?.name ?? "",
         b.booking_date,
         b.travel_date ?? "",
-        FLIGHT_STATUS_LABEL[b.status],
+        t(FLIGHT_STATUS_LABEL[b.status]),
         displaySaleTotal(b.status, Number(b.sale_total)),
         received(b),
         receivable(b),
@@ -131,7 +133,7 @@ export default function BookingsPage() {
   return (
     <div>
       <PageHeader
-        title="Bookings"
+        title={t("Bookings")}
         action={
           <div className="flex items-center gap-2">
             <button
@@ -139,14 +141,14 @@ export default function BookingsPage() {
               disabled={filtered.length === 0}
               className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
             >
-              ⬇ Export CSV
+              {t("⬇ Export CSV")}
             </button>
             {!isAgent && (
               <Link
                 href="/flights/bookings/new"
                 className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"
               >
-                + New booking
+                {t("+ New booking")}
               </Link>
             )}
           </div>
@@ -156,18 +158,18 @@ export default function BookingsPage() {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
           <span className="text-sm text-slate-500 dark:text-slate-400">
-            Status
+            {t("Status")}
           </span>
           <div className="w-44">
             <Select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">All</option>
+              <option value="all">{t("All")}</option>
               {(Object.keys(FLIGHT_STATUS_LABEL) as FlightBookingStatus[]).map(
                 (s) => (
                   <option key={s} value={s}>
-                    {FLIGHT_STATUS_LABEL[s]}
+                    {t(FLIGHT_STATUS_LABEL[s])}
                   </option>
                 ),
               )}
@@ -179,8 +181,8 @@ export default function BookingsPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search customer name or phone number…"
-            aria-label="Search bookings by customer name or phone number"
+            placeholder={t("Search customer name or phone number…")}
+            aria-label={t("Search bookings by customer name or phone number")}
           />
         </div>
       </div>
@@ -199,7 +201,7 @@ export default function BookingsPage() {
                   {bookingRef(b.id)}
                 </span>
                 <Badge className={FLIGHT_STATUS_CLASS[b.status]}>
-                  {FLIGHT_STATUS_LABEL[b.status]}
+                  {t(FLIGHT_STATUS_LABEL[b.status])}
                 </Badge>
               </div>
               <div className="mt-1 text-sm">
@@ -221,7 +223,7 @@ export default function BookingsPage() {
                 )}
                 {!isAgent && receivable(b) > 0 && (
                   <span className="text-amber-600 dark:text-amber-400">
-                    {fmtMoney(receivable(b))} due
+                    {t("{amount} due", { amount: fmtMoney(receivable(b)) })}
                   </span>
                 )}
               </div>
@@ -233,15 +235,15 @@ export default function BookingsPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Ref</Th>
-              <Th>PNR</Th>
-              <Th>Airline</Th>
-              <Th>Customer</Th>
-              <Th>Travel</Th>
-              <Th>Status</Th>
-              {!isAgent && <Th>Sale total</Th>}
-              {!isAgent && <Th>Received</Th>}
-              {!isAgent && <Th>Receivable</Th>}
+              <Th>{t("Ref")}</Th>
+              <Th>{t("PNR")}</Th>
+              <Th>{t("Airline")}</Th>
+              <Th>{t("Customer")}</Th>
+              <Th>{t("Travel")}</Th>
+              <Th>{t("Status")}</Th>
+              {!isAgent && <Th>{t("Sale total")}</Th>}
+              {!isAgent && <Th>{t("Received")}</Th>}
+              {!isAgent && <Th>{t("Receivable")}</Th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -261,7 +263,7 @@ export default function BookingsPage() {
                 <Td className="whitespace-nowrap">{fmtDate(b.travel_date)}</Td>
                 <Td>
                   <Badge className={FLIGHT_STATUS_CLASS[b.status]}>
-                    {FLIGHT_STATUS_LABEL[b.status]}
+                    {t(FLIGHT_STATUS_LABEL[b.status])}
                   </Badge>
                 </Td>
                 {!isAgent && (
@@ -291,7 +293,7 @@ export default function BookingsPage() {
                             name: b.flight_customers!.name,
                           })
                         }
-                        title={`See what makes up ${b.flight_customers.name}'s balance`}
+                        title={t("See what makes up {name}'s balance", { name: b.flight_customers.name })}
                         className="-mx-2 rounded-full px-2 py-0.5 text-amber-600 transition-colors hover:bg-amber-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:text-amber-400 dark:hover:bg-amber-400/15"
                       >
                         {fmtMoney(receivable(b))}
@@ -317,8 +319,8 @@ export default function BookingsPage() {
           <EmptyState
             message={
               bookings.length === 0
-                ? "No bookings yet."
-                : "No bookings match this filter."
+                ? t("No bookings yet.")
+                : t("No bookings match this filter.")
             }
           />
         )}

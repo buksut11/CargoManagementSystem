@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import type { AuditEntry, ShipmentStatus } from "@/lib/types";
 import { fmtDateTime, shipmentRef, STATUS_LABEL } from "@/lib/format";
 import { Badge, Card, EmptyState, PageHeader, Select, Td, Th } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const ACTION_LABEL: Record<AuditEntry["action"], string> = {
   create: "Created",
@@ -50,9 +51,10 @@ function Changes({ entry }: { entry: AuditEntry }) {
 }
 
 function Actor({ entry }: { entry: AuditEntry }) {
+  const t = useT();
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5">
-      <span>{entry.user_email ?? "system"}</span>
+      <span>{entry.user_email ?? t("system")}</span>
       {entry.user_role && (
         <Badge
           className={
@@ -61,7 +63,7 @@ function Actor({ entry }: { entry: AuditEntry }) {
               : "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300"
           }
         >
-          {entry.user_role}
+          {t(entry.user_role)}
         </Badge>
       )}
     </span>
@@ -69,6 +71,7 @@ function Actor({ entry }: { entry: AuditEntry }) {
 }
 
 export default function AuditPage() {
+  const t = useT();
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState("");
@@ -92,16 +95,16 @@ export default function AuditPage() {
   return (
     <div>
       <PageHeader
-        title="Audit trail"
+        title={t("Audit trail")}
         action={
           <div className="w-44">
             <Select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
             >
-              <option value="">Everyone</option>
-              <option value="agent">Agents only</option>
-              <option value="admin">Admins only</option>
+              <option value="">{t("Everyone")}</option>
+              <option value="agent">{t("Agents only")}</option>
+              <option value="admin">{t("Admins only")}</option>
             </Select>
           </div>
         }
@@ -116,7 +119,7 @@ export default function AuditPage() {
               <div className="flex items-center justify-between gap-2">
                 <Actor entry={e} />
                 <Badge className={ACTION_CLASS[e.action]}>
-                  {ACTION_LABEL[e.action]}
+                  {t(ACTION_LABEL[e.action])}
                 </Badge>
               </div>
               <div className="mt-1 text-sm">
@@ -142,11 +145,11 @@ export default function AuditPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>When</Th>
-              <Th>Who</Th>
-              <Th>Action</Th>
-              <Th>Shipment</Th>
-              <Th>Changes</Th>
+              <Th>{t("When")}</Th>
+              <Th>{t("Who")}</Th>
+              <Th>{t("Action")}</Th>
+              <Th>{t("Shipment")}</Th>
+              <Th>{t("Changes")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -161,7 +164,7 @@ export default function AuditPage() {
                 </Td>
                 <Td>
                   <Badge className={ACTION_CLASS[e.action]}>
-                    {ACTION_LABEL[e.action]}
+                    {t(ACTION_LABEL[e.action])}
                   </Badge>
                 </Td>
                 <Td>
@@ -194,8 +197,8 @@ export default function AuditPage() {
           <EmptyState
             message={
               entries.length === 0
-                ? "No activity recorded yet — shipment changes will appear here."
-                : "No activity matches this filter."
+                ? t("No activity recorded yet — shipment changes will appear here.")
+                : t("No activity matches this filter.")
             }
           />
         )}

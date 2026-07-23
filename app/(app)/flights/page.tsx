@@ -18,6 +18,7 @@ import { ChartIcon, TicketIcon } from "@/components/icons";
 import { CountUp } from "@/components/count-up";
 import { TiltCard } from "@/components/tilt-card";
 import { AreaChart, CHART_COLORS, type ChartPoint } from "@/components/charts";
+import { useT } from "@/lib/i18n";
 
 const fmtCount = (n: number) => Math.round(n).toLocaleString("en-US");
 
@@ -54,6 +55,7 @@ type Summary = {
 };
 
 export default function FlightDashboardPage() {
+  const t = useT();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -169,14 +171,14 @@ export default function FlightDashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Flight Dashboard" />
+      <PageHeader title={t("Flight Dashboard")} />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
           <TiltCard key={s.label} className="h-full">
             <Card className="h-full p-5">
               <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                {s.label}
+                {t(s.label)}
               </div>
               <div
                 className={`mt-1.5 break-words text-xl font-bold tracking-tight lg:text-2xl ${
@@ -199,14 +201,14 @@ export default function FlightDashboardPage() {
               <ChartIcon />
             </IconChip>
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Sales per month
+              {t("Sales per month")}
             </div>
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-xl font-bold" style={{ color: CHART_COLORS.blue }}>
               {loading ? "…" : fmtMoney(salesSeries[salesSeries.length - 1].value)}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">this month</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{t("this month")}</span>
           </div>
           <div className="mt-2">
             <AreaChart points={salesSeries} color={CHART_COLORS.blue} format={fmtMoney} />
@@ -220,14 +222,14 @@ export default function FlightDashboardPage() {
                 <TicketIcon />
               </IconChip>
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Recent bookings
+                {t("Recent bookings")}
               </h2>
             </div>
             <Link
               href="/flights/bookings"
               className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
             >
-              View all →
+              {t("View all →")}
             </Link>
           </div>
           <div className="mt-2 space-y-3 px-4 pb-4">
@@ -247,7 +249,7 @@ export default function FlightDashboardPage() {
                       {bookingRef(b.id)}
                     </span>
                     <Badge className={FLIGHT_STATUS_CLASS[b.status]}>
-                      {FLIGHT_STATUS_LABEL[b.status]}
+                      {t(FLIGHT_STATUS_LABEL[b.status])}
                     </Badge>
                   </div>
                   <div className="mt-1 text-sm">{b.airline ?? "—"}</div>
@@ -265,7 +267,7 @@ export default function FlightDashboardPage() {
               );
             })}
             {!loading && recent.length === 0 && (
-              <EmptyState message="No bookings yet — create your first from the Bookings page." />
+              <EmptyState message={t("No bookings yet — create your first from the Bookings page.")} />
             )}
           </div>
         </Card>

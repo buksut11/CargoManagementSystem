@@ -30,6 +30,7 @@ import {
   Th,
 } from "@/components/ui";
 import { ChartIcon, WalletIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 type BookingProfit = Pick<FlightBooking, "profit" | "booking_date">;
 
@@ -46,6 +47,7 @@ function monthLabel(ym: string): string {
 }
 
 export default function FlightExpensesPage() {
+  const t = useT();
   const [expenses, setExpenses] = useState<FlightExpense[]>([]);
   const [bookings, setBookings] = useState<BookingProfit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,22 +201,22 @@ export default function FlightExpensesPage() {
       .sort((a, b) => b.total - a.total);
   })();
 
-  const periodNote = month ? ` · ${monthLabel(month)}` : " · all time";
+  const periodNote = month ? ` · ${monthLabel(month)}` : ` · ${t("all time")}`;
   const stats = [
-    { label: `Gross profit (bookings)${periodNote}`, value: fmtMoney(grossProfit) },
-    { label: "Operating expenses", value: `−${fmtMoney(totalExpenses)}`, red: true },
-    { label: "Net profit", value: fmtMoney(netProfit), red: netProfit < 0 },
+    { label: `${t("Gross profit (bookings)")}${periodNote}`, value: fmtMoney(grossProfit) },
+    { label: t("Operating expenses"), value: `−${fmtMoney(totalExpenses)}`, red: true },
+    { label: t("Net profit"), value: fmtMoney(netProfit), red: netProfit < 0 },
   ];
 
   return (
     <div>
       <PageHeader
-        title="Operating Expenses"
+        title={t("Operating Expenses")}
         action={
           <div className="flex items-center gap-2">
             <div className="w-40">
               <Select value={month} onChange={(e) => setMonth(e.target.value)}>
-                <option value="">All time</option>
+                <option value="">{t("All time")}</option>
                 {months.map((m) => (
                   <option key={m} value={m}>
                     {monthLabel(m)}
@@ -227,10 +229,10 @@ export default function FlightExpensesPage() {
                 downloadCsv(
                   `flight-operating-expenses${month ? `-${month}` : ""}.csv`,
                   [
-                    ["Date", "Category", "Staff", "Note", "Amount"],
+                    [t("Date"), t("Category"), t("Staff"), t("Note"), t("Amount")],
                     ...filteredExpenses.map((e) => [
                       e.expense_date,
-                      flightExpenseCategoryLabel(e.category),
+                      t(flightExpenseCategoryLabel(e.category)),
                       e.staff_name ?? "",
                       e.note ?? "",
                       Number(e.amount),
@@ -241,7 +243,7 @@ export default function FlightExpensesPage() {
               disabled={filteredExpenses.length === 0}
               className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
             >
-              ⬇ Export CSV
+              {t("⬇ Export CSV")}
             </button>
           </div>
         }
@@ -269,19 +271,19 @@ export default function FlightExpensesPage() {
       <Section
         className="mt-5"
         icon={<WalletIcon />}
-        title={editingId ? "Edit operating expense" : "Add an operating expense"}
-        subtitle="Overhead that keeps the office running (staff salary, rent, electricity…)"
+        title={editingId ? t("Edit operating expense") : t("Add an operating expense")}
+        subtitle={t("Overhead that keeps the office running (staff salary, rent, electricity…)")}
       >
         <div ref={formRef} className="-mt-2 scroll-mt-6" />
         <form
           onSubmit={save}
           className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-5"
         >
-          <Field label="Category">
+          <Field label={t("Category")}>
             <FlightExpenseSelect value={category} onChange={changeCategory} />
           </Field>
           {category === STAFF_SALARY && (
-            <Field label="Staff name">
+            <Field label={t("Staff name")}>
               <Input
                 value={staffName}
                 onChange={(e) => setStaffName(e.target.value)}
@@ -290,7 +292,7 @@ export default function FlightExpensesPage() {
               />
             </Field>
           )}
-          <Field label="Amount">
+          <Field label={t("Amount")}>
             <Input
               type="number"
               step="0.01"
@@ -300,29 +302,29 @@ export default function FlightExpensesPage() {
               required
             />
           </Field>
-          <Field label="Date (optional)">
+          <Field label={t("Date (optional)")}>
             <DatePicker value={date} onChange={setDate} />
           </Field>
           <div className="sm:col-span-2 lg:col-span-1">
-            <Field label="Note (optional)">
+            <Field label={t("Note (optional)")}>
               <Input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="e.g. June payroll"
+                placeholder={t("e.g. June payroll")}
               />
             </Field>
           </div>
           <div className="flex gap-2 sm:col-span-2 lg:col-span-5">
             <Button type="submit" disabled={busy}>
               {busy
-                ? "Saving…"
+                ? t("Saving…")
                 : editingId
-                  ? "Save changes"
-                  : "Add expense"}
+                  ? t("Save changes")
+                  : t("Add expense")}
             </Button>
             {editingId && (
               <Button type="button" variant="secondary" onClick={resetForm}>
-                Cancel
+                {t("Cancel")}
               </Button>
             )}
           </div>
@@ -339,7 +341,7 @@ export default function FlightExpensesPage() {
               <WalletIcon />
             </IconChip>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              {month ? `Expenses · ${monthLabel(month)}` : "All expenses"}
+              {month ? t("Expenses · {month}", { month: monthLabel(month) }) : t("All expenses")}
             </h2>
           </div>
           <div className="mt-2 space-y-3 p-3 lg:hidden">
@@ -350,7 +352,7 @@ export default function FlightExpensesPage() {
               >
                 <div className="flex items-center justify-between gap-2">
                   <span>
-                    {flightExpenseCategoryLabel(exp.category)}
+                    {t(flightExpenseCategoryLabel(exp.category))}
                     {exp.staff_name && (
                       <span className="text-slate-500 dark:text-slate-400">
                         {" · "}
@@ -367,10 +369,10 @@ export default function FlightExpensesPage() {
                   {exp.note && <span>{exp.note}</span>}
                   <span className="ml-auto flex items-center gap-2">
                     <button onClick={() => startEdit(exp)} className={rowActionClass}>
-                      Edit
+                      {t("Edit")}
                     </button>
                     <button onClick={() => setPending(exp)} className={rowDeleteClass}>
-                      Delete
+                      {t("Delete")}
                     </button>
                   </span>
                 </div>
@@ -380,10 +382,10 @@ export default function FlightExpensesPage() {
           <table className="mt-1 hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Date</Th>
-                <Th>Category</Th>
-                <Th>Note</Th>
-                <Th>Amount</Th>
+                <Th>{t("Date")}</Th>
+                <Th>{t("Category")}</Th>
+                <Th>{t("Note")}</Th>
+                <Th>{t("Amount")}</Th>
                 <Th />
               </tr>
             </thead>
@@ -395,7 +397,7 @@ export default function FlightExpensesPage() {
                 >
                   <Td className="whitespace-nowrap">{fmtDate(exp.expense_date)}</Td>
                   <Td className="whitespace-nowrap">
-                    {flightExpenseCategoryLabel(exp.category)}
+                    {t(flightExpenseCategoryLabel(exp.category))}
                     {exp.staff_name && (
                       <span className="text-slate-500 dark:text-slate-400">
                         {" · "}
@@ -410,13 +412,13 @@ export default function FlightExpensesPage() {
                   <Td className="text-right">
                     <span className="inline-flex items-center gap-2">
                       <button onClick={() => startEdit(exp)} className={rowActionClass}>
-                        Edit
+                        {t("Edit")}
                       </button>
                       <button
                         onClick={() => setPending(exp)}
                         className={rowDeleteClass}
                       >
-                        Delete
+                        {t("Delete")}
                       </button>
                     </span>
                   </Td>
@@ -428,8 +430,8 @@ export default function FlightExpensesPage() {
             <EmptyState
               message={
                 month
-                  ? "No operating expenses recorded for this month."
-                  : "No operating expenses yet — record staff salary, rent, electricity and other overhead to see your true net profit."
+                  ? t("No operating expenses recorded for this month.")
+                  : t("No operating expenses yet — record staff salary, rent, electricity and other overhead to see your true net profit.")
               }
             />
           )}
@@ -441,14 +443,14 @@ export default function FlightExpensesPage() {
               <ChartIcon />
             </IconChip>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              By category
+              {t("By category")}
             </h2>
           </div>
           <table className="mt-2 w-full">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Category</Th>
-                <Th>Total</Th>
+                <Th>{t("Category")}</Th>
+                <Th>{t("Total")}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -458,7 +460,7 @@ export default function FlightExpensesPage() {
                   className="hover:bg-white/60 dark:hover:bg-white/[0.08]"
                 >
                   <Td className="font-medium">
-                    {flightExpenseCategoryLabel(r.category)}
+                    {t(flightExpenseCategoryLabel(r.category))}
                   </Td>
                   <Td className="whitespace-nowrap text-red-600 dark:text-red-400">
                     −{fmtMoney(r.total)}
@@ -467,7 +469,7 @@ export default function FlightExpensesPage() {
               ))}
               {byCategory.length > 0 && (
                 <tr className="border-t-2 border-slate-300/60 dark:border-white/20">
-                  <Td className="font-semibold">Total</Td>
+                  <Td className="font-semibold">{t("Total")}</Td>
                   <Td className="whitespace-nowrap font-semibold text-red-600 dark:text-red-400">
                     −{fmtMoney(totalExpenses)}
                   </Td>
@@ -476,21 +478,20 @@ export default function FlightExpensesPage() {
             </tbody>
           </table>
           {!loading && byCategory.length === 0 && (
-            <EmptyState message="Category totals appear here once you add expenses." />
+            <EmptyState message={t("Category totals appear here once you add expenses.")} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete expense?"
+        title={t("Delete expense?")}
         message={
           pending
-            ? `This removes the ${fmtMoney(
-                Number(pending.amount),
-              )} ${flightExpenseCategoryLabel(
-                pending.category,
-              ).toLowerCase()} expense. This cannot be undone.`
+            ? t("This removes the {amount} {category} expense. This cannot be undone.", {
+                amount: fmtMoney(Number(pending.amount)),
+                category: t(flightExpenseCategoryLabel(pending.category)).toLowerCase(),
+              })
             : undefined
         }
         busy={deleting}

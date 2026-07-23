@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Field, inputClass } from "@/components/ui";
 import { BuildingIcon, PhoneIcon, WalletIcon } from "@/components/icons";
 import { PLANS, type Plan } from "@/lib/plans";
+import { useT } from "@/lib/i18n";
 
 // Per-provider accent styling, kept as literal class strings so Tailwind's
 // compiler can see them (no dynamic `bg-${x}`).
@@ -122,6 +123,7 @@ export function BillingCards({
   subStatus: string | null;
   onUpgraded: () => void;
 }) {
+  const t = useT();
   // Always the Pro price — these cards upgrade to Pro regardless of the org's
   // current plan (reading the current plan's label showed the free "$0").
   const proPrice = PLANS.pro.priceLabel;
@@ -130,7 +132,7 @@ export function BillingCards({
     return (
       <div className="glass-panel flex items-center gap-2 rounded-2xl p-4 text-sm text-emerald-600 dark:text-emerald-400 sm:p-5">
         <CheckMark />
-        Your organization is on the Pro plan
+        {t("Your organization is on the Pro plan")}
         {subStatus ? ` · ${subStatus}` : ""}.
       </div>
     );
@@ -162,6 +164,7 @@ function ProviderCard({
   price: string;
   onUpgraded: () => void;
 }) {
+  const t = useT();
   const accent = ACCENTS[provider.accent];
   const [account, setAccount] = useState("");
   const [busy, setBusy] = useState(false);
@@ -186,7 +189,7 @@ function ProviderCard({
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok || !data.ok) {
-      setError(data.error ?? "The payment could not be completed.");
+      setError(data.error ?? t("The payment could not be completed."));
       return;
     }
     setAccount("");
@@ -226,7 +229,7 @@ function ProviderCard({
         <div className="my-4 h-px bg-slate-200/70 dark:bg-white/10" />
 
         <form onSubmit={pay} className="space-y-3">
-          <Field label={provider.label} hint={provider.hint}>
+          <Field label={t(provider.label)} hint={t(provider.hint)}>
             <div className="relative">
               <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -254,19 +257,21 @@ function ProviderCard({
             {busy ? (
               <>
                 <Spinner />
-                Confirming…
+                {t("Confirming…")}
               </>
             ) : (
               <>
                 <Lock className="h-4 w-4" />
-                Pay {price}
+                {t("Pay {price}", { price })}
               </>
             )}
           </button>
 
           {busy && (
             <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-              A prompt was sent to {account.trim()} — approve it with your PIN.
+              {t("A prompt was sent to {account} — approve it with your PIN.", {
+                account: account.trim(),
+              })}
             </p>
           )}
         </form>
@@ -274,7 +279,7 @@ function ProviderCard({
         {done && (
           <p className="mt-3 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
             <CheckMark />
-            Payment received — you&apos;re now on the Pro plan.
+            {t("Payment received — you're now on the Pro plan.")}
           </p>
         )}
         {error && (
@@ -285,7 +290,7 @@ function ProviderCard({
 
         <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
           <Lock className="h-3 w-3" />
-          Secured · {provider.tag}
+          {t("Secured · {tag}", { tag: provider.tag })}
         </p>
       </div>
     </div>

@@ -24,6 +24,7 @@ import {
 import { BoxIcon, ClockIcon, CoinsIcon, WalletIcon } from "@/components/icons";
 import { CountUp } from "@/components/count-up";
 import { TiltCard } from "@/components/tilt-card";
+import { useT } from "@/lib/i18n";
 import {
   AreaChart,
   BarChart,
@@ -80,6 +81,7 @@ function bucketByMonth<T>(
 }
 
 export default function DashboardPage() {
+  const t = useT();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -199,13 +201,13 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Dashboard" />
+      <PageHeader title={t("Dashboard")} />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
           <TiltCard key={s.label} className="h-full">
             <Card className="h-full p-5">
-              <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{s.label}</div>
+              <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t(s.label)}</div>
               <div
                 className={`mt-1.5 break-words text-xl font-bold tracking-tight lg:text-2xl ${
                   s.accent ? "text-amber-600 dark:text-amber-400" : "text-slate-900 dark:text-slate-100"
@@ -227,7 +229,7 @@ export default function DashboardPage() {
                   <BoxIcon />
                 </IconChip>
                 <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Kg shipped per month
+                  {t("Kg shipped per month")}
                 </div>
               </div>
               <div className="mt-1 flex items-baseline gap-2">
@@ -237,7 +239,7 @@ export default function DashboardPage() {
                 >
                   ↑ {loading ? "…" : fmtKg(kgThisMonth)}
                 </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">this month</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">{t("this month")}</span>
               </div>
             </div>
           </div>
@@ -256,7 +258,7 @@ export default function DashboardPage() {
               <CoinsIcon />
             </IconChip>
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Payment status
+              {t("Payment status")}
             </div>
           </div>
           {invoiced > 0 ? (
@@ -265,8 +267,9 @@ export default function DashboardPage() {
             </div>
           ) : (
             <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              Nothing invoiced yet — create your first invoice to see paid vs.
-              due here.
+              {t(
+                "Nothing invoiced yet — create your first invoice to see paid vs. due here.",
+              )}
             </p>
           )}
         </Card>
@@ -279,7 +282,7 @@ export default function DashboardPage() {
               <WalletIcon />
             </IconChip>
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Received per month
+              {t("Received per month")}
             </div>
           </div>
           <div className="mt-1 flex items-baseline gap-2">
@@ -289,7 +292,7 @@ export default function DashboardPage() {
             >
               ↑ {loading ? "…" : fmtMoney(receivedThisMonth)}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">this month</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{t("this month")}</span>
           </div>
           <div className="mt-2">
             <BarChart
@@ -307,14 +310,14 @@ export default function DashboardPage() {
                 <ClockIcon />
               </IconChip>
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Recent shipments
+                {t("Recent shipments")}
               </h2>
             </div>
             <Link
               href="/shipments"
               className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
             >
-              View all →
+              {t("View all →")}
             </Link>
           </div>
           <div className="mt-2 space-y-3 px-4 pb-4 lg:hidden">
@@ -329,7 +332,7 @@ export default function DashboardPage() {
                     {shipmentRef(s.id)}
                   </span>
                   <Badge className={STATUS_CLASS[s.status]}>
-                    {STATUS_LABEL[s.status]}
+                    {t(STATUS_LABEL[s.status])}
                   </Badge>
                 </div>
                 <div className="mt-1 text-sm">{s.description}</div>
@@ -343,11 +346,11 @@ export default function DashboardPage() {
           <table className="mt-1 hidden w-full lg:table">
             <thead>
               <tr>
-                <Th>Ref</Th>
-                <Th>Description</Th>
-                <Th>Weight</Th>
-                <Th>Status</Th>
-                <Th>Date</Th>
+                <Th>{t("Ref")}</Th>
+                <Th>{t("Description")}</Th>
+                <Th>{t("Weight")}</Th>
+                <Th>{t("Status")}</Th>
+                <Th>{t("Date")}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -367,7 +370,7 @@ export default function DashboardPage() {
                   </Td>
                   <Td>
                     <Badge className={STATUS_CLASS[s.status]}>
-                      {STATUS_LABEL[s.status]}
+                      {t(STATUS_LABEL[s.status])}
                     </Badge>
                   </Td>
                   <Td className="whitespace-nowrap">{fmtDate(s.ship_date)}</Td>
@@ -376,7 +379,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
           {!loading && recent.length === 0 && (
-            <EmptyState message="No shipments yet — add your first one from the Shipments page." />
+            <EmptyState message={t("No shipments yet — add your first one from the Shipments page.")} />
           )}
         </Card>
       </div>

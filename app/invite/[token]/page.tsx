@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Button, ErrorNote, Field, Input } from "@/components/ui";
 import { BoxIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 type InviteInfo =
   | { valid: true; email: string; role: string; orgName: string }
@@ -16,6 +17,7 @@ export default function InvitePage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = use(params);
+  const t = useT();
   const router = useRouter();
   const [info, setInfo] = useState<InviteInfo | null>(null);
   const [password, setPassword] = useState("");
@@ -52,7 +54,7 @@ export default function InvitePage({
     const data = await res.json();
     if (!res.ok) {
       setBusy(false);
-      setError(data.error ?? "Something went wrong.");
+      setError(data.error ?? t("Something went wrong."));
       return;
     }
     // Account + membership created — sign in and enter the app.
@@ -62,7 +64,7 @@ export default function InvitePage({
     });
     setBusy(false);
     if (signInErr) {
-      setError("Account created — please sign in from the login page.");
+      setError(t("Account created — please sign in from the login page."));
       return;
     }
     router.replace("/");
@@ -76,49 +78,50 @@ export default function InvitePage({
             <BoxIcon />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Join on CargoBook
+            {t("Join on CargoBook")}
           </h1>
         </div>
 
         {info === null && (
-          <p className="text-center text-sm text-slate-500 dark:text-slate-400">Checking your invitation…</p>
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400">{t("Checking your invitation…")}</p>
         )}
 
         {info && info.valid === false && (
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
             {info.reason === "used"
-              ? "This invitation has already been used."
+              ? t("This invitation has already been used.")
               : info.reason === "expired"
-                ? "This invitation has expired. Ask for a new one."
+                ? t("This invitation has expired. Ask for a new one.")
                 : info.reason === "server"
-                  ? "Invites aren’t fully set up yet. Ask the admin to add the SUPABASE_SERVICE_ROLE_KEY to the site’s environment."
-                  : "This invitation link is invalid."}
+                  ? t("Invites aren’t fully set up yet. Ask the admin to add the SUPABASE_SERVICE_ROLE_KEY to the site’s environment.")
+                  : t("This invitation link is invalid.")}
           </p>
         )}
 
         {info && info.valid && (
           <form onSubmit={accept} className="space-y-4">
             <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-              You’ve been invited to{" "}
-              <strong className="text-slate-900 dark:text-white">{info.orgName}</strong> as{" "}
-              <span className="capitalize">{info.role}</span>.
+              {t("You’ve been invited to ")}
+              <strong className="text-slate-900 dark:text-white">{info.orgName}</strong>
+              {t(" as ")}
+              <span className="capitalize">{t(info.role)}</span>.
             </p>
-            <Field label="Email">
+            <Field label={t("Email")}>
               <Input type="email" value={info.email} disabled readOnly />
             </Field>
-            <Field label="Choose a password">
+            <Field label={t("Choose a password")}>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder={t("At least 8 characters")}
                 autoComplete="new-password"
                 required
               />
             </Field>
             <ErrorNote message={error} />
             <Button type="submit" disabled={busy} className="w-full">
-              {busy ? "Joining…" : "Accept & join"}
+              {busy ? t("Joining…") : t("Accept & join")}
             </Button>
           </form>
         )}
