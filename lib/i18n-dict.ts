@@ -716,6 +716,10 @@ const so: Dictionary = {
     "Ku raadi buugaynta magaca macmiilka ama lambarka telefoonka",
   "No bookings yet.": "Weli buugayn ma jirto.",
   "No bookings match this filter.": "Ma jirto buugayn u dhigma shaandhadan.",
+  "made up of {count} ticket": "oo ka kooban {count} tigidh",
+  "made up of {count} tickets": "oo ka kooban {count} tigidh",
+  "No unpaid tickets — this balance may be from a rounding adjustment.":
+    "Ma jiraan tigidh aan la bixin — hadhaagan wuxuu ka iman karaa hagaajin isu-ekaysiineed.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

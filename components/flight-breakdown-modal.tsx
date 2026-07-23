@@ -8,6 +8,7 @@ import {
 } from "@/lib/balance";
 import { fmtDate, fmtMoney } from "@/lib/format";
 import { CloseIcon, PlaneIcon, StatementIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 // Drill-down that answers "where does the $X due come from?" for one flight
 // customer: the tickets still carrying a balance, each showing charged / paid /
@@ -26,6 +27,7 @@ export function FlightBreakdownModal({
   customerName: string;
   onClose: () => void;
 }) {
+  const t = useT();
   // Keep the fetched lines tagged with the customer they belong to. `lines` is
   // then derived: it reads as null (loading) until the result for the *current*
   // customer arrives, which also covers switching customers without resetting
@@ -65,14 +67,14 @@ export function FlightBreakdownModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Balance breakdown for ${customerName}`}
+        aria-label={t("Balance breakdown for {name}", { name: customerName })}
         className="glass-panel relative z-10 flex max-h-[85vh] w-full max-w-lg flex-col rounded-3xl"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-slate-200/60 p-5 dark:border-white/[0.08]">
           <div className="min-w-0">
             <div className="text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">
-              Balance due
+              {t("Balance due")}
             </div>
             <div className="mt-0.5 truncate text-lg font-bold text-slate-900 dark:text-slate-100">
               {lines === null ? "…" : fmtMoney(Math.max(due, 0))}
@@ -82,8 +84,10 @@ export function FlightBreakdownModal({
               {lines !== null && (
                 <>
                   {" "}
-                  · made up of {owing.length}{" "}
-                  {owing.length === 1 ? "ticket" : "tickets"}
+                  ·{" "}
+                  {owing.length === 1
+                    ? t("made up of {count} ticket", { count: owing.length })
+                    : t("made up of {count} tickets", { count: owing.length })}
                 </>
               )}
             </div>
@@ -91,7 +95,7 @@ export function FlightBreakdownModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("Close")}
             className="shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-500/10 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
           >
             <CloseIcon className="h-5 w-5" />
@@ -101,10 +105,10 @@ export function FlightBreakdownModal({
         {/* Lines */}
         <div className="min-h-0 flex-1 overflow-y-auto p-3">
           {lines === null ? (
-            <div className="py-10 text-center text-sm text-slate-400">Loading…</div>
+            <div className="py-10 text-center text-sm text-slate-400">{t("Loading…")}</div>
           ) : owing.length === 0 ? (
             <div className="py-10 text-center text-sm text-slate-400">
-              No unpaid tickets — this balance may be from a rounding adjustment.
+              {t("No unpaid tickets — this balance may be from a rounding adjustment.")}
             </div>
           ) : (
             <ul className="space-y-2">
@@ -129,9 +133,15 @@ export function FlightBreakdownModal({
                       <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                         {fmtDate(l.date)}
                         {l.airline ? ` · ${l.airline}` : ""}
+                        {" · "}
                         {l.paid > 0.005
-                          ? ` · ${fmtMoney(l.charged)} charged, ${fmtMoney(l.paid)} paid`
-                          : ` · ${fmtMoney(l.charged)} charged, unpaid`}
+                          ? t("{charged} charged, {paid} paid", {
+                              charged: fmtMoney(l.charged),
+                              paid: fmtMoney(l.paid),
+                            })
+                          : t("{charged} charged, unpaid", {
+                              charged: fmtMoney(l.charged),
+                            })}
                       </div>
                     </div>
                     <span className="shrink-0 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold tabular-nums text-amber-600 dark:bg-amber-400/15 dark:text-amber-400">
@@ -147,7 +157,7 @@ export function FlightBreakdownModal({
         {/* Footer */}
         <div className="flex items-center justify-between gap-3 border-t border-slate-200/60 p-4 dark:border-white/[0.08]">
           <span className="text-sm text-slate-500 dark:text-slate-400">
-            Total due{" "}
+            {t("Total due")}{" "}
             <span className="font-semibold text-slate-900 dark:text-slate-100">
               {lines === null ? "…" : fmtMoney(Math.max(due, 0))}
             </span>
@@ -157,7 +167,7 @@ export function FlightBreakdownModal({
             className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-700"
           >
             <StatementIcon className="h-4 w-4" />
-            Full statement
+            {t("Full statement")}
           </Link>
         </div>
       </div>
