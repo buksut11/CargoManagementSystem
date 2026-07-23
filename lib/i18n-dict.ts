@@ -533,6 +533,30 @@ const so: Dictionary = {
   "Its payments will be deleted and its shipments become uninvoiced again. This cannot be undone.":
     "Lacag-bixinnadeeda waa la tirtiri doonaa shixnadaheeduna mar kale way noqon doonaan kuwo aan la qaansheegin. Tan dib looma celin karo.",
   "Invoice not found.": "Qaansheegga lama helin.",
+
+  // ── Members ───────────────────────────────────────────────────────────────
+  "Invite someone": "Casuun qof",
+  "Add a teammate to this organization": "Ku dar saaxiib shaqo ururkan",
+  Role: "Doorka",
+  Agent: "Wakiil",
+  Manager: "Maareeye",
+  Admin: "Maamule sare",
+  "Create invite link": "Samee link casuun",
+  "Could not create the invite.": "Casuunta lama abuuri karin.",
+  "Invite emailed — you can also share this link:":
+    "Casuunta iimayl ahaan ayaa loo diray — sidoo kale wadaag linkigan:",
+  "Invite link ready — share it with them:":
+    "Linkiga casuunta diyaar — la wadaag iyaga:",
+  Copied: "La koobiyeeyay",
+  Copy: "Koobiyeeg",
+  "Pending invites": "Casuumaadaha sugaya",
+  Revoke: "Baabi'i",
+  "(you)": "(adiga)",
+  "No members yet.": "Weli xubno ma jiraan.",
+  "Remove member?": "Ka saar xubinta?",
+  "Remove {name} from the organization? They will lose access.":
+    "Ka saar {name} ururka? Waxay lumin doonaan gelitaanka.",
+  "this member": "xubintan",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

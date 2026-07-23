@@ -20,6 +20,7 @@ import {
   Th,
 } from "@/components/ui";
 import { ClockIcon, MailIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 type Member = {
   id: string;
@@ -37,6 +38,7 @@ type Invite = {
 };
 
 export default function MembersPage() {
+  const t = useT();
   const org = useOrg();
   const orgId = org?.orgId ?? "";
   const [members, setMembers] = useState<Member[]>([]);
@@ -129,7 +131,7 @@ export default function MembersPage() {
     const data = await res.json();
     setBusy(false);
     if (!res.ok || !data.link) {
-      setError(data.error ?? "Could not create the invite.");
+      setError(data.error ?? t("Could not create the invite."));
       return;
     }
     setLastLink(data.link);
@@ -179,17 +181,17 @@ export default function MembersPage() {
 
   return (
     <div>
-      <PageHeader title="Members" />
+      <PageHeader title={t("Members")} />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
         <div className="space-y-6">
           <Section
             icon={<MailIcon />}
-            title="Invite someone"
-            subtitle="Add a teammate to this organization"
+            title={t("Invite someone")}
+            subtitle={t("Add a teammate to this organization")}
           >
             <form onSubmit={invite} className="space-y-3">
-              <Field label="Email">
+              <Field label={t("Email")}>
                 <Input
                   type="email"
                   value={email}
@@ -198,15 +200,15 @@ export default function MembersPage() {
                   required
                 />
               </Field>
-              <Field label="Role">
+              <Field label={t("Role")}>
                 <Select value={role} onChange={(e) => setRole(e.target.value)}>
-                  <option value="agent">Agent</option>
-                  <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
+                  <option value="agent">{t("Agent")}</option>
+                  <option value="manager">{t("Manager")}</option>
+                  <option value="admin">{t("Admin")}</option>
                 </Select>
               </Field>
               <Button type="submit" disabled={busy || !orgId} className="w-full">
-                {busy ? "Creating…" : "Create invite link"}
+                {busy ? t("Creating…") : t("Create invite link")}
               </Button>
             </form>
             <div className="mt-3">
@@ -216,8 +218,8 @@ export default function MembersPage() {
               <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs dark:border-emerald-500/30 dark:bg-emerald-500/10">
                 <p className="mb-2 font-medium text-emerald-800 dark:text-emerald-300">
                   {emailed
-                    ? "Invite emailed — you can also share this link:"
-                    : "Invite link ready — share it with them:"}
+                    ? t("Invite emailed — you can also share this link:")
+                    : t("Invite link ready — share it with them:")}
                 </p>
                 <div className="flex items-center gap-2">
                   <input
@@ -230,7 +232,7 @@ export default function MembersPage() {
                     onClick={copyLink}
                     className="shrink-0 rounded-full bg-blue-600 px-2.5 py-1.5 font-medium text-white hover:bg-blue-700"
                   >
-                    {copied ? "Copied" : "Copy"}
+                    {copied ? t("Copied") : t("Copy")}
                   </button>
                 </div>
               </div>
@@ -238,7 +240,7 @@ export default function MembersPage() {
           </Section>
 
           {invites.length > 0 && (
-            <Section icon={<ClockIcon />} title="Pending invites">
+            <Section icon={<ClockIcon />} title={t("Pending invites")}>
               <ul className="space-y-2">
                 {invites.map((inv) => (
                   <li
@@ -247,13 +249,13 @@ export default function MembersPage() {
                   >
                     <span className="min-w-0 truncate">
                       {inv.email}{" "}
-                      <span className="capitalize text-slate-400">· {inv.role}</span>
+                      <span className="text-slate-400">· {t(inv.role)}</span>
                     </span>
                     <button
                       onClick={() => revokeInvite(inv.id)}
                       className={`shrink-0 ${rowDeleteClass}`}
                     >
-                      Revoke
+                      {t("Revoke")}
                     </button>
                   </li>
                 ))}
@@ -275,22 +277,22 @@ export default function MembersPage() {
                   <div className="break-all text-sm font-medium">
                     {m.email ?? "—"}
                     {isSelf && (
-                      <span className="ml-1 text-xs text-slate-400">(you)</span>
+                      <span className="ml-1 text-xs text-slate-400">{t("(you)")}</span>
                     )}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     {isOwner ? (
                       <span className="text-sm capitalize text-slate-500 dark:text-slate-400">
-                        {m.role}
+                        {t(m.role)}
                       </span>
                     ) : (
                       <Select
                         value={m.role}
                         onChange={(e) => changeRole(m, e.target.value as OrgRole)}
                       >
-                        <option value="agent">Agent</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Admin</option>
+                        <option value="agent">{t("Agent")}</option>
+                        <option value="manager">{t("Manager")}</option>
+                        <option value="admin">{t("Admin")}</option>
                       </Select>
                     )}
                     {!isOwner && !isSelf && (
@@ -298,7 +300,7 @@ export default function MembersPage() {
                         onClick={() => setPendingRemove(m)}
                         className={rowDeleteClass}
                       >
-                        Remove
+                        {t("Remove")}
                       </button>
                     )}
                   </div>
@@ -309,8 +311,8 @@ export default function MembersPage() {
           <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Email</Th>
-                <Th>Role</Th>
+                <Th>{t("Email")}</Th>
+                <Th>{t("Role")}</Th>
                 <Th />
               </tr>
             </thead>
@@ -322,19 +324,19 @@ export default function MembersPage() {
                   <tr key={m.id} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                     <Td className="font-medium">
                       {m.email ?? "—"}
-                      {isSelf && <span className="ml-1 text-xs text-slate-400">(you)</span>}
+                      {isSelf && <span className="ml-1 text-xs text-slate-400">{t("(you)")}</span>}
                     </Td>
                     <Td>
                       {isOwner ? (
-                        <span className="capitalize">{m.role}</span>
+                        <span className="capitalize">{t(m.role)}</span>
                       ) : (
                         <Select
                           value={m.role}
                           onChange={(e) => changeRole(m, e.target.value as OrgRole)}
                         >
-                          <option value="agent">Agent</option>
-                          <option value="manager">Manager</option>
-                          <option value="admin">Admin</option>
+                          <option value="agent">{t("Agent")}</option>
+                          <option value="manager">{t("Manager")}</option>
+                          <option value="admin">{t("Admin")}</option>
                         </Select>
                       )}
                     </Td>
@@ -344,7 +346,7 @@ export default function MembersPage() {
                           onClick={() => setPendingRemove(m)}
                           className={rowDeleteClass}
                         >
-                          Remove
+                          {t("Remove")}
                         </button>
                       )}
                     </Td>
@@ -354,17 +356,19 @@ export default function MembersPage() {
             </tbody>
           </table>
           {!loading && members.length === 0 && (
-            <EmptyState message="No members yet." />
+            <EmptyState message={t("No members yet.")} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pendingRemove}
-        title="Remove member?"
+        title={t("Remove member?")}
         message={
           pendingRemove
-            ? `Remove ${pendingRemove.email ?? "this member"} from the organization? They will lose access.`
+            ? t("Remove {name} from the organization? They will lose access.", {
+                name: pendingRemove.email ?? t("this member"),
+              })
             : undefined
         }
         busy={removing}
