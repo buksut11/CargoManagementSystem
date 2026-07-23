@@ -483,7 +483,7 @@ export default function AppLayout({
           aria-hidden={!menuOpen}
         >
           <div
-            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+            className={`absolute inset-0 bg-slate-900/25 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
               menuOpen ? "opacity-100" : "opacity-0"
             }`}
             onClick={() => setMenuOpen(false)}
