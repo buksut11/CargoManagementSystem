@@ -930,6 +930,14 @@ const so: Dictionary = {
   "Refund to customer": "Celin macmiilka",
   "penalty {amount}": "ganaax {amount}",
   "ADM {amount}": "ADM {amount}",
+
+  // ── Flight statement ──────────────────────────────────────────────────────
+  "Air ticket": "Tigidh diyaaradeed",
+  "PNR {pnr}": "PNR {pnr}",
+  "Travel {date}": "Safar {date}",
+  "Void credit": "Deyn-celin buri",
+  "Reissue credit": "Deyn-celin dib-u-qoris",
+  "Refund credit": "Deyn-celin celin",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
