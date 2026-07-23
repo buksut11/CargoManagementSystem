@@ -938,6 +938,26 @@ const so: Dictionary = {
   "Void credit": "Deyn-celin buri",
   "Reissue credit": "Deyn-celin dib-u-qoris",
   "Refund credit": "Deyn-celin celin",
+
+  // ── Airline (supplier) statement ──────────────────────────────────────────
+  "Pick an airline and a date range, then print or save as PDF.":
+    "Dooro shirkad iyo muddo taariikheed, kadibna daabac ama u kaydi PDF.",
+  "Select an airline…": "Dooro shirkad…",
+  "← Back to airlines": "← Ku noqo shirkadaha",
+  "Choose an airline above to build their statement of account.":
+    "Dooro shirkad kor ku yaal si aad ugu dhisto bayaanka xisaabteeda.",
+  "Airline statement of account": "Bayaanka xisaabta shirkadda",
+  "Ticket costs": "Kharashyada tigidhada",
+  "Balance payable": "Hadhaaga la bixinayo",
+  "Ticket cost": "Kharashka tigidhka",
+  "For {name}": "Loogu talagalay {name}",
+  "Payment to airline": "Lacag-bixin shirkadda",
+  "(airline owes {amount})": "(shirkadda ayaa leh {amount})",
+  "Payable by age": "Deynta sida ay u da' weyn tahay",
+  consolidator: "kuu-ururiye",
+  bsp: "BSP",
+  gds: "GDS",
+  other: "kale",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
