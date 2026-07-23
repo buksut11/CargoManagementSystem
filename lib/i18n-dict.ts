@@ -880,7 +880,6 @@ const so: Dictionary = {
 
   // ── Flight receipts / payables ────────────────────────────────────────────
   "Customer receipts": "Rasiidyada macmiilka",
-  Booking: "Buugayn",
   "No receipts yet — record them from a booking's page.":
     "Weli rasiidyo ma jiraan — ka diiwaangeli bogga buugaynta.",
   "Airline payments": "Lacag-bixinnada shirkadda",
