@@ -702,6 +702,20 @@ const so: Dictionary = {
   "Recent bookings": "Buugaynta ugu dambeysay",
   "No bookings yet — create your first from the Bookings page.":
     "Weli buugayn ma jirto — samee tii ugu horreysay bogga Buugaynta.",
+
+  // ── Bookings list ─────────────────────────────────────────────────────────
+  "+ New booking": "+ Buugayn cusub",
+  Travel: "Safarka",
+  "Sale total": "Wadarta iibka",
+  "Booking date": "Taariikhda buugaynta",
+  "Travel date": "Taariikhda safarka",
+  "Net cost": "Kharashka saafiga",
+  "Search customer name or phone number…":
+    "Raadi magaca macmiilka ama lambarka telefoonka…",
+  "Search bookings by customer name or phone number":
+    "Ku raadi buugaynta magaca macmiilka ama lambarka telefoonka",
+  "No bookings yet.": "Weli buugayn ma jirto.",
+  "No bookings match this filter.": "Ma jirto buugayn u dhigma shaandhadan.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
