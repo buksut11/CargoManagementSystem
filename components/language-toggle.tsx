@@ -134,7 +134,7 @@ export function LanguageTogglePill({ className = "" }: { className?: string }) {
         aria-label={t("Language")}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-1.5 rounded-full border border-slate-900/10 bg-slate-900/80 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-white shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/60 [&_svg]:h-4 [&_svg]:w-4"
+        className="flex h-9 items-center gap-1.5 rounded-full border border-slate-900/10 bg-slate-900/80 px-3 text-xs font-semibold uppercase tracking-wide text-white shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/60 [&_svg]:h-4 [&_svg]:w-4"
       >
         <GlobeIcon />
         {locale}

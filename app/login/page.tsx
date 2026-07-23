@@ -211,14 +211,16 @@ export default function LoginPage() {
           style={{ opacity: 0 }}
           className="glass-card relative w-full max-w-md rounded-[1.75rem] p-8 sm:p-10"
         >
-          <div className="absolute right-5 top-5 flex items-center gap-2">
+          {/* Language + theme controls get their own row so they never crowd
+              the centered logo below them. */}
+          <div className="mb-6 flex items-center justify-end gap-2">
             <LanguageTogglePill />
             <ThemeTogglePill />
           </div>
 
           <div className="mb-8 text-center">
             {branding?.logoUrl ? (
-              <span className="mx-auto mb-4 mt-1 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-black/10 dark:ring-white/15">
+              <span className="mx-auto mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-black/10 dark:ring-white/15">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={branding.logoUrl}
@@ -229,7 +231,7 @@ export default function LoginPage() {
                 />
               </span>
             ) : (
-              <LogoOrb className="mx-auto -mt-2 mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(59,130,246,0.4)]" />
+              <LogoOrb className="mx-auto mb-3 h-24 w-24 drop-shadow-[0_10px_25px_rgba(59,130,246,0.4)]" />
             )}
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {t("Welcome back")}
