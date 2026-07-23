@@ -9,6 +9,7 @@ import {
   StatementIcon,
   TrashIcon,
 } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 // The shared Customers card board, styled to mirror the Destinations pages:
 // a compact stacked list on phones and a dense auto-fill card grid on tablets
@@ -75,23 +76,27 @@ function StatusPill({
   due: number;
   onShowBreakdown: () => void;
 }) {
+  const t = useT();
   if (due > 0) {
     return (
       <button
         type="button"
         onClick={onShowBreakdown}
-        title={`See what makes up ${name}'s balance`}
-        aria-label={`See what makes up ${name}'s balance of ${fmtMoney(due)}`}
+        title={t("See what makes up {name}'s balance", { name })}
+        aria-label={t("See what makes up {name}'s balance of {amount}", {
+          name,
+          amount: fmtMoney(due),
+        })}
         className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-600 transition-colors duration-200 ease-out hover:bg-amber-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25"
       >
-        {fmtMoney(due)} due
+        {t("{amount} due", { amount: fmtMoney(due) })}
       </button>
     );
   }
   return (
     <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-      Settled
+      {t("Settled")}
     </span>
   );
 }
@@ -109,6 +114,7 @@ function CardActions<T extends CustomerCardItem>({
   onDelete: (c: T) => void;
   revealOnHover: boolean;
 }) {
+  const t = useT();
   return (
     <div
       className={`flex shrink-0 items-center gap-0.5 ${
@@ -119,24 +125,24 @@ function CardActions<T extends CustomerCardItem>({
     >
       <Link
         href={statementHref(customer)}
-        title="View statement"
-        aria-label={`View ${customer.name}'s statement`}
+        title={t("View statement")}
+        aria-label={t("View {name}'s statement", { name: customer.name })}
         className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-blue-500/10 hover:text-blue-600 dark:hover:bg-blue-400/10 dark:hover:text-blue-400"
       >
         <StatementIcon className="h-4 w-4" />
       </Link>
       <button
         onClick={() => onEdit(customer)}
-        title="Edit"
-        aria-label={`Edit ${customer.name}`}
+        title={t("Edit")}
+        aria-label={t("Edit {name}", { name: customer.name })}
         className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-slate-500/10 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-100"
       >
         <EditIcon className="h-4 w-4" />
       </button>
       <button
         onClick={() => onDelete(customer)}
-        title="Delete"
-        aria-label={`Delete ${customer.name}`}
+        title={t("Delete")}
+        aria-label={t("Delete {name}", { name: customer.name })}
         className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 ease-out hover:bg-red-500/10 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
       >
         <TrashIcon className="h-4 w-4" />
@@ -164,6 +170,7 @@ function CustomerCard<T extends CustomerCardItem>({
   onDelete: (c: T) => void;
   interactive: boolean;
 }) {
+  const t = useT();
   return (
     <div
       className={`group flex flex-col rounded-2xl border p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04] ${
@@ -185,7 +192,7 @@ function CustomerCard<T extends CustomerCardItem>({
           <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
             <MailIcon className="h-3 w-3 shrink-0 opacity-70" />
             <span className="truncate" title={customer.email ?? undefined}>
-              {customer.email || "No email"}
+              {customer.email || t("No email")}
             </span>
           </div>
         </div>
@@ -202,7 +209,7 @@ function CustomerCard<T extends CustomerCardItem>({
         <span className="flex min-w-0 items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
           <PhoneIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
           <span className="truncate tabular-nums" title={customer.phone ?? undefined}>
-            {customer.phone || "No phone"}
+            {customer.phone || t("No phone")}
           </span>
         </span>
         <CardActions

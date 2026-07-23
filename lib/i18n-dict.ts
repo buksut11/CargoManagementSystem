@@ -239,6 +239,46 @@ const so: Dictionary = {
   "Delete destination?": "Tirtir meesha?",
   "Delete \"{name}\"? Shipments using it will show no destination.":
     "Tirtir “{name}”? Shixnadaha isticmaalaya ayaan meel muujin doonin.",
+
+  // ── Customers ─────────────────────────────────────────────────────────────
+  "Edit customer": "Wax ka beddel macmiilka",
+  "New customer": "Macmiil cusub",
+  "People or companies you ship for": "Dadka ama shirkadaha aad u dirto",
+  "e.g. Ali Trading Co.": "tusaale Ali Trading Co.",
+  "Add customer": "Ku dar macmiil",
+  "All customers": "Dhammaan macaamiisha",
+  "Search by name or phone number…": "Ku raadi magac ama lambar telefoon…",
+  "Search customers by name or phone number":
+    "Ku raadi macaamiisha magac ama lambar telefoon",
+  "No customers yet — they appear here as you invoice, or add them manually.":
+    "Weli macaamiil ma jiraan — waxay halkan ka soo muuqdaan markaad qaansheegto, ama gacanta ku dar.",
+  'No customers match "{search}".': "Ma jiraan macaamiil u dhigma “{search}”.",
+  "Delete customer?": "Tirtir macmiilka?",
+  'Delete "{name}"? Their invoices will keep working but show no customer.':
+    "Tirtir “{name}”? Qaansheegyadooda way sii shaqayn doonaan laakiin macmiil ma muujin doonaan.",
+  "Balance breakdown for {name}": "Kala-qaybinta hadhaaga ee {name}",
+  "Balance due": "Hadhaaga la leeyahay",
+  "made up of {count} invoice": "oo ka kooban {count} qaansheeg",
+  "made up of {count} invoices": "oo ka kooban {count} qaansheeg",
+  "No unpaid invoices — this balance may be from a rounding adjustment.":
+    "Ma jiraan qaansheeg aan la bixin — hadhaagan wuxuu ka iman karaa hagaajin isu-ekaysiineed.",
+  "{charged} charged, {paid} paid": "{charged} la dallacay, {paid} la bixiyay",
+  "{charged} charged, unpaid": "{charged} la dallacay, aan la bixin",
+  "Total due": "Wadarta la leeyahay",
+  "Full statement": "Bayaanka buuxa",
+
+  // ── Customer card board (shared) ──────────────────────────────────────────
+  "See what makes up {name}'s balance": "Arag waxa ka kooban hadhaaga {name}",
+  "See what makes up {name}'s balance of {amount}":
+    "Arag waxa ka kooban hadhaaga {name} ee ah {amount}",
+  "{amount} due": "{amount} la leeyahay",
+  Settled: "La bixiyay",
+  "View statement": "Fiiri bayaanka",
+  "View {name}'s statement": "Fiiri bayaanka {name}",
+  "Edit {name}": "Wax ka beddel {name}",
+  "Delete {name}": "Tirtir {name}",
+  "No email": "Iimayl ma leh",
+  "No phone": "Telefoon ma leh",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

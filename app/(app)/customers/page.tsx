@@ -29,8 +29,10 @@ import {
   UsersIcon,
 } from "@/components/icons";
 import { CustomerCardBoard } from "@/components/customer-card-board";
+import { useT } from "@/lib/i18n";
 
 export default function CargoCustomersPage() {
+  const t = useT();
   const [customers, setCustomers] = useState<CargoCustomer[]>([]);
   const [balances, setBalances] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
@@ -156,27 +158,27 @@ export default function CargoCustomersPage() {
 
   return (
     <div>
-      <PageHeader title="Customers" />
+      <PageHeader title={t("Customers")} />
       <div className="space-y-6">
         <Section
           icon={<UsersIcon />}
-          title={editingId ? "Edit customer" : "New customer"}
-          subtitle="People or companies you ship for"
+          title={editingId ? t("Edit customer") : t("New customer")}
+          subtitle={t("People or companies you ship for")}
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="flex flex-wrap items-end gap-3">
             <div className="min-w-40 flex-1">
-              <Field label="Name">
+              <Field label={t("Name")}>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Ali Trading Co."
+                  placeholder={t("e.g. Ali Trading Co.")}
                   required
                 />
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Email">
+              <Field label={t("Email")}>
                 <Input
                   type="email"
                   value={email}
@@ -185,12 +187,12 @@ export default function CargoCustomersPage() {
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Phone">
+              <Field label={t("Phone")}>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Address">
+              <Field label={t("Address")}>
                 <Input
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
@@ -199,11 +201,11 @@ export default function CargoCustomersPage() {
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : editingId ? "Save changes" : "Add customer"}
+                {busy ? t("Saving…") : editingId ? t("Save changes") : t("Add customer")}
               </Button>
               {editingId && (
                 <Button type="button" variant="secondary" onClick={resetForm}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
               )}
             </div>
@@ -215,7 +217,7 @@ export default function CargoCustomersPage() {
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
             <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              All customers
+              {t("All customers")}
             </h2>
             {customers.length > 0 && (
               <span className="rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-white/[0.08] dark:text-slate-300">
@@ -230,8 +232,8 @@ export default function CargoCustomersPage() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name or phone number…"
-                aria-label="Search customers by name or phone number"
+                placeholder={t("Search by name or phone number…")}
+                aria-label={t("Search customers by name or phone number")}
                 className="w-full rounded-2xl border border-white/70 bg-white/50 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-black/[0.02] outline-none backdrop-blur transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white/70 focus:ring-4 focus:ring-blue-200/50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400/60 dark:focus:bg-white/[0.08] dark:focus:ring-blue-500/20"
               />
             </div>
@@ -246,20 +248,22 @@ export default function CargoCustomersPage() {
             onDelete={setPending}
           />
           {!loading && customers.length === 0 && (
-            <EmptyState message="No customers yet — they appear here as you invoice, or add them manually." />
+            <EmptyState message={t("No customers yet — they appear here as you invoice, or add them manually.")} />
           )}
           {!loading && customers.length > 0 && filtered.length === 0 && (
-            <EmptyState message={`No customers match "${search.trim()}".`} />
+            <EmptyState message={t('No customers match "{search}".', { search: search.trim() })} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete customer?"
+        title={t("Delete customer?")}
         message={
           pending
-            ? `Delete "${pending.name}"? Their invoices will keep working but show no customer.`
+            ? t('Delete "{name}"? Their invoices will keep working but show no customer.', {
+                name: pending.name,
+              })
             : undefined
         }
         busy={deleting}
@@ -296,6 +300,7 @@ function BreakdownModal({
   lines: CargoCustomerBreakdownLine[] | null;
   onClose: () => void;
 }) {
+  const t = useT();
   // Only invoices that still owe make up the balance due; fully-settled ones are
   // noise here. A tiny epsilon avoids float dust ($0.00 rows).
   const owing = (lines ?? []).filter((l) => l.remaining > 0.005);
@@ -310,27 +315,29 @@ function BreakdownModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Balance breakdown for ${customer.name}`}
+        aria-label={t("Balance breakdown for {name}", { name: customer.name })}
         className="glass-panel relative z-10 flex max-h-[85vh] w-full max-w-lg flex-col rounded-3xl"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-slate-200/60 p-5 dark:border-white/[0.08]">
           <div className="min-w-0">
             <div className="text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">
-              Balance due
+              {t("Balance due")}
             </div>
             <div className="mt-0.5 truncate text-lg font-bold text-slate-900 dark:text-slate-100">
               {fmtMoney(due)}
             </div>
             <div className="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-400">
-              {customer.name} · made up of {owing.length}{" "}
-              {owing.length === 1 ? "invoice" : "invoices"}
+              {customer.name} ·{" "}
+              {owing.length === 1
+                ? t("made up of {count} invoice", { count: owing.length })
+                : t("made up of {count} invoices", { count: owing.length })}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("Close")}
             className="shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-500/10 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
           >
             <CloseIcon className="h-5 w-5" />
@@ -340,10 +347,10 @@ function BreakdownModal({
         {/* Lines */}
         <div className="min-h-0 flex-1 overflow-y-auto p-3">
           {lines === null ? (
-            <div className="py-10 text-center text-sm text-slate-400">Loading…</div>
+            <div className="py-10 text-center text-sm text-slate-400">{t("Loading…")}</div>
           ) : owing.length === 0 ? (
             <div className="py-10 text-center text-sm text-slate-400">
-              No unpaid invoices — this balance may be from a rounding adjustment.
+              {t("No unpaid invoices — this balance may be from a rounding adjustment.")}
             </div>
           ) : (
             <ul className="space-y-2">
@@ -367,9 +374,15 @@ function BreakdownModal({
                       </div>
                       <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                         {fmtDate(l.date)}
+                        {" · "}
                         {l.paid > 0.005
-                          ? ` · ${fmtMoney(l.charged)} charged, ${fmtMoney(l.paid)} paid`
-                          : ` · ${fmtMoney(l.charged)} charged, unpaid`}
+                          ? t("{charged} charged, {paid} paid", {
+                              charged: fmtMoney(l.charged),
+                              paid: fmtMoney(l.paid),
+                            })
+                          : t("{charged} charged, unpaid", {
+                              charged: fmtMoney(l.charged),
+                            })}
                       </div>
                     </div>
                     <span className="shrink-0 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold tabular-nums text-amber-600 dark:bg-amber-400/15 dark:text-amber-400">
@@ -385,7 +398,7 @@ function BreakdownModal({
         {/* Footer */}
         <div className="flex items-center justify-between gap-3 border-t border-slate-200/60 p-4 dark:border-white/[0.08]">
           <span className="text-sm text-slate-500 dark:text-slate-400">
-            Total due{" "}
+            {t("Total due")}{" "}
             <span className="font-semibold text-slate-900 dark:text-slate-100">
               {fmtMoney(due)}
             </span>
@@ -395,7 +408,7 @@ function BreakdownModal({
             className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-700"
           >
             <StatementIcon className="h-4 w-4" />
-            Full statement
+            {t("Full statement")}
           </Link>
         </div>
       </div>
