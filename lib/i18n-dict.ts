@@ -652,6 +652,25 @@ const so: Dictionary = {
   "Created {date}": "La abuuray {date}",
   "Sender signature": "Saxeexa dirayaha",
   "Receiver signature": "Saxeexa qaataha",
+
+  // ── Invite acceptance ─────────────────────────────────────────────────────
+  "Join on CargoBook": "Ku biir CargoBook",
+  "Checking your invitation…": "Waa la hubinayaa casuuntaada…",
+  "This invitation has already been used.":
+    "Casuuntan hore ayaa loo isticmaalay.",
+  "This invitation has expired. Ask for a new one.":
+    "Casuuntan way dhacday. Weydiiso mid cusub.",
+  "Invites aren’t fully set up yet. Ask the admin to add the SUPABASE_SERVICE_ROLE_KEY to the site’s environment.":
+    "Casuumaadaha weli si buuxda looma dejin. Weydiiso maamulaha inuu SUPABASE_SERVICE_ROLE_KEY ku daro deegaanka goobta.",
+  "This invitation link is invalid.": "Linkiga casuuntan ma shaqaynayo.",
+  "You’ve been invited to ": "Waxaa lagugu casumay ",
+  " as ": " ahaan ",
+  "Choose a password": "Dooro furaha sirta ah",
+  "At least 8 characters": "Ugu yaraan 8 xaraf",
+  "Joining…": "Waa la biirinayaa…",
+  "Accept & join": "Aqbal & ku biir",
+  "Account created — please sign in from the login page.":
+    "Akoon la abuuray — fadlan ka gal bogga gelitaanka.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
