@@ -822,7 +822,6 @@ const so: Dictionary = {
   "Add airline": "Ku dar shirkad",
   "An airline with that name already exists.":
     "Shirkad magacaas leh hore ayay u jirtay.",
-  Statement: "Bayaan",
   "View {name} statement": "Fiiri bayaanka {name}",
   "No airlines yet — add the airlines you buy through.":
     "Weli shirkado ma jiraan — ku dar shirkadaha aad ka iibsato.",
@@ -834,7 +833,6 @@ const so: Dictionary = {
   "👥 Staff salary": "👥 Mushahar shaqaale",
   "🏢 Rent": "🏢 Kiro",
   "💡 Electricity": "💡 Koronto",
-  "📦 Other": "📦 Kale",
   "➕ Add new category…": "➕ Ku dar qayb cusub…",
   "New expense category": "Qayb kharash cusub",
   "e.g. 🌐 Internet": "tusaale 🌐 Internet",
