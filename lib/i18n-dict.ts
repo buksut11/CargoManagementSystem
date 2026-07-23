@@ -222,6 +222,23 @@ const so: Dictionary = {
   "Load older shipments": "Soo raro shixnadihii hore",
   "Showing the {count} most recent — search covers what’s loaded.":
     "Waxaa la tusayaa {count} ee ugu dambeeyay — raadintu waxay dabooshaa waxa la soo dejiyay.",
+
+  // ── Destinations ──────────────────────────────────────────────────────────
+  "Edit destination": "Wax ka beddel meesha",
+  "Add a destination": "Ku dar meel",
+  "Places you ship to": "Meelaha aad wax u dirto",
+  "City / place": "Magaalo / meel",
+  "e.g. Istanbul": "tusaale Istanbul",
+  "Country (optional)": "Wadanka (ikhtiyaari)",
+  "e.g. Türkiye": "tusaale Turkiga",
+  "That destination already exists.": "Meeshaas hore ayay u jirtay.",
+  "All destinations": "Dhammaan meelaha",
+  "No country": "Wadan ma leh",
+  "No destinations yet — add the places you ship to.":
+    "Weli meelo ma jiraan — ku dar meelaha aad wax u dirto.",
+  "Delete destination?": "Tirtir meesha?",
+  "Delete \"{name}\"? Shipments using it will show no destination.":
+    "Tirtir “{name}”? Shixnadaha isticmaalaya ayaan meel muujin doonin.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
