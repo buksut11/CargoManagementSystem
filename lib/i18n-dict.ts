@@ -489,6 +489,50 @@ const so: Dictionary = {
   "Note (optional)": "Faallo (ikhtiyaari)",
   "e.g. fuel to airport": "tusaale shidaal loo aado garoonka",
   "+ Add expense": "+ Ku dar kharash",
+
+  // ── New invoice ───────────────────────────────────────────────────────────
+  "New invoice": "Qaansheeg cusub",
+  "Who this invoice is for": "Cida qaansheeggan loo qorayo",
+  "Pick a saved customer or type a new name.":
+    "Dooro macmiil la kaydiyay ama qor magac cusub.",
+  "✓ Existing customer — details filled in.":
+    "✓ Macmiil hore u jiray — faahfaahin la buuxiyay.",
+  "New customer — will be added to your customer list.":
+    "Macmiil cusub — waxaa lagu dari doonaa liiskaaga macaamiisha.",
+  "Phone (optional)": "Telefoon (ikhtiyaari)",
+  "Issue date": "Taariikhda soo saarista",
+  "Address (optional)": "Cinwaanka (ikhtiyaari)",
+  "Shown at the bottom of the printed invoice.":
+    "Waxaa lagu tusayaa hoosta qaansheegga la daabaco.",
+  "Shipments to include": "Shixnadaha lagu darayo",
+  "Uninvoiced shipments only": "Shixnadaha aan la qaansheegin oo keliya",
+  "All shipments are already invoiced — add a new shipment first.":
+    "Dhammaan shixnadaha hore ayaa loo qaansheegay — marka hore ku dar shixnad cusub.",
+  "Invoice total:": "Wadarta qaansheegga:",
+  selected: "la doortay",
+  "Creating…": "Waa la abuurayaa…",
+  "Create invoice": "Abuur qaansheeg",
+  "Select at least one shipment to invoice.":
+    "Dooro ugu yaraan hal shixnad si aad u qaansheegto.",
+  "Could not create invoice.": "Qaansheegga lama abuuri karin.",
+
+  // ── Invoice detail ────────────────────────────────────────────────────────
+  "🖨 Print": "🖨 Daabac",
+  "Paid in full": "La bixiyay dhammaan",
+  "No payments yet.": "Weli lacag-bixinno ma jiraan.",
+  "Record a payment": "Diiwaangeli lacag-bixin",
+  "Log what the customer has paid on this invoice":
+    "Diiwaangeli waxa macmiilku bixiyay qaansheeggan",
+  "Method (optional)": "Habka (ikhtiyaari)",
+  "cash, bank transfer…": "cash, wareejin bangi…",
+  "Add payment": "Ku dar lacag-bixin",
+  "Fill remaining balance ({amount})": "Buuxi hadhaaga hadhay ({amount})",
+  "Delete payment?": "Tirtir lacag-bixinta?",
+  "This removes the {amount} payment. This cannot be undone.":
+    "Tan waxay saartaa lacag-bixinta {amount}. Tan dib looma celin karo.",
+  "Its payments will be deleted and its shipments become uninvoiced again. This cannot be undone.":
+    "Lacag-bixinnadeeda waa la tirtiri doonaa shixnadaheeduna mar kale way noqon doonaan kuwo aan la qaansheegin. Tan dib looma celin karo.",
+  "Invoice not found.": "Qaansheegga lama helin.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

@@ -16,8 +16,10 @@ import {
 } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 import { BoxIcon, InvoiceIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 export default function NewInvoicePage() {
+  const t = useT();
   const router = useRouter();
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -82,7 +84,7 @@ export default function NewInvoicePage() {
   async function create(e: React.FormEvent) {
     e.preventDefault();
     if (selected.size === 0) {
-      setError("Select at least one shipment to invoice.");
+      setError(t("Select at least one shipment to invoice."));
       return;
     }
     setBusy(true);
@@ -129,7 +131,7 @@ export default function NewInvoicePage() {
       .single();
     if (invError || !inv) {
       setBusy(false);
-      setError(invError?.message ?? "Could not create invoice.");
+      setError(invError?.message ?? t("Could not create invoice."));
       return;
     }
     const { error: linkError } = await supabase
@@ -146,22 +148,22 @@ export default function NewInvoicePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="New invoice" />
+      <PageHeader title={t("New invoice")} />
       <form onSubmit={create} className="space-y-4">
         <Section
           icon={<InvoiceIcon />}
-          title="Bill to"
-          subtitle="Who this invoice is for"
+          title={t("Bill to")}
+          subtitle={t("Who this invoice is for")}
         >
           <div className="space-y-4">
             <Field
-              label="Bill to"
-              hint="Pick a saved customer or type a new name."
+              label={t("Bill to")}
+              hint={t("Pick a saved customer or type a new name.")}
             >
               <Input
                 value={billTo}
                 onChange={(e) => onBillToChange(e.target.value)}
-                placeholder="e.g. Ali Trading Co."
+                placeholder={t("e.g. Ali Trading Co.")}
                 list="cargo-customers"
                 autoComplete="off"
                 required
@@ -181,13 +183,13 @@ export default function NewInvoicePage() {
                   }`}
                 >
                   {matchedCustomer
-                    ? "✓ Existing customer — details filled in."
-                    : "New customer — will be added to your customer list."}
+                    ? t("✓ Existing customer — details filled in.")
+                    : t("New customer — will be added to your customer list.")}
                 </p>
               )}
             </Field>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Phone (optional)">
+              <Field label={t("Phone (optional)")}>
                 <Input
                   type="tel"
                   value={phone}
@@ -195,22 +197,22 @@ export default function NewInvoicePage() {
                   placeholder="e.g. +90 555 123 4567"
                 />
               </Field>
-              <Field label="Issue date">
+              <Field label={t("Issue date")}>
                 <DatePicker value={issuedDate} onChange={setIssuedDate} required />
               </Field>
             </div>
-            <Field label="Address (optional)">
+            <Field label={t("Address (optional)")}>
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="e.g. Kadıköy, İstanbul"
               />
             </Field>
-            <Field label="Notes (optional)">
+            <Field label={t("Notes (optional)")}>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Shown at the bottom of the printed invoice."
+                placeholder={t("Shown at the bottom of the printed invoice.")}
               />
             </Field>
           </div>
@@ -218,12 +220,12 @@ export default function NewInvoicePage() {
 
         <Section
           icon={<BoxIcon />}
-          title="Shipments to include"
-          subtitle="Uninvoiced shipments only"
+          title={t("Shipments to include")}
+          subtitle={t("Uninvoiced shipments only")}
         >
           {shipments.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              All shipments are already invoiced — add a new shipment first.
+              {t("All shipments are already invoiced — add a new shipment first.")}
             </p>
           ) : (
             <div className="space-y-2">
@@ -254,7 +256,7 @@ export default function NewInvoicePage() {
             </div>
           )}
           <div className="mt-4 flex justify-end border-t border-slate-200/60 dark:border-white/10 pt-3 text-sm">
-            <span className="text-slate-500 dark:text-slate-400">Invoice total:&nbsp;</span>
+            <span className="text-slate-500 dark:text-slate-400">{t("Invoice total:")}&nbsp;</span>
             <span className="font-bold">{fmtMoney(total)}</span>
           </div>
         </Section>
@@ -262,7 +264,7 @@ export default function NewInvoicePage() {
         <ErrorNote message={error} />
         <div className="glass-panel sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
           <span className="text-sm text-slate-500 dark:text-slate-400">
-            {selected.size} selected · Total{" "}
+            {selected.size} {t("selected")} · {t("Total")}{" "}
             <span className="font-semibold text-slate-900 dark:text-slate-100">
               {fmtMoney(total)}
             </span>
@@ -273,10 +275,10 @@ export default function NewInvoicePage() {
               variant="secondary"
               onClick={() => router.push("/invoices")}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" disabled={busy}>
-              {busy ? "Creating…" : "Create invoice"}
+              {busy ? t("Creating…") : t("Create invoice")}
             </Button>
           </div>
         </div>
