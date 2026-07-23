@@ -671,6 +671,17 @@ const so: Dictionary = {
   "Accept & join": "Aqbal & ku biir",
   "Account created — please sign in from the login page.":
     "Akoon la abuuray — fadlan ka gal bogga gelitaanka.",
+
+  // ── Pricing ───────────────────────────────────────────────────────────────
+  "Simple pricing": "Qiimo fudud",
+  "Track shipments, invoices and payments for your cargo business.":
+    "La soco shixnado, qaansheegyo iyo lacag-bixinno ganacsigaaga xamuulka.",
+  "Unlimited shipments": "Shixnado aan xadidnayn",
+  "Invoices & payments": "Qaansheegyo & lacag-bixinno",
+  "1 organization": "1 urur",
+  "Invoices, payments & statements": "Qaansheegyo, lacag-bixinno & bayaanno",
+  "Priority support": "Taageero mudnaan leh",
+  "Already have an account?": "Horey ma u lahayd akoon?",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
