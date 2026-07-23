@@ -200,6 +200,7 @@ function SidebarContent({
   modules,
   pathname,
   onNavigate,
+  onClose,
   onSignOut,
 }: {
   orgRole: OrgRole;
@@ -208,13 +209,17 @@ function SidebarContent({
   modules: string[];
   pathname: string;
   onNavigate?: () => void;
+  onClose?: () => void;
   onSignOut: () => void;
 }) {
   const t = useT();
   const nav = navFor(orgRole, modules);
   return (
     <>
-      <div className="mb-5 flex items-center gap-2.5 px-1">
+      {/* items-start so the close button and logo pin to the top while the
+          org name wraps freely beneath — the button lives in the flex row
+          (never absolutely positioned over the title). */}
+      <div className="mb-5 flex items-start gap-2.5 px-1">
         <div
           className={`h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10 ${
             orgLogoUrl ? "" : "bg-white dark:bg-slate-700"
@@ -229,7 +234,7 @@ function SidebarContent({
             className={`h-full w-full ${orgLogoUrl ? "object-contain" : "object-cover"}`}
           />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 py-0.5">
           <div
             className="line-clamp-2 break-words text-[13px] font-bold leading-tight text-slate-900 dark:text-white"
             title={orgName}
@@ -240,6 +245,17 @@ function SidebarContent({
             CargoBook · {t(orgRole)}
           </div>
         </div>
+        {/* Mobile-only close button — a real flex sibling of the title, so the
+            org name reserves its own column and can never run underneath it. */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label={t("Close menu")}
+            className="-mr-1 -mt-1 shrink-0 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
+          >
+            <CloseIcon />
+          </button>
+        )}
       </div>
       {nav.map((section, si) => (
         <div key={section.label ?? `section-${si}`} className="flex flex-col gap-1.5">
@@ -494,13 +510,6 @@ export default function AppLayout({
               menuOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            <button
-              onClick={() => setMenuOpen(false)}
-              aria-label={t("Close menu")}
-              className="absolute right-3 top-4 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
-            >
-              <CloseIcon />
-            </button>
             <SidebarContent
               orgRole={resolved.org.role}
               orgName={resolved.org.orgName}
@@ -508,6 +517,7 @@ export default function AppLayout({
               modules={resolved.org.modules}
               pathname={pathname}
               onNavigate={() => setMenuOpen(false)}
+              onClose={() => setMenuOpen(false)}
               onSignOut={signOut}
             />
           </aside>
