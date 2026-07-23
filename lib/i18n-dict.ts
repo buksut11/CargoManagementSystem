@@ -788,6 +788,22 @@ const so: Dictionary = {
   adult: "qof weyn",
   child: "ilmo",
   infant: "dhallaan",
+
+  // ── Flight destinations ───────────────────────────────────────────────────
+  "New destination": "Meel cusub",
+  "Airports or cities you fly to": "Garoomada ama magaalooyinka aad u duusho",
+  Code: "Koodh",
+  "Add destination": "Ku dar meel",
+  "Code is optional — the IATA / airport code.":
+    "Koodhku waa ikhtiyaari — koodhka IATA / garoonka.",
+  "A destination with that name already exists.":
+    "Meel magacaas leh hore ayay u jirtay.",
+  Airport: "Garoon",
+  "No code": "Koodh ma leh",
+  "No destinations yet — add the airports or cities you fly to.":
+    "Weli meelo ma jiraan — ku dar garoomada ama magaalooyinka aad u duusho.",
+  'Delete "{name}"? Existing bookings keep their saved itinerary.':
+    "Tirtir “{name}”? Buugaynta jirta way hayn doontaa jadwalkeeda la kaydiyay.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
