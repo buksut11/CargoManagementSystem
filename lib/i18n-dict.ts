@@ -463,6 +463,32 @@ const so: Dictionary = {
   "Uploading…": "Waa la soo gelinayaa…",
   "Click to upload an image": "Guji si aad sawir u soo geliso",
   "PNG or JPG · parcel or receipt": "PNG ama JPG · baakidh ama rasiid",
+
+  // ── Shipment detail ───────────────────────────────────────────────────────
+  "Not invoiced": "Aan la qaansheegin",
+  "Invoice total": "Wadarta qaansheegga",
+  Attachment: "Lifaaq",
+  "Status & notes": "Xaaladda & faallo",
+  "Update status": "Cusboonaysii xaaladda",
+  "Add a note about this shipment…": "Ku dar faallo ku saabsan shixnaddan…",
+  "Saved.": "Waa la kaydiyay.",
+  "Shipment not found.": "Shixnadda lama helin.",
+  "Edit {ref}": "Wax ka beddel {ref}",
+  "🖨 Print receipt": "🖨 Daabac rasiidka",
+  "Delete {ref}?": "Tirtir {ref}?",
+  "This permanently removes the shipment. This cannot be undone.":
+    "Tan si joogto ah ayay u saartaa shixnadda. Tan dib looma celin karo.",
+  "This shipment is on ": "Shixnaddani waxay ku jirtaa ",
+  ". Changing its total will change that invoice’s balance.":
+    ". Beddelka wadarteeda ayaa beddeli doona hadhaaga qaansheeggaas.",
+
+  // ── Shipment expenses (detail sidebar) ────────────────────────────────────
+  "Delivery expenses & profit": "Kharashaadka gaarsiinta & faaiidada",
+  "Costs to deliver this shipment and the resulting net profit":
+    "Kharashka lagu gaarsiiyo shixnaddan iyo faaiidada saafiga ah ee ka dhalata",
+  "Note (optional)": "Faallo (ikhtiyaari)",
+  "e.g. fuel to airport": "tusaale shidaal loo aado garoonka",
+  "+ Add expense": "+ Ku dar kharash",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
