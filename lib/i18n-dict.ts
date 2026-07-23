@@ -682,6 +682,26 @@ const so: Dictionary = {
   "Invoices, payments & statements": "Qaansheegyo, lacag-bixinno & bayaanno",
   "Priority support": "Taageero mudnaan leh",
   "Already have an account?": "Horey ma u lahayd akoon?",
+
+  // ── Flight statuses ───────────────────────────────────────────────────────
+  Quote: "Qiimo",
+  Booked: "La buugay",
+  Ticketed: "Tigidh la sameeyay",
+  Cancelled: "La joojiyay",
+  Refunded: "La celiyay",
+  Void: "Buray",
+
+  // ── Flight dashboard ──────────────────────────────────────────────────────
+  Sales: "Iibka",
+  "Gross profit": "Faaiidada guud",
+  "Op. expenses": "Kharashka hawlgalka",
+  Received: "La helay",
+  Receivable: "La sugayo",
+  Payable: "La bixinayo",
+  "Sales per month": "Iibka bishiiba",
+  "Recent bookings": "Buugaynta ugu dambeysay",
+  "No bookings yet — create your first from the Bookings page.":
+    "Weli buugayn ma jirto — samee tii ugu horreysay bogga Buugaynta.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
