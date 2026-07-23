@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import { bookingRef, fmtDate, fmtMoney } from "@/lib/format";
 import { Badge, Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 // A unified cash ledger for the flight module: every money movement in one
 // chronological list — customer receipts (in), supplier payments (out),
@@ -42,6 +43,7 @@ const KIND_CLASS: Record<Entry["kind"], string> = {
 };
 
 export default function FlightLedgerPage() {
+  const t = useT();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +59,7 @@ export default function FlightLedgerPage() {
           key: `p-${row.id}`,
           date: row.paid_date,
           kind: "receipt",
-          description: `Customer payment${row.method ? ` (${row.method})` : ""}`,
+          description: `${t("Customer payment")}${row.method ? ` (${row.method})` : ""}`,
           bookingId: row.booking_id,
           inAmt: Number(row.amount),
           outAmt: 0,
@@ -68,9 +70,9 @@ export default function FlightLedgerPage() {
           key: `s-${row.id}`,
           date: row.paid_date,
           kind: "supplier",
-          description: `Paid ${row.flight_suppliers?.name ?? "airline"}${
-            row.method ? ` (${row.method})` : ""
-          }`,
+          description: `${t("Paid {name}", {
+            name: row.flight_suppliers?.name ?? t("airline"),
+          })}${row.method ? ` (${row.method})` : ""}`,
           bookingId: row.booking_id,
           inAmt: 0,
           outAmt: Number(row.amount),
@@ -84,7 +86,9 @@ export default function FlightLedgerPage() {
               key: `ro-${row.id}`,
               date: row.refund_date,
               kind: "refund_out",
-              description: `Refund to customer (${row.refund_type})`,
+              description: t("Refund to customer ({type})", {
+                type: t(row.refund_type),
+              }),
               bookingId: row.booking_id,
               inAmt: 0,
               outAmt: Number(row.customer_refund),
@@ -95,7 +99,9 @@ export default function FlightLedgerPage() {
               key: `ri-${row.id}`,
               date: row.refund_date,
               kind: "refund_in",
-              description: `Recovered from airline (${row.refund_type})`,
+              description: t("Recovered from airline ({type})", {
+                type: t(row.refund_type),
+              }),
               bookingId: row.booking_id,
               inAmt: Number(row.supplier_refund),
               outAmt: 0,
@@ -112,17 +118,17 @@ export default function FlightLedgerPage() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [t]);
 
   const totalIn = entries.reduce((sum, e) => sum + e.inAmt, 0);
   const totalOut = entries.reduce((sum, e) => sum + e.outAmt, 0);
 
   function exportCsv() {
     downloadCsv("flight-ledger.csv", [
-      ["Date", "Type", "Description", "Booking", "In", "Out"],
+      [t("Date"), t("Type"), t("Description"), t("Booking"), t("In"), t("Out")],
       ...entries.map((e) => [
         e.date,
-        KIND_LABEL[e.kind],
+        t(KIND_LABEL[e.kind]),
         e.description,
         e.bookingId ? bookingRef(e.bookingId) : "",
         e.inAmt || "",
@@ -134,14 +140,14 @@ export default function FlightLedgerPage() {
   return (
     <div>
       <PageHeader
-        title="Ledger"
+        title={t("Ledger")}
         action={
           <button
             onClick={exportCsv}
             disabled={entries.length === 0}
             className="rounded-full border border-white/60 bg-white/35 px-4 py-2 text-sm font-medium text-slate-700 backdrop-blur hover:bg-white/60 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.08]"
           >
-            ⬇ Export CSV
+            {t("⬇ Export CSV")}
           </button>
         }
       />
@@ -149,7 +155,7 @@ export default function FlightLedgerPage() {
       <div className="mb-5 grid grid-cols-3 gap-4">
         <Card className="p-4">
           <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Money in
+            {t("Money in")}
           </div>
           <div className="mt-1 text-lg font-bold text-emerald-600 dark:text-emerald-400">
             {loading ? "…" : fmtMoney(totalIn)}
@@ -157,7 +163,7 @@ export default function FlightLedgerPage() {
         </Card>
         <Card className="p-4">
           <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Money out
+            {t("Money out")}
           </div>
           <div className="mt-1 text-lg font-bold text-rose-600 dark:text-rose-400">
             {loading ? "…" : fmtMoney(totalOut)}
@@ -165,7 +171,7 @@ export default function FlightLedgerPage() {
         </Card>
         <Card className="p-4">
           <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Net cash
+            {t("Net cash")}
           </div>
           <div
             className={`mt-1 text-lg font-bold ${
@@ -187,7 +193,7 @@ export default function FlightLedgerPage() {
               className="rounded-2xl border border-slate-200/60 bg-white/40 p-4 shadow-sm dark:bg-white/[0.04] dark:border-white/10"
             >
               <div className="flex items-center justify-between gap-2">
-                <Badge className={KIND_CLASS[e.kind]}>{KIND_LABEL[e.kind]}</Badge>
+                <Badge className={KIND_CLASS[e.kind]}>{t(KIND_LABEL[e.kind])}</Badge>
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {fmtDate(e.date)}
                 </span>
@@ -222,12 +228,12 @@ export default function FlightLedgerPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>Date</Th>
-              <Th>Type</Th>
-              <Th>Description</Th>
-              <Th>Booking</Th>
-              <Th>In</Th>
-              <Th>Out</Th>
+              <Th>{t("Date")}</Th>
+              <Th>{t("Type")}</Th>
+              <Th>{t("Description")}</Th>
+              <Th>{t("Booking")}</Th>
+              <Th>{t("In")}</Th>
+              <Th>{t("Out")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -235,7 +241,7 @@ export default function FlightLedgerPage() {
               <tr key={e.key} className="hover:bg-white/60 dark:hover:bg-white/[0.08]">
                 <Td className="whitespace-nowrap">{fmtDate(e.date)}</Td>
                 <Td>
-                  <Badge className={KIND_CLASS[e.kind]}>{KIND_LABEL[e.kind]}</Badge>
+                  <Badge className={KIND_CLASS[e.kind]}>{t(KIND_LABEL[e.kind])}</Badge>
                 </Td>
                 <Td>{e.description}</Td>
                 <Td>
@@ -261,7 +267,7 @@ export default function FlightLedgerPage() {
           </tbody>
         </table>
         {!loading && entries.length === 0 && (
-          <EmptyState message="No money movements yet — receipts, airline payments and refunds will appear here." />
+          <EmptyState message={t("No money movements yet — receipts, airline payments and refunds will appear here.")} />
         )}
       </Card>
     </div>

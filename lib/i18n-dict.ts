@@ -886,6 +886,26 @@ const so: Dictionary = {
   "Total paid:": "Wadarta la bixiyay:",
   "No airline payments yet — record them from a booking's page.":
     "Weli lacag-bixinno shirkadeed ma jiraan — ka diiwaangeli bogga buugaynta.",
+
+  // ── Flight ledger ─────────────────────────────────────────────────────────
+  "Money in": "Lacag soo gashay",
+  "Money out": "Lacag baxday",
+  "Net cash": "Lacagta saafiga ah",
+  Receipt: "Rasiid",
+  Refund: "Celin",
+  Recovery: "Soo celin",
+  "Customer payment": "Lacag-bixin macmiil",
+  "Paid {name}": "La bixiyay {name}",
+  airline: "shirkad",
+  "Refund to customer ({type})": "Celin macmiilka ({type})",
+  "Recovered from airline ({type})": "Laga soo celiyay shirkadda ({type})",
+  refund: "celin",
+  void: "buri",
+  reissue: "dib-u-qoris",
+  In: "Soo gal",
+  Out: "Bax",
+  "No money movements yet — receipts, airline payments and refunds will appear here.":
+    "Weli dhaqdhaqaaq lacageed ma jiro — rasiidyada, lacag-bixinnada shirkadaha iyo celinta ayaa halkan ka soo muuqan doona.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
