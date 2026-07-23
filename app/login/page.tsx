@@ -13,14 +13,13 @@ import {
 import { ErrorNote, Field } from "@/components/ui";
 import {
   BoxIcon,
-  CoinsIcon,
   EyeIcon,
   EyeOffIcon,
-  InvoiceIcon,
   LockIcon,
   MailIcon,
 } from "@/components/icons";
 import { LogoOrb } from "@/components/logo-orb";
+import { LoginStory } from "@/components/login-story";
 import { ThemeTogglePill } from "@/components/theme-toggle";
 import { LanguageTogglePill } from "@/components/language-toggle";
 import { useT } from "@/lib/i18n";
@@ -37,12 +36,6 @@ const REMEMBER_KEY = "cargobook:email";
 // room on the left for the leading icon.
 const glassInput =
   "glass-field w-full min-w-0 rounded-xl border border-white/60 bg-white/50 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-300/60 dark:border-white/10 dark:bg-white/[0.07] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-500/30";
-
-const featureItems = [
-  { label: "Shipments", icon: <BoxIcon /> },
-  { label: "Invoices", icon: <InvoiceIcon /> },
-  { label: "Payments", icon: <CoinsIcon /> },
-];
 
 export default function LoginPage() {
   const t = useT();
@@ -189,37 +182,27 @@ export default function LoginPage() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-6 py-10 lg:flex-row lg:justify-between lg:px-10">
-        {/* Brand hero — desktop only */}
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-start gap-8 px-6 py-10 lg:flex-row lg:justify-between lg:gap-12 lg:px-10">
+        {/* Brand + storytelling panel — shown on every screen size. On desktop
+            it fills the left column; on mobile it sits above the auth card so
+            new users see what CargoBook does before signing in. */}
         <section
           data-animate
           style={{ opacity: 0 }}
-          className="hidden max-w-md flex-col gap-6 text-slate-900 lg:flex dark:text-white"
+          className="flex w-full max-w-md flex-col gap-5 text-slate-900 dark:text-white"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900/10 ring-1 ring-slate-900/20 backdrop-blur dark:bg-white/15 dark:ring-white/25">
               <BoxIcon />
             </span>
-            <span className="text-xl font-bold tracking-tight">CargoBook</span>
+            <span className="text-xl font-bold tracking-tight">
+              {branding?.name ?? "CargoBook"}
+            </span>
           </div>
-          <h2 className="text-4xl font-bold leading-tight tracking-tight xl:text-5xl">
-            {t("Track Every Shipment, From Port to Door")}
+          <h2 className="hidden text-3xl font-bold leading-tight tracking-tight lg:block xl:text-4xl">
+            {t("Run flights and cargo from one clean dashboard")}
           </h2>
-          <p className="max-w-sm text-lg text-slate-700 dark:text-white/75">
-            {t(
-              "Shipments, invoices and payments — organised in one clean, fast dashboard built for the way you work.",
-            )}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-5 text-sm font-medium text-slate-800 dark:text-white/80">
-            {featureItems.map(({ label, icon }) => (
-              <span key={label} className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900/10 ring-1 ring-slate-900/15 backdrop-blur dark:bg-white/10 dark:ring-white/20 [&_svg]:h-4 [&_svg]:w-4">
-                  {icon}
-                </span>
-                {t(label)}
-              </span>
-            ))}
-          </div>
+          <LoginStory className="mx-auto w-full max-w-[15rem] sm:max-w-[17rem] lg:mx-0 lg:max-w-none" />
         </section>
 
         {/* Auth card — frosted glass in both themes */}

@@ -83,6 +83,19 @@ const so: Dictionary = {
     "La soco Shixnad kasta, Deked ilaa Albaab",
   "Shipments, invoices and payments — organised in one clean, fast dashboard built for the way you work.":
     "Shixnado, qaansheegyo iyo lacag-bixinno — oo lagu habeeyay hal dashboodh nadiif ah, dhaqso leh oo loo dhisay sida aad u shaqeyso.",
+  // Storytelling panel (feature tour)
+  "Run flights and cargo from one clean dashboard":
+    "Ka maamul duulimaadyada iyo xamuulka hal dashboodh nadiif ah",
+  "Feature tour": "Booqasho astaamaha",
+  "Book flights in seconds": "Buug duulimaadyo ilbidhiqsi gudahood",
+  "Search, choose a seat and confirm — the whole booking in one flow.":
+    "Raadi, dooro kursi oo xaqiiji — buugista oo dhan hal socod.",
+  "Track cargo, port to door": "La soco xamuulka, deked ilaa albaab",
+  "Follow every shipment down the route with live status at each stop.":
+    "La soco shixnad kasta jidka dhexdiisa iyadoo xaalad toos ah joog kasta lagu muujinayo.",
+  "Invoice and get paid": "Qaansheeg oo lacagtaada hel",
+  "Turn deliveries into invoices and record payments in a tap.":
+    "U beddel gaarsiinta qaansheegyo oo diiwaangeli lacag-bixinno hal taabasho.",
   "Enter your email above first, then tap “Forgot password”.":
     "Marka hore geli iimaylkaaga kore, kadibna taabo “Furaha ma illowday”.",
   "We’ve sent a password reset link to {email}.":
