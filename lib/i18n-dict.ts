@@ -906,6 +906,8 @@ const so: Dictionary = {
   Out: "Bax",
   "No money movements yet — receipts, airline payments and refunds will appear here.":
     "Weli dhaqdhaqaaq lacageed ma jiro — rasiidyada, lacag-bixinnada shirkadaha iyo celinta ayaa halkan ka soo muuqan doona.",
+  "No activity recorded yet — booking changes will appear here.":
+    "Weli dhaqdhaqaaq lama diiwaangelin — isbeddellada buugaynta halkan ayay ka soo muuqan doonaan.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import type { FlightAuditEntry } from "@/lib/types";
 import { bookingRef, fmtDateTime } from "@/lib/format";
 import { Badge, Card, EmptyState, PageHeader, Td, Th } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const ACTION_LABEL: Record<FlightAuditEntry["action"], string> = {
   create: "Created",
@@ -47,9 +48,10 @@ function Changes({ entry }: { entry: FlightAuditEntry }) {
 }
 
 function Actor({ entry }: { entry: FlightAuditEntry }) {
+  const t = useT();
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5">
-      <span>{entry.user_email ?? "system"}</span>
+      <span>{entry.user_email ?? t("system")}</span>
       {entry.user_role && (
         <Badge
           className={
@@ -58,7 +60,7 @@ function Actor({ entry }: { entry: FlightAuditEntry }) {
               : "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300"
           }
         >
-          {entry.user_role}
+          {t(entry.user_role)}
         </Badge>
       )}
     </span>
@@ -66,6 +68,7 @@ function Actor({ entry }: { entry: FlightAuditEntry }) {
 }
 
 export default function FlightAuditPage() {
+  const t = useT();
   const [entries, setEntries] = useState<FlightAuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,7 +86,7 @@ export default function FlightAuditPage() {
 
   return (
     <div>
-      <PageHeader title="Activity" />
+      <PageHeader title={t("Activity")} />
       <Card className="table-scroll">
         <div className="space-y-3 p-3 lg:hidden">
           {entries.map((e) => (
@@ -94,7 +97,7 @@ export default function FlightAuditPage() {
               <div className="flex items-center justify-between gap-2">
                 <Actor entry={e} />
                 <Badge className={ACTION_CLASS[e.action]}>
-                  {ACTION_LABEL[e.action]}
+                  {t(ACTION_LABEL[e.action])}
                 </Badge>
               </div>
               <div className="mt-1 text-sm">
@@ -120,11 +123,11 @@ export default function FlightAuditPage() {
         <table className="hidden w-full lg:table">
           <thead className="border-b border-slate-200/60 dark:border-white/10">
             <tr>
-              <Th>When</Th>
-              <Th>Who</Th>
-              <Th>Action</Th>
-              <Th>Booking</Th>
-              <Th>Changes</Th>
+              <Th>{t("When")}</Th>
+              <Th>{t("Who")}</Th>
+              <Th>{t("Action")}</Th>
+              <Th>{t("Booking")}</Th>
+              <Th>{t("Changes")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -139,7 +142,7 @@ export default function FlightAuditPage() {
                 </Td>
                 <Td>
                   <Badge className={ACTION_CLASS[e.action]}>
-                    {ACTION_LABEL[e.action]}
+                    {t(ACTION_LABEL[e.action])}
                   </Badge>
                 </Td>
                 <Td>
@@ -169,7 +172,7 @@ export default function FlightAuditPage() {
           </tbody>
         </table>
         {!loading && entries.length === 0 && (
-          <EmptyState message="No activity recorded yet — booking changes will appear here." />
+          <EmptyState message={t("No activity recorded yet — booking changes will appear here.")} />
         )}
       </Card>
     </div>
