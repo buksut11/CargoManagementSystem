@@ -21,10 +21,12 @@ import {
   Th,
 } from "@/components/ui";
 import { PlaneIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 const fmtCount = (n: number) => Math.round(n).toLocaleString("en-US");
 
 export default function BookingSeatsPage() {
+  const t = useT();
   const [rows, setRows] = useState<BookingSeat[]>([]);
   const [loading, setLoading] = useState(true);
   const [seatDate, setSeatDate] = useState("");
@@ -112,19 +114,19 @@ export default function BookingSeatsPage() {
 
   return (
     <div>
-      <PageHeader title="Booking Seats" />
+      <PageHeader title={t("Booking Seats")} />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <Section
           icon={<PlaneIcon />}
-          title={editingId ? "Edit booking seats" : "New booking seats"}
-          subtitle="Seat blocks you hold with an airline"
+          title={editingId ? t("Edit booking seats") : t("New booking seats")}
+          subtitle={t("Seat blocks you hold with an airline")}
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="space-y-3">
-            <Field label="Date">
+            <Field label={t("Date")}>
               <DatePicker value={seatDate} onChange={setSeatDate} required />
             </Field>
-            <Field label="Air name">
+            <Field label={t("Air name")}>
               <Input
                 value={airName}
                 onChange={(e) => setAirName(e.target.value)}
@@ -132,15 +134,15 @@ export default function BookingSeatsPage() {
                 required
               />
             </Field>
-            <Field label="City">
+            <Field label={t("City")}>
               <Input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="e.g. Istanbul"
+                placeholder={t("e.g. Istanbul")}
                 required
               />
             </Field>
-            <Field label="Number of Seats">
+            <Field label={t("Number of Seats")}>
               <Input
                 type="number"
                 min={0}
@@ -153,11 +155,11 @@ export default function BookingSeatsPage() {
             </Field>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : editingId ? "Save changes" : "Add booking seats"}
+                {busy ? t("Saving…") : editingId ? t("Save changes") : t("Add booking seats")}
               </Button>
               {editingId && (
                 <Button type="button" variant="secondary" onClick={resetForm}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
               )}
             </div>
@@ -178,14 +180,14 @@ export default function BookingSeatsPage() {
                   </span>
                 </div>
                 <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  📍 {r.city} · {fmtCount(r.seats)} seats
+                  📍 {r.city} · {fmtCount(r.seats)} {t("seats")}
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <button onClick={() => startEdit(r)} className={rowActionClass}>
-                    Edit
+                    {t("Edit")}
                   </button>
                   <button onClick={() => setPending(r)} className={rowDeleteClass}>
-                    Delete
+                    {t("Delete")}
                   </button>
                 </div>
               </div>
@@ -194,10 +196,10 @@ export default function BookingSeatsPage() {
           <table className="hidden w-full lg:table">
             <thead className="border-b border-slate-200/60 dark:border-white/10">
               <tr>
-                <Th>Date</Th>
-                <Th>Air name</Th>
-                <Th>City</Th>
-                <Th>Seats</Th>
+                <Th>{t("Date")}</Th>
+                <Th>{t("Air name")}</Th>
+                <Th>{t("City")}</Th>
+                <Th>{t("Seats")}</Th>
                 <Th />
               </tr>
             </thead>
@@ -211,10 +213,10 @@ export default function BookingSeatsPage() {
                   <Td className="text-right">
                     <span className="inline-flex items-center gap-2">
                       <button onClick={() => startEdit(r)} className={rowActionClass}>
-                        Edit
+                        {t("Edit")}
                       </button>
                       <button onClick={() => setPending(r)} className={rowDeleteClass}>
-                        Delete
+                        {t("Delete")}
                       </button>
                     </span>
                   </Td>
@@ -223,17 +225,20 @@ export default function BookingSeatsPage() {
             </tbody>
           </table>
           {!loading && rows.length === 0 && (
-            <EmptyState message="No booking seats yet — add your first entry with the form." />
+            <EmptyState message={t("No booking seats yet — add your first entry with the form.")} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete booking seats?"
+        title={t("Delete booking seats?")}
         message={
           pending
-            ? `Delete the ${fmtDate(pending.seat_date)} entry for "${pending.air_name}"?`
+            ? t('Delete the {date} entry for "{air}"?', {
+                date: fmtDate(pending.seat_date),
+                air: pending.air_name,
+              })
             : undefined
         }
         busy={deleting}

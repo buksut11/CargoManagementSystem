@@ -861,6 +861,22 @@ const so: Dictionary = {
     "Wadarta qaybaha halkan ayay ka soo muuqan doontaa marka aad kharash darto.",
   "This removes the {amount} {category} expense. This cannot be undone.":
     "Tan waxay saartaa kharashka {amount} ee {category}. Tan dib looma celin karo.",
+
+  // ── Booking seats ─────────────────────────────────────────────────────────
+  "Edit booking seats": "Wax ka beddel kuraasta",
+  "New booking seats": "Kuraas cusub",
+  "Seat blocks you hold with an airline": "Kuraasaha aad shirkad la hayso",
+  "Air name": "Magaca shirkadda",
+  City: "Magaalada",
+  "Number of Seats": "Tirada Kuraasta",
+  "Add booking seats": "Ku dar kuraas",
+  seats: "kuraas",
+  Seats: "Kuraasta",
+  "No booking seats yet — add your first entry with the form.":
+    "Weli kuraas ma jirto — ku dar gelitaankaaga ugu horreeya foomka.",
+  "Delete booking seats?": "Tirtir kuraasta?",
+  'Delete the {date} entry for "{air}"?':
+    "Tirtir gelitaanka {date} ee “{air}”?",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
