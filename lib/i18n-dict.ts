@@ -837,6 +837,30 @@ const so: Dictionary = {
   "New expense category": "Qayb kharash cusub",
   "e.g. 🌐 Internet": "tusaale 🌐 Internet",
   "Add category": "Ku dar qaybta",
+
+  // ── Flight operating expenses ─────────────────────────────────────────────
+  "Operating Expenses": "Kharashka Hawlgalka",
+  Staff: "Shaqaale",
+  "all time": "waqti kasta",
+  "Gross profit (bookings)": "Faaiidada guud (buugaynta)",
+  "Operating expenses": "Kharashka hawlgalka",
+  "Edit operating expense": "Wax ka beddel kharashka hawlgalka",
+  "Add an operating expense": "Ku dar kharash hawlgal",
+  "Overhead that keeps the office running (staff salary, rent, electricity…)":
+    "Kharashka guud ee shaqada sii wada (mushahar shaqaale, kiro, koronto…)",
+  "Staff name": "Magaca shaqaalaha",
+  "e.g. June payroll": "tusaale mushaharka Juun",
+  "Add expense": "Ku dar kharash",
+  "Expenses · {month}": "Kharashaadka · {month}",
+  "By category": "Qaybtii",
+  "No operating expenses recorded for this month.":
+    "Kharashaad hawlgal lama diiwaangelin bishaan.",
+  "No operating expenses yet — record staff salary, rent, electricity and other overhead to see your true net profit.":
+    "Weli kharashaad hawlgal ma jiraan — diiwaangeli mushahar shaqaale, kiro, koronto iyo kharash kale si aad u aragto faaiidadaada saafiga ah ee dhabta ah.",
+  "Category totals appear here once you add expenses.":
+    "Wadarta qaybaha halkan ayay ka soo muuqan doontaa marka aad kharash darto.",
+  "This removes the {amount} {category} expense. This cannot be undone.":
+    "Tan waxay saartaa kharashka {amount} ee {category}. Tan dib looma celin karo.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
