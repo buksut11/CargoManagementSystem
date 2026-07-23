@@ -720,6 +720,60 @@ const so: Dictionary = {
   "made up of {count} tickets": "oo ka kooban {count} tigidh",
   "No unpaid tickets — this balance may be from a rounding adjustment.":
     "Ma jiraan tigidh aan la bixin — hadhaagan wuxuu ka iman karaa hagaajin isu-ekaysiineed.",
+
+  // ── Booking form ──────────────────────────────────────────────────────────
+  "New booking": "Buugayn cusub",
+  "Trip details": "Faahfaahinta safarka",
+  "Who is flying and with which airline":
+    "Cida duulaysa iyo shirkadda ay la duulayaan",
+  "— Select airline —": "— Dooro shirkad duulis —",
+  "— None —": "— Midna —",
+  "Existing balance": "Hadhaaga jira",
+  "with this ticket": "tigidhkan la socda",
+  due: "ayaa la sugayo",
+  "Airline booking reference / locator":
+    "Tixraaca buugaynta shirkadda / raadiyaha",
+  "Trip type": "Nooca safarka",
+  "One-way": "Hal dhinac",
+  "Round-Trip": "Laba dhinac",
+  Passengers: "Rakaabka",
+  "Add every traveller and their ticket price":
+    "Ku dar rakaab kasta iyo qiimaha tigidhkooda",
+  Passenger: "Rakaab",
+  "Full name": "Magaca oo dhan",
+  Adult: "Qof weyn",
+  Child: "Ilmo",
+  Infant: "Dhallaan",
+  "Sale price": "Qiimaha iibka",
+  "Flights, dates and classes — the first departure sets the travel date":
+    "Duulimaadyo, taariikho iyo darajooyin — bixitaanka ugu horreeya ayaa dejiya taariikhda safarka",
+  Flight: "Duulimaad",
+  "From and To are the same destination — pick a different arrival city.":
+    "Ka iyo Ilaa waa isku meel — dooro magaalo imaatin oo kale.",
+  Departure: "Bixitaanka",
+  Arrival: "Imaatinka",
+  "— Classes —": "— Darajooyin —",
+  Economy: "Fasalka caadiga",
+  Business: "Fasalka ganacsiga",
+  Pricing: "Qiimaynta",
+  "What you pay the airline versus what the customer pays you":
+    "Waxa aad shirkadda siiso iyo waxa macmiilku ku siiyo",
+  "Net cost (to airline)": "Kharashka saafiga (shirkadda)",
+  "The fare and fees you owe the airline":
+    "Qiimaha iyo khidmadaha aad shirkadda ku leedahay",
+  "Internal only": "Gudaha oo keliya",
+  "Internal notes about this booking…":
+    "Faallo gudaha ah oo ku saabsan buugayntan…",
+  "{count} passenger": "{count} rakaab",
+  "{count} passengers": "{count} rakaab",
+  "Create booking": "Abuur buugayn",
+  "Flight {number} has the same From and To destination — pick a different arrival city.":
+    "Duulimaadka {number} wuxuu leeyahay Ka iyo Ilaa isku mid ah — dooro magaalo imaatin oo kale.",
+  "Could not create the booking.": "Buugaynta lama abuuri karin.",
+  "+ Add {item}": "+ Ku dar {item}",
+  "{item} {number}": "{item} {number}",
+  "Remove {item} {number}": "Ka saar {item} {number}",
+  "{placeholder} time": "{placeholder} waqtiga",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
