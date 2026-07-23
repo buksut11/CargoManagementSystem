@@ -18,8 +18,10 @@ import {
   Section,
 } from "@/components/ui";
 import { SearchIcon, UsersIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 export default function FlightCustomersPage() {
+  const t = useT();
   const [customers, setCustomers] = useState<FlightCustomer[]>([]);
   const [balances, setBalances] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
@@ -131,17 +133,17 @@ export default function FlightCustomersPage() {
 
   return (
     <div>
-      <PageHeader title="Customers" />
+      <PageHeader title={t("Customers")} />
       <div className="space-y-6">
         <Section
           icon={<UsersIcon />}
-          title={editingId ? "Edit customer" : "New customer"}
-          subtitle="People or agencies you sell tickets to"
+          title={editingId ? t("Edit customer") : t("New customer")}
+          subtitle={t("People or agencies you sell tickets to")}
         >
           <div ref={formRef} className="-mt-2 scroll-mt-6" />
           <form onSubmit={save} className="flex flex-wrap items-end gap-3">
             <div className="min-w-40 flex-1">
-              <Field label="Name">
+              <Field label={t("Name")}>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -151,7 +153,7 @@ export default function FlightCustomersPage() {
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Email">
+              <Field label={t("Email")}>
                 <Input
                   type="email"
                   value={email}
@@ -160,12 +162,12 @@ export default function FlightCustomersPage() {
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Phone">
+              <Field label={t("Phone")}>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
               </Field>
             </div>
             <div className="min-w-40 flex-1">
-              <Field label="Address">
+              <Field label={t("Address")}>
                 <Input
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
@@ -174,11 +176,11 @@ export default function FlightCustomersPage() {
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : editingId ? "Save changes" : "Add customer"}
+                {busy ? t("Saving…") : editingId ? t("Save changes") : t("Add customer")}
               </Button>
               {editingId && (
                 <Button type="button" variant="secondary" onClick={resetForm}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
               )}
             </div>
@@ -190,7 +192,7 @@ export default function FlightCustomersPage() {
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-3 dark:border-white/[0.08]">
             <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              All customers
+              {t("All customers")}
             </h2>
             {customers.length > 0 && (
               <span className="rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-white/[0.08] dark:text-slate-300">
@@ -205,8 +207,8 @@ export default function FlightCustomersPage() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name or phone number…"
-                aria-label="Search customers by name or phone number"
+                placeholder={t("Search by name or phone number…")}
+                aria-label={t("Search customers by name or phone number")}
                 className="w-full rounded-2xl border border-white/70 bg-white/50 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-black/[0.02] outline-none backdrop-blur transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white/70 focus:ring-4 focus:ring-blue-200/50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400/60 dark:focus:bg-white/[0.08] dark:focus:ring-blue-500/20"
               />
             </div>
@@ -221,20 +223,22 @@ export default function FlightCustomersPage() {
             onDelete={setPending}
           />
           {!loading && customers.length === 0 && (
-            <EmptyState message="No customers yet — add the people or agencies you sell tickets to." />
+            <EmptyState message={t("No customers yet — add the people or agencies you sell tickets to.")} />
           )}
           {!loading && customers.length > 0 && filtered.length === 0 && (
-            <EmptyState message={`No customers match "${search.trim()}".`} />
+            <EmptyState message={t('No customers match "{search}".', { search: search.trim() })} />
           )}
         </Card>
       </div>
 
       <ConfirmDialog
         open={!!pending}
-        title="Delete customer?"
+        title={t("Delete customer?")}
         message={
           pending
-            ? `Delete "${pending.name}"? Their bookings will keep working but show no customer.`
+            ? t('Delete "{name}"? Their bookings will keep working but show no customer.', {
+                name: pending.name,
+              })
             : undefined
         }
         busy={deleting}

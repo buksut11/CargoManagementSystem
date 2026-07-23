@@ -804,6 +804,14 @@ const so: Dictionary = {
     "Weli meelo ma jiraan — ku dar garoomada ama magaalooyinka aad u duusho.",
   'Delete "{name}"? Existing bookings keep their saved itinerary.':
     "Tirtir “{name}”? Buugaynta jirta way hayn doontaa jadwalkeeda la kaydiyay.",
+
+  // ── Flight customers / suppliers ──────────────────────────────────────────
+  "People or agencies you sell tickets to":
+    "Dadka ama wakaaladaha aad tigidhada ka iibiso",
+  "No customers yet — add the people or agencies you sell tickets to.":
+    "Weli macaamiil ma jiraan — ku dar dadka ama wakaaladaha aad tigidhada ka iibiso.",
+  'Delete "{name}"? Their bookings will keep working but show no customer.':
+    "Tirtir “{name}”? Buugayntooda way sii shaqayn doontaa laakiin macmiil ma muujin doonto.",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {
