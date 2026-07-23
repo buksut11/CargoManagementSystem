@@ -569,6 +569,78 @@ const so: Dictionary = {
   Hour: "Saac",
   Min: "Daqiiqad",
   Time: "Waqti",
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+  Organization: "Ururka",
+  "The logo and details below appear on your printed invoices.":
+    "Astaanta iyo faahfaahinta hoose waxay ka soo muuqdaan qaansheegyadaada la daabaco.",
+  "Organization logo": "Astaanta ururka",
+  "No logo": "Astaan ma leh",
+  "Working…": "Waa la shaqaynayaa…",
+  "Replace logo": "Beddel astaanta",
+  "Upload logo": "Soo geli astaan",
+  Saved: "La kaydiyay",
+  Modules: "Qaybaha",
+  "The product areas included in your plan. Contact us to add or remove one.":
+    "Qaybaha alaabta ee ku jira qorshahaaga. Nala soo xiriir si aad mid ugu darto ama uga saarto.",
+  Cargo: "Xamuul",
+  Flights: "Duulimaadyo",
+  "Shipments, invoices, expenses & delivery tracking.":
+    "Shixnado, qaansheegyo, kharashaad & raadraaca gaarsiinta.",
+  "Air-ticket bookings, receivables, payables & refunds.":
+    "Buugaynta tigidhada diyaaradaha, lacagaha la sugayo, deymaha & celinta lacagaha.",
+  Included: "Waa ku jiraa",
+  "Not included": "Kuma jiro",
+  Billing: "Biilasha",
+  "Backup & restore": "Kayd & soo celin",
+  "Download all of this organization's data (shipments, invoices, payments, expenses, bookings, ledgers…) as a JSON file, or add the contents of a backup back in.":
+    "Soo dejiso dhammaan xogta ururkan (shixnado, qaansheegyo, lacag-bixinno, kharashaad, buugaynta, xisaabaadka…) sida fayl JSON ah, ama dib ugu dar waxa ku jira kayd.",
+  "Preparing…": "Waa la diyaarinayaa…",
+  "⬇ Download backup": "⬇ Soo dejiso kaydka",
+  "⬆ Restore from backup": "⬆ Ka soo celi kaydka",
+  "Restore finished — {count} records added.":
+    "Soo celintii way dhammaatay — {count} diiwaan ayaa lagu daray.",
+  "Existing entries were reused for: {list}.":
+    "Diiwaannada jira ayaa dib loo isticmaalay: {list}.",
+  "Restore only adds — it never deletes existing data. Restoring the same backup twice will duplicate shipments, invoices and bookings.":
+    "Soo celintu wax kaliya way ku dartaa — waligeed ma tirtirto xogta jirta. Soo celinta isla kaydka labo jeer waxay noqon doontaa shixnado, qaansheegyo iyo buugaynta oo laba-laab ah.",
+  "Restore this backup?": "Soo celi kaydkan?",
+  'Backup from {date}. Its shipments, invoices, bookings and payments will be ADDED to "{org}". Nothing is deleted, but restoring the same backup twice creates duplicates.':
+    "Kayd ka yimid {date}. Shixnadaheeda, qaansheegyadeeda, buugaynteeda iyo lacag-bixinnadeeda waxaa LAGU DARI DOONAA “{org}”. Waxba lama tirtiro, laakiin soo celinta isla kaydka labo jeer waxay abuurtaa nuqullo.",
+  Restore: "Soo celi",
+  "Starting…": "Waa la bilaabayaa…",
+  "Backup failed.": "Kaydku wuu fashilmay.",
+  "This file is not a CargoBook backup.": "Faylkani maaha kayd CargoBook.",
+  "Could not read the file.": "Faylka lama akhriyi karin.",
+  "Restore failed.": "Soo celintii way fashilantay.",
+  "this organization": "ururkan",
+
+  // ── Billing cards ─────────────────────────────────────────────────────────
+  "EVC number": "Lambarka EVC",
+  "eDahab number": "Lambarka eDahab",
+  "Account or phone": "Akoon ama telefoon",
+  "You'll approve the payment with your PIN on this phone.":
+    "Waxaad ku ansixin doontaa lacag-bixinta PIN-kaaga taleefankan.",
+  "You'll confirm the payment through Premier Bank.":
+    "Waxaad ku xaqiijin doontaa lacag-bixinta Premier Bank.",
+  "Your organization is on the Pro plan":
+    "Ururkaagu wuxuu ku jiraa qorshaha Pro",
+  "Confirming…": "Waa la xaqiijinayaa…",
+  "Pay {price}": "Bixi {price}",
+  "A prompt was sent to {account} — approve it with your PIN.":
+    "Codsi ayaa loo diray {account} — ku ansixi PIN-kaaga.",
+  "Payment received — you're now on the Pro plan.":
+    "Lacag-bixin la helay — hadda waxaad ku jirtaa qorshaha Pro.",
+  "The payment could not be completed.":
+    "Lacag-bixinta lama dhammaystiri karin.",
+  "Secured · {tag}": "La sugay · {tag}",
+
+  // ── Billing history ───────────────────────────────────────────────────────
+  "Billing history": "Taariikhda biilasha",
+  "Pro-plan payment attempts, most recent first.":
+    "Isku dayada lacag-bixinta qorshaha Pro, kii ugu dambeeyay marka hore.",
+  Approved: "La ansixiyay",
+  Failed: "Fashilmay",
 };
 
 export const DICTIONARIES: Record<string, Dictionary> = {

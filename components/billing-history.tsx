@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Section } from "@/components/ui";
 import { ReceiptIcon } from "@/components/icons";
 import { fmtDateTime, fmtMoney } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 // A single row from billing_transactions (migration 0042). Only the fields the
 // list needs are selected.
@@ -36,6 +37,7 @@ function maskAccount(account: string): string {
 // RLS (migration 0042) only returns rows for orgs where the viewer is an admin,
 // so non-admins simply see an empty list.
 export function BillingHistory({ orgId }: { orgId: string }) {
+  const tr = useT();
   const [rows, setRows] = useState<Txn[] | null>(null);
 
   useEffect(() => {
@@ -62,8 +64,8 @@ export function BillingHistory({ orgId }: { orgId: string }) {
   return (
     <Section
       icon={<ReceiptIcon />}
-      title="Billing history"
-      subtitle="Pro-plan payment attempts, most recent first."
+      title={tr("Billing history")}
+      subtitle={tr("Pro-plan payment attempts, most recent first.")}
       className="mt-4"
     >
       <ul className="divide-y divide-slate-200/60 dark:divide-white/10">
@@ -100,7 +102,7 @@ export function BillingHistory({ orgId }: { orgId: string }) {
                       : "text-rose-600 dark:text-rose-400"
                   }`}
                 >
-                  {approved ? "Approved" : "Failed"}
+                  {approved ? tr("Approved") : tr("Failed")}
                 </span>
               </div>
             </li>
