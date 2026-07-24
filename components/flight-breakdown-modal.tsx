@@ -7,7 +7,8 @@ import {
   type CustomerBookingBreakdownLine,
 } from "@/lib/balance";
 import { fmtDate, fmtMoney } from "@/lib/format";
-import { CloseIcon, PlaneIcon, StatementIcon } from "@/components/icons";
+import { PlaneIcon, StatementIcon } from "@/components/icons";
+import { CloseButton } from "@/components/ui";
 import { useT } from "@/lib/i18n";
 
 // Drill-down that answers "where does the $X due come from?" for one flight
@@ -92,14 +93,7 @@ export function FlightBreakdownModal({
               )}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("Close")}
-            className="shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-500/10 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
-          >
-            <CloseIcon className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={onClose} />
         </div>
 
         {/* Lines */}

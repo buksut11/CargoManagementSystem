@@ -19,6 +19,34 @@ import type {
 } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
+import { CloseIcon } from "@/components/icons";
+
+// A dismiss (✕) control for modals, panels and dialogs. Unlike a bare icon,
+// it carries a resting background chip and a mid-tone stroke so it reads as a
+// tappable button *before* hover — the earlier icon-only version faded into
+// the glass panel and users couldn't find it. Hover deepens it; keyboard
+// focus shows a ring.
+export function CloseButton({
+  onClick,
+  label,
+  className = "",
+}: {
+  onClick: () => void;
+  label?: string;
+  className?: string;
+}) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label ?? t("Close")}
+      className={`shrink-0 rounded-full bg-slate-500/10 p-1.5 text-slate-500 transition-colors hover:bg-slate-500/20 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20 dark:hover:text-white ${className}`}
+    >
+      <CloseIcon className="h-5 w-5" />
+    </button>
+  );
+}
 
 export function Card({
   children,

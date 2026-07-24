@@ -13,6 +13,7 @@ import type { CargoCustomer } from "@/lib/types";
 import {
   Button,
   Card,
+  CloseButton,
   ConfirmDialog,
   EmptyState,
   ErrorNote,
@@ -23,7 +24,6 @@ import {
 } from "@/components/ui";
 import {
   BoxIcon,
-  CloseIcon,
   SearchIcon,
   StatementIcon,
   UsersIcon,
@@ -334,14 +334,7 @@ function BreakdownModal({
                 : t("made up of {count} invoices", { count: owing.length })}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("Close")}
-            className="shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-500/10 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
-          >
-            <CloseIcon className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={onClose} />
         </div>
 
         {/* Lines */}
