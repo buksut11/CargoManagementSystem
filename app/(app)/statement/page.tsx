@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useOrg } from "@/components/org-context";
 import type { CargoCustomer, Organization } from "@/lib/types";
-import { fmtDate, fmtMoney, invoiceRef } from "@/lib/format";
+import { fmtDate, fmtMoney, invoiceRef, shipmentRef } from "@/lib/format";
 import {
   Card,
   Field,
@@ -25,14 +25,27 @@ import {
 } from "@/components/icons";
 import { useT } from "@/lib/i18n";
 
-// One movement on the account: a charge (invoice) or a credit (payment).
-// `sort` disambiguates several entries that share a date so the running balance
-// is deterministic (charges before the credits that settle them).
+// A shipment listed beneath its invoice: the itemised detail that makes up a
+// charge, so the customer sees every item (its reference, destination and
+// amount) without the invoice being split into separate accounting movements.
+type LineItem = {
+  ref: string; // shipment reference (SHP-…)
+  description: string;
+  dest?: string;
+  amount: number;
+};
+
+// One movement on the account: a charge (an invoice, carrying its shipments as
+// itemised detail) or a credit (payment). The invoice stays the settleable unit
+// so the running balance, aging and payments all line up at the invoice level —
+// the shipments are shown as a breakdown, not as separate balances. `sort`
+// disambiguates several entries that share a date so the running balance is
+// deterministic (charges before the credits that settle them).
 type Line = {
   date: string;
-  ref: string;
+  ref: string; // invoice reference (INV-…)
   description: string;
-  sub?: string; // secondary detail (the shipment manifest)
+  items?: LineItem[]; // itemised shipment breakdown for a charge line
   debit: number;
   credit: number;
   sort: number;
@@ -41,6 +54,7 @@ type Line = {
 // The slices we need from each side of the ledger.
 type InvoiceRow = { id: number; issued_date: string };
 type ShipmentRow = {
+  id: number;
   invoice_id: number | null;
   description: string;
   total: number;
@@ -157,9 +171,10 @@ export default function CargoStatementPage() {
 
   // Every recognised movement on the selected customer's account — reloaded
   // whenever the customer changes. The date range is applied in memory (below)
-  // so switching dates never re-hits the network. Charges are the customer's
-  // invoices (summing the shipments on each); credits are the payments recorded
-  // against those invoices. Cargo has no refunds, so there are no credit notes.
+  // so switching dates never re-hits the network. Charges are the individual
+  // shipments on the customer's invoices (one line each); credits are the
+  // payments recorded against those invoices. Cargo has no refunds, so there
+  // are no credit notes.
   useEffect(() => {
     let active = true;
     async function load() {
@@ -182,7 +197,7 @@ export default function CargoStatementPage() {
         const [s, p] = await Promise.all([
           supabase
             .from("shipments")
-            .select("invoice_id, description, total, destinations(name)")
+            .select("id, invoice_id, description, total, destinations(name)")
             .in("invoice_id", ids),
           supabase
             .from("payments")
@@ -194,7 +209,7 @@ export default function CargoStatementPage() {
       }
 
       // Group each invoice's shipments so a charge line carries the invoice
-      // total plus a readable manifest (descriptions) and its destinations.
+      // total plus the itemised shipment breakdown shown beneath it.
       const shipByInvoice = new Map<number, ShipmentRow[]>();
       for (const sh of shipments) {
         if (sh.invoice_id == null) continue;
@@ -209,23 +224,33 @@ export default function CargoStatementPage() {
       };
 
       const rows: Line[] = [
+        // One charge line per invoice — the invoice is the settleable unit, so
+        // the running balance and aging stay at the invoice level. Its shipments
+        // ride along as `items` (reference, destination, amount) for the itemised
+        // breakdown, and sum back to the invoice total.
         ...invoices.map((iv) => {
-          const ships = shipByInvoice.get(iv.id) ?? [];
+          const ships = (shipByInvoice.get(iv.id) ?? [])
+            .slice()
+            .sort((a, b) => a.id - b.id);
           const total = ships.reduce((sum, sh) => sum + Number(sh.total), 0);
           // Distinct destinations flown to, e.g. "Mogadishu, Baidoa".
           const dests = Array.from(
             new Set(ships.map(destName).filter(Boolean)),
           ).join(", ");
-          const manifest = ships
-            .map((sh) => sh.description)
+          const description = [t("Cargo invoice"), dests]
             .filter(Boolean)
-            .join(", ");
-          const description = [t("Cargo invoice"), dests].filter(Boolean).join(" · ");
+            .join(" · ");
+          const items: LineItem[] = ships.map((sh) => ({
+            ref: shipmentRef(sh.id),
+            description: sh.description || t("Cargo invoice"),
+            dest: destName(sh) || undefined,
+            amount: Number(sh.total),
+          }));
           return {
             date: iv.issued_date,
             ref: invoiceRef(iv.id),
             description,
-            sub: manifest || undefined,
+            items: items.length ? items : undefined,
             debit: total,
             credit: 0,
             sort: 0,
@@ -532,29 +557,66 @@ export default function CargoStatementPage() {
                   </tr>
                 )}
                 {view?.period.map((l, i) => (
-                  <tr key={i} className="border-b border-slate-200 align-top">
-                    <td className="py-2 pr-2 whitespace-nowrap">
-                      {fmtDate(l.date)}
-                    </td>
-                    <td className="py-2 pr-2 whitespace-nowrap text-slate-500">
-                      {l.ref}
-                    </td>
-                    <td className="py-2 pr-2">
-                      {l.description}
-                      {l.sub && (
-                        <div className="text-xs text-slate-500">{l.sub}</div>
-                      )}
-                    </td>
-                    <td className="py-2 pr-2 text-right">
-                      {l.debit ? fmtMoney(l.debit) : "—"}
-                    </td>
-                    <td className="py-2 pr-2 text-right">
-                      {l.credit ? fmtMoney(l.credit) : "—"}
-                    </td>
-                    <td className="py-2 text-right font-medium">
-                      {fmtMoney(view.running[i])}
-                    </td>
-                  </tr>
+                  <Fragment key={i}>
+                    {/* Invoice-level movement: the charge, payment and running
+                        balance all sit here at the invoice grain. */}
+                    <tr
+                      className={`align-top ${
+                        l.items ? "" : "border-b border-slate-200"
+                      }`}
+                    >
+                      <td className="py-2 pr-2 whitespace-nowrap">
+                        {fmtDate(l.date)}
+                      </td>
+                      <td className="py-2 pr-2 whitespace-nowrap font-medium text-slate-600">
+                        {l.ref}
+                      </td>
+                      <td className="py-2 pr-2 font-medium text-slate-800">
+                        {l.description}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        {l.debit ? fmtMoney(l.debit) : "—"}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        {l.credit ? fmtMoney(l.credit) : "—"}
+                      </td>
+                      <td className="py-2 text-right font-medium">
+                        {fmtMoney(view.running[i])}
+                      </td>
+                    </tr>
+                    {/* Itemised shipment breakdown — each shipment's reference,
+                        destination and amount, aligned under the Charge column.
+                        No running balance: the balance is settled per invoice. */}
+                    {l.items?.map((it, j) => {
+                      const last = j === l.items!.length - 1;
+                      return (
+                        <tr
+                          key={j}
+                          className={`align-top text-slate-500 ${
+                            last ? "border-b border-slate-200" : ""
+                          }`}
+                        >
+                          <td className="py-1 pr-2"></td>
+                          <td className="py-1 pr-2 whitespace-nowrap">
+                            <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-medium text-blue-600">
+                              {it.ref}
+                            </span>
+                          </td>
+                          <td className="py-1 pr-2 text-xs">
+                            {it.description}
+                            {it.dest && (
+                              <span className="text-slate-400"> · {it.dest}</span>
+                            )}
+                          </td>
+                          <td className="py-1 pr-2 text-right text-xs">
+                            {fmtMoney(it.amount)}
+                          </td>
+                          <td className="py-1 pr-2"></td>
+                          <td className="py-1"></td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
                 ))}
                 {view && view.period.length === 0 && (
                   <tr>
