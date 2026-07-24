@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -38,14 +38,27 @@ import {
 } from "@/components/icons";
 import { useT } from "@/lib/i18n";
 
-// One movement on the account: a charge (booking) or a credit (payment/refund).
-// `sort` disambiguates several entries that share a date so the running balance
-// is deterministic (charges before the credits that settle them).
+// A passenger listed beneath their booking: the itemised detail that makes up a
+// charge, so the customer sees every traveller (name, type and their own fare)
+// without the booking being split into separate accounting movements.
+type LineItem = {
+  ref: string; // short tag shown in the Ref column (e.g. "PAX")
+  description: string;
+  amount?: number; // the passenger's own fare; omitted when there is no split
+};
+
+// One movement on the account: a charge (a booking, carrying its passengers as
+// itemised detail) or a credit (payment/refund). The booking stays the
+// settleable unit, so the running balance and aging stay at the booking level —
+// the passengers are shown as a breakdown, not as separate balances. `sort`
+// disambiguates several entries that share a date so the running balance is
+// deterministic (charges before the credits that settle them).
 type Line = {
   date: string;
   ref: string;
   description: string;
-  sub?: string; // secondary detail (travel date · passenger · airline)
+  sub?: string; // secondary detail (travel date · airline)
+  items?: LineItem[]; // itemised passenger breakdown for a charge line
   debit: number;
   credit: number;
   sort: number;
@@ -191,8 +204,9 @@ export default function FlightStatementPage() {
           supabase.from("booking_refunds").select("*").in("booking_id", ids),
           supabase
             .from("flight_passengers")
-            .select("booking_id, full_name, type")
-            .in("booking_id", ids),
+            .select("booking_id, full_name, type, sale_amount")
+            .in("booking_id", ids)
+            .order("id"),
           supabase
             .from("flight_segments")
             .select("booking_id, segment_no, origin, destination")
@@ -205,16 +219,19 @@ export default function FlightStatementPage() {
         segments = (seg.data as SegmentRow[]) ?? [];
       }
 
-      // Every passenger on a booking, each tagged with their type, e.g.
-      // "Amina Yusuf (Adult), Omar Ali (Child)" — the full manifest, not a count.
-      const paxByBooking = new Map<number, string[]>();
+      // Every passenger on a booking becomes an itemised line beneath it — the
+      // traveller's name, type and their own fare (adult/child/infant fares
+      // differ). The fares sum back to the booking's sale_total.
+      const paxByBooking = new Map<number, LineItem[]>();
       for (const px of passengers) {
         const list = paxByBooking.get(px.booking_id) ?? [];
-        list.push(`${px.full_name} (${t(passengerTypeLabel(px.type))})`);
+        list.push({
+          ref: t("PAX"),
+          description: `${px.full_name} (${t(passengerTypeLabel(px.type))})`,
+          amount: Number(px.sale_amount),
+        });
         paxByBooking.set(px.booking_id, list);
       }
-      const paxLabel = (bookingId: number): string =>
-        (paxByBooking.get(bookingId) ?? []).join(", ");
 
       // The route flown, chained across the booking's segments (already sorted
       // by segment_no), e.g. "Baidoa → Mogadishu" or "Baidoa → Mogadishu →
@@ -239,14 +256,14 @@ export default function FlightStatementPage() {
       const rows: Line[] = [
         ...bookings.map((bk) => {
           const route = routeLabel(bk.id);
-          const pax = paxLabel(bk.id);
-          // Main label carries the route so the journey reads at a glance;
-          // the secondary line holds passengers, travel date and airline.
+          const items = paxByBooking.get(bk.id);
+          // Main label carries the route so the journey reads at a glance; the
+          // secondary line holds travel date and airline. Passengers are listed
+          // beneath as itemised lines (see `items`).
           const description = [t("Air ticket"), route, bk.pnr ? t("PNR {pnr}", { pnr: bk.pnr }) : ""]
             .filter(Boolean)
             .join(" · ");
           const detail = [
-            pax,
             bk.travel_date ? t("Travel {date}", { date: fmtDate(bk.travel_date) }) : "",
             bk.airline || "",
           ]
@@ -257,6 +274,7 @@ export default function FlightStatementPage() {
             ref: bookingRef(bk.id),
             description,
             sub: detail || undefined,
+            items: items && items.length ? items : undefined,
             debit: Number(bk.sale_total),
             credit: 0,
             sort: 0,
@@ -576,29 +594,66 @@ export default function FlightStatementPage() {
                   </tr>
                 )}
                 {view?.period.map((l, i) => (
-                  <tr key={i} className="border-b border-slate-200 align-top">
-                    <td className="py-2 pr-2 whitespace-nowrap">
-                      {fmtDate(l.date)}
-                    </td>
-                    <td className="py-2 pr-2 whitespace-nowrap text-slate-500">
-                      {l.ref}
-                    </td>
-                    <td className="py-2 pr-2">
-                      {l.description}
-                      {l.sub && (
-                        <div className="text-xs text-slate-500">{l.sub}</div>
-                      )}
-                    </td>
-                    <td className="py-2 pr-2 text-right">
-                      {l.debit ? fmtMoney(l.debit) : "—"}
-                    </td>
-                    <td className="py-2 pr-2 text-right">
-                      {l.credit ? fmtMoney(l.credit) : "—"}
-                    </td>
-                    <td className="py-2 text-right font-medium">
-                      {fmtMoney(view.running[i])}
-                    </td>
-                  </tr>
+                  <Fragment key={i}>
+                    {/* Booking-level movement: the charge, payment and running
+                        balance all sit here at the booking grain. */}
+                    <tr
+                      className={`align-top ${
+                        l.items ? "" : "border-b border-slate-200"
+                      }`}
+                    >
+                      <td className="py-2 pr-2 whitespace-nowrap">
+                        {fmtDate(l.date)}
+                      </td>
+                      <td className="py-2 pr-2 whitespace-nowrap font-medium text-slate-600">
+                        {l.ref}
+                      </td>
+                      <td className="py-2 pr-2 font-medium text-slate-800">
+                        {l.description}
+                        {l.sub && (
+                          <div className="text-xs font-normal text-slate-500">
+                            {l.sub}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        {l.debit ? fmtMoney(l.debit) : "—"}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        {l.credit ? fmtMoney(l.credit) : "—"}
+                      </td>
+                      <td className="py-2 text-right font-medium">
+                        {fmtMoney(view.running[i])}
+                      </td>
+                    </tr>
+                    {/* Itemised passenger breakdown — each traveller's name, type
+                        and fare, aligned under the Charge column. No running
+                        balance: the balance is settled per booking. */}
+                    {l.items?.map((it, j) => {
+                      const last = j === l.items!.length - 1;
+                      return (
+                        <tr
+                          key={j}
+                          className={`align-top text-slate-500 ${
+                            last ? "border-b border-slate-200" : ""
+                          }`}
+                        >
+                          <td className="py-1 pr-2"></td>
+                          <td className="py-1 pr-2 whitespace-nowrap">
+                            <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-medium text-blue-600">
+                              {it.ref}
+                            </span>
+                          </td>
+                          <td className="py-1 pr-2 text-xs">{it.description}</td>
+                          <td className="py-1 pr-2 text-right text-xs">
+                            {it.amount != null ? fmtMoney(it.amount) : ""}
+                          </td>
+                          <td className="py-1 pr-2"></td>
+                          <td className="py-1"></td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
                 ))}
                 {view && view.period.length === 0 && (
                   <tr>

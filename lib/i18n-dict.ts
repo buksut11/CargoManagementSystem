@@ -947,6 +947,7 @@ const so: Dictionary = {
 
   // ── Flight statement ──────────────────────────────────────────────────────
   "Air ticket": "Tigidh diyaaradeed",
+  PAX: "Rakaab",
   "PNR {pnr}": "PNR {pnr}",
   "Travel {date}": "Safar {date}",
   "Void credit": "Deyn-celin buri",

@@ -1,21 +1,36 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useOrg } from "@/components/org-context";
 import type {
   FlightBooking,
+  FlightPassenger,
   FlightSupplier,
   Organization,
   SupplierPayment,
 } from "@/lib/types";
-import { bookingRef, fmtDate, fmtMoney, REVERSED_IN_LIST } from "@/lib/format";
+import {
+  bookingRef,
+  fmtDate,
+  fmtMoney,
+  passengerTypeLabel,
+  REVERSED_IN_LIST,
+} from "@/lib/format";
 import { Card, Field, PageHeader, Section, Select } from "@/components/ui";
 import { DatePicker } from "@/components/date-picker";
 import { BuildingIcon, PhoneIcon, StatementIcon } from "@/components/icons";
 import { useT } from "@/lib/i18n";
+
+// A passenger listed beneath their booking cost — informational only. Airlines
+// are owed a booking-level net_cost, not a per-passenger amount, so these lines
+// name the travellers without carrying a money split.
+type LineItem = {
+  ref: string; // short tag shown in the Ref column (e.g. "PAX")
+  description: string;
+};
 
 // One movement on the airline's account, from the agency's payables viewpoint:
 // a charge is a ticket cost we owe the airline; a credit is a payment we made
@@ -25,7 +40,8 @@ type Line = {
   date: string;
   ref: string;
   description: string;
-  sub?: string; // secondary detail (route · customer · travel date)
+  sub?: string; // secondary detail (customer · travel date)
+  items?: LineItem[]; // passenger names beneath a cost line (no amounts)
   debit: number; // increases what we owe the airline
   credit: number; // reduces what we owe the airline
   sort: number;
@@ -178,15 +194,43 @@ export default function FlightSupplierStatementPage() {
         .eq("supplier_id", sid);
       const payments = (payData as SupplierPayment[]) ?? [];
 
-      // The itinerary segments for these bookings, used to draw each route.
+      // The itinerary segments (for each route) and the passengers on each
+      // booking (listed by name beneath the cost line).
       let segments: SegmentRow[] = [];
+      let passengers: Pick<
+        FlightPassenger,
+        "booking_id" | "full_name" | "type"
+      >[] = [];
       if (ids.length) {
-        const { data: seg } = await supabase
-          .from("flight_segments")
-          .select("booking_id, segment_no, origin, destination")
-          .in("booking_id", ids)
-          .order("segment_no");
-        segments = (seg as SegmentRow[]) ?? [];
+        const [seg, pax] = await Promise.all([
+          supabase
+            .from("flight_segments")
+            .select("booking_id, segment_no, origin, destination")
+            .in("booking_id", ids)
+            .order("segment_no"),
+          supabase
+            .from("flight_passengers")
+            .select("booking_id, full_name, type")
+            .in("booking_id", ids)
+            .order("id"),
+        ]);
+        segments = (seg.data as SegmentRow[]) ?? [];
+        passengers =
+          (pax.data as Pick<
+            FlightPassenger,
+            "booking_id" | "full_name" | "type"
+          >[]) ?? [];
+      }
+
+      // Passenger names beneath each booking, tagged with their type.
+      const paxByBooking = new Map<number, LineItem[]>();
+      for (const px of passengers) {
+        const list = paxByBooking.get(px.booking_id) ?? [];
+        list.push({
+          ref: t("PAX"),
+          description: `${px.full_name} (${t(passengerTypeLabel(px.type))})`,
+        });
+        paxByBooking.set(px.booking_id, list);
       }
 
       // The route flown, chained across the booking's segments (already sorted
@@ -224,11 +268,13 @@ export default function FlightSupplierStatementPage() {
         ]
           .filter(Boolean)
           .join(" · ");
+        const items = paxByBooking.get(bk.id);
         rows.push({
           date: bk.booking_date,
           ref: bookingRef(bk.id),
           description,
           sub: detail || undefined,
+          items: items && items.length ? items : undefined,
           debit: cost,
           credit: 0,
           sort: 0,
@@ -531,29 +577,64 @@ export default function FlightSupplierStatementPage() {
                   </tr>
                 )}
                 {view?.period.map((l, i) => (
-                  <tr key={i} className="border-b border-slate-200 align-top">
-                    <td className="py-2 pr-2 whitespace-nowrap">
-                      {fmtDate(l.date)}
-                    </td>
-                    <td className="py-2 pr-2 whitespace-nowrap text-slate-500">
-                      {l.ref}
-                    </td>
-                    <td className="py-2 pr-2">
-                      {l.description}
-                      {l.sub && (
-                        <div className="text-xs text-slate-500">{l.sub}</div>
-                      )}
-                    </td>
-                    <td className="py-2 pr-2 text-right">
-                      {l.debit ? fmtMoney(l.debit) : "—"}
-                    </td>
-                    <td className="py-2 pr-2 text-right">
-                      {l.credit ? fmtMoney(l.credit) : "—"}
-                    </td>
-                    <td className="py-2 text-right font-medium">
-                      {fmtMoney(view.running[i])}
-                    </td>
-                  </tr>
+                  <Fragment key={i}>
+                    {/* Booking-level movement: the cost, payment and running
+                        balance sit here at the booking grain. */}
+                    <tr
+                      className={`align-top ${
+                        l.items ? "" : "border-b border-slate-200"
+                      }`}
+                    >
+                      <td className="py-2 pr-2 whitespace-nowrap">
+                        {fmtDate(l.date)}
+                      </td>
+                      <td className="py-2 pr-2 whitespace-nowrap font-medium text-slate-600">
+                        {l.ref}
+                      </td>
+                      <td className="py-2 pr-2 font-medium text-slate-800">
+                        {l.description}
+                        {l.sub && (
+                          <div className="text-xs font-normal text-slate-500">
+                            {l.sub}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        {l.debit ? fmtMoney(l.debit) : "—"}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        {l.credit ? fmtMoney(l.credit) : "—"}
+                      </td>
+                      <td className="py-2 text-right font-medium">
+                        {fmtMoney(view.running[i])}
+                      </td>
+                    </tr>
+                    {/* Passenger names — informational only, no amount: the
+                        airline is owed the booking cost, not a per-passenger
+                        split. */}
+                    {l.items?.map((it, j) => {
+                      const last = j === l.items!.length - 1;
+                      return (
+                        <tr
+                          key={j}
+                          className={`align-top text-slate-500 ${
+                            last ? "border-b border-slate-200" : ""
+                          }`}
+                        >
+                          <td className="py-1 pr-2"></td>
+                          <td className="py-1 pr-2 whitespace-nowrap">
+                            <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-medium text-blue-600">
+                              {it.ref}
+                            </span>
+                          </td>
+                          <td className="py-1 pr-2 text-xs" colSpan={3}>
+                            {it.description}
+                          </td>
+                          <td className="py-1"></td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
                 ))}
                 {view && view.period.length === 0 && (
                   <tr>
