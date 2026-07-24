@@ -12,13 +12,13 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle, LanguageTogglePill } from "@/components/language-toggle";
 import { useT } from "@/lib/i18n";
 import { PageTransition } from "@/components/page-transition";
+import { CloseButton } from "@/components/ui";
 import {
   BookIcon,
   BoxIcon,
   BuildingIcon,
   ChartIcon,
   ClockIcon,
-  CloseIcon,
   CoinsIcon,
   DashboardIcon,
   HomeIcon,
@@ -248,13 +248,11 @@ function SidebarContent({
         {/* Mobile-only close button — a real flex sibling of the title, so the
             org name reserves its own column and can never run underneath it. */}
         {onClose && (
-          <button
+          <CloseButton
             onClick={onClose}
-            aria-label={t("Close menu")}
-            className="-mr-1 -mt-1 shrink-0 rounded-full p-1.5 text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
-          >
-            <CloseIcon />
-          </button>
+            label={t("Close menu")}
+            className="-mr-1 -mt-1"
+          />
         )}
       </div>
       {nav.map((section, si) => (
