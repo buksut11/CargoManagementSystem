@@ -32,6 +32,15 @@ import {
   Th,
 } from "@/components/ui";
 
+// Statuses offered in the Bookings list's status filter. The full status set
+// (quote, ticketed, void, …) still drives badges/labels elsewhere; here we
+// only surface the ones staff actually filter by.
+const STATUS_FILTER_OPTIONS: FlightBookingStatus[] = [
+  "booked",
+  "cancelled",
+  "refunded",
+];
+
 export default function BookingsPage() {
   const t = useT();
   const role = useRole();
@@ -166,13 +175,11 @@ export default function BookingsPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="all">{t("All")}</option>
-              {(Object.keys(FLIGHT_STATUS_LABEL) as FlightBookingStatus[]).map(
-                (s) => (
-                  <option key={s} value={s}>
-                    {t(FLIGHT_STATUS_LABEL[s])}
-                  </option>
-                ),
-              )}
+              {STATUS_FILTER_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {t(FLIGHT_STATUS_LABEL[s])}
+                </option>
+              ))}
             </Select>
           </div>
         </div>
